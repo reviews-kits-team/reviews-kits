@@ -1,0 +1,84 @@
+name: CI Main
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build
+        run: bun run build
+
+  quality:
+    name: Quality & Test
+    needs: build
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: your_secure_password
+          POSTGRES_DB: reviewskits
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:your_secure_password@localhost:5433/reviewskits
+      BETTER_AUTH_SECRET: your_super_secret_auth_key
+      ADMIN_EMAIL: admin@reviewskits.com
+      ADMIN_PASSWORD: admin_secure_password
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Push Schema
+        run: cd apps/server && bun x drizzle-kit push
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
+      - name: Run Lint
+        run: bun run lint
+
+      - name: Run Tests
+        shell: bash
+        run: |
+          cd apps/server
+          find tests -name "*.test.ts" | while read -r f; do
+            echo "::group::Running test $f"
+            bun test "$f" --env-file=../../.env || exit 1
+            echo "::endgroup::"
+          done
+

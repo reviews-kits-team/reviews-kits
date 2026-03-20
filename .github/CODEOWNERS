@@ -1,0 +1,34 @@
+# .github/CODEOWNERS
+
+# Par défaut — toute PR te notifie
+* @Lordkode
+
+# Le coeur du projet — review obligatoire
+/packages/types/        @Lordkode
+/packages/sdk-react/    @Lordkode
+/packages/sdk-vue/      @Lordkode
+
+# L'API et la DB — critique
+/apps/server/src/routes/        @Lordkode
+/apps/server/src/infrastructure/db/    @Lordkode
+
+# L'infra et le déploiement
+/infra/                 @Lordkode
+/apps/server/Dockerfile @Lordkode
+
+# La configuration du monorepo
+turbo.json              @Lordkode
+package.json            @Lordkode
+
+# Les workflows CI/CD
+/.github/workflows/     @Lordkode
+```
+
+---
+
+## La règle simple
+```
+*                    → fallback — tout ce qui n'est pas listé
+/dossier/            → tout ce qui est dans ce dossier
+/fichier.ext         → un fichier spécifique
+*.ts                 → tous les fichiers TypeScript

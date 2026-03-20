@@ -1,0 +1,36 @@
+{
+  "name": "@reviewskits/server",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "drizzle-kit": "^0.31.9"
+  },
+  "scripts": {
+    "dev": "bun --env-file=../../.env run --hot src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target bun",
+    "db:push": "bun --env-file=../../.env drizzle-kit push",
+    "db:studio": "bun --env-file=../../.env drizzle-kit studio",
+    "db:generate": "bun --env-file=../../.env drizzle-kit generate",
+    "db:migrate": "bun --env-file=../../.env drizzle-kit migrate",
+    "db:seed:admin": "bun --env-file=../../.env scripts/seed-admin.ts",
+    "test:e2e:prepare": "bun --env-file=../../.env scripts/prepare-e2e-db.ts",
+    "lint": "tsc --noEmit",
+    "test": "bun test --env-file=../../.env --max-concurrency 1"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.19.11",
+    "@hono/swagger-ui": "^0.6.1",
+    "@hono/zod-openapi": "^1.2.2",
+    "@reviewskits/types": "workspace:*",
+    "better-auth": "^1.5.5",
+    "drizzle-orm": "^0.45.1",
+    "hono": "^4.12.8",
+    "postgres": "^3.4.8",
+    "zod": "^4.3.6"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "reviews-kits",
+  "private": true,
+  "type": "module",
+  "packageManager": "bun@1.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev --no-daemon",
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "husky": "^9.1.7",
+    "turbo": "^2.8.19",
+    "typescript": "^5.9.3"
+  }
+}

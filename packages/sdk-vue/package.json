@@ -1,0 +1,35 @@
+{
+  "name": "@reviewskits/vue",
+  "version": "0.0.1",
+  "description": "Vue SDK for Reviewskits",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "lint": "tsc --noEmit",
+    "test": "echo 'No tests yet'"
+  },
+  "keywords": [
+    "reviewskits",
+    "testimonials",
+    "vue",
+    "sdk"
+  ],
+  "author": "Reviewskits Team",
+  "license": "MIT",
+  "peerDependencies": {
+    "vue": ">=3"
+  },
+  "devDependencies": {
+    "@reviewskits/types": "workspace:*",
+    "tsup": "^8.3.5",
+    "typescript": "^5.9.3",
+    "vue": "^3.5.13"
+  }
+}

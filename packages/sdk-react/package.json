@@ -1,0 +1,35 @@
+{
+  "name": "@reviewskits/react",
+  "version": "0.0.1",
+  "description": "React SDK for Reviewskits",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": [
+    "reviewskits",
+    "testimonials",
+    "react",
+    "sdk"
+  ],
+  "author": "Reviewskits Team",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@reviewskits/types": "workspace:*",
+    "@types/react": "^19.0.0",
+    "react": "^19.0.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.9.3"
+  }
+}
