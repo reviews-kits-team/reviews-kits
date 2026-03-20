@@ -3,7 +3,6 @@ import { swaggerUI } from '@hono/swagger-ui';
 import { cors } from 'hono/cors';
 import { authRouter } from './interface/routes/auth';
 import { adminRouter } from './interface/routes/admin';
-import { orgRouter } from './interface/routes/organizations';
 
 import { meRouter } from './interface/routes/me';
 
@@ -13,7 +12,7 @@ const app = new OpenAPIHono();
 app.use('*', cors({
   origin: ['http://172.20.0.1:5180', 'http://localhost:5180', 'http://localhost:3000'], // Allow frontend and self (swagger)
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization', 'organization-id'],
+  allowHeaders: ['Content-Type', 'Authorization'],
   exposeHeaders: ['Content-Length', 'Set-Cookie'],
   credentials: true,
 }));
@@ -56,7 +55,6 @@ app.route('/api/auth', authRouter);
 // Mount Business API Routes (v1)
 app.route('/api/v1/me', meRouter);
 app.route('/api/v1/admin', adminRouter);
-app.route('/api/v1/organizations', orgRouter);
 
 // Welcome Route
 app.get('/', (c) => {

@@ -16,17 +16,17 @@ export class DrizzleFormRepository implements FormRepository {
     return this.mapToDomain(row);
   }
 
-  async findBySlug(projectId: string, slug: string): Promise<Form | null> {
+  async findBySlug(userId: string, slug: string): Promise<Form | null> {
     const [row] = await this.db.select()
       .from(forms)
-      .where(and(eq(forms.projectId, projectId), eq(forms.slug, slug)));
+      .where(and(eq(forms.userId, userId), eq(forms.slug, slug)));
     if (!row) return null;
 
     return this.mapToDomain(row);
   }
 
-  async findByProject(projectId: string): Promise<Form[]> {
-    const rows = await this.db.select().from(forms).where(eq(forms.projectId, projectId));
+  async findByUser(userId: string): Promise<Form[]> {
+    const rows = await this.db.select().from(forms).where(eq(forms.userId, userId));
     return rows.map(row => this.mapToDomain(row));
   }
 
@@ -34,7 +34,7 @@ export class DrizzleFormRepository implements FormRepository {
     const props = form.getProps();
     await this.db.insert(forms).values({
       id: props.id,
-      projectId: props.projectId,
+      userId: props.userId,
       name: props.name,
       slug: props.slug.getValue(),
       description: props.description,
@@ -70,7 +70,7 @@ export class DrizzleFormRepository implements FormRepository {
   private mapToDomain(row: any): Form {
     return new Form({
       id: row.id,
-      projectId: row.projectId,
+      userId: row.userId,
       name: row.name,
       slug: Slug.create(row.slug),
       description: row.description || undefined,

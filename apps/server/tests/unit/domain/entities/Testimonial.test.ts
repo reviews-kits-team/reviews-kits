@@ -6,7 +6,7 @@ import { Email } from "../../../../src/domain/value-objects/Email";
 describe("Testimonial Entity", () => {
   const validProps: TestimonialProps = {
     id: "test-1",
-    projectId: "project-1",
+    userId: "user-1",
     formId: "form-1",
     content: "This is a great product!",
     authorName: "Jane Doe",
@@ -17,7 +17,7 @@ describe("Testimonial Entity", () => {
       const testimonial = new Testimonial(validProps);
       
       expect(testimonial.id).toBe(validProps.id);
-      expect(testimonial.projectId).toBe(validProps.projectId);
+      expect(testimonial.userId).toBe(validProps.userId);
       expect(testimonial.getProps().content).toBe(validProps.content);
       expect(testimonial.getProps().authorName).toBe(validProps.authorName);
       expect(testimonial.createdAt).toBeInstanceOf(Date);
@@ -44,9 +44,9 @@ describe("Testimonial Entity", () => {
       expect(() => new Testimonial(invalidProps)).toThrow("Testimonial author name cannot be empty");
     });
 
-    it("should throw error if projectId is empty", () => {
-      const invalidProps = { ...validProps, projectId: "" };
-      expect(() => new Testimonial(invalidProps)).toThrow("Testimonial project ID cannot be empty");
+    it("should throw error if userId is empty", () => {
+      const invalidProps = { ...validProps, userId: "" };
+      expect(() => new Testimonial(invalidProps)).toThrow("Testimonial user ID cannot be empty");
     });
 
     describe("FormId Validation Logic", () => {

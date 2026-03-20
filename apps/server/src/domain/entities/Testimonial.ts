@@ -4,7 +4,7 @@ import { Email } from '../value-objects/Email';
 
 export interface TestimonialProps {
   id: string;
-  projectId: string;
+  userId: string;
   content: string;
   authorName: string;
   status?: TestimonialStatus;
@@ -22,7 +22,7 @@ export interface TestimonialProps {
 
 export class Testimonial {
   public readonly id: string;
-  public readonly projectId: string;
+  public readonly userId: string;
   private content: string;
   private authorName: string;
   private status: TestimonialStatus;
@@ -40,7 +40,7 @@ export class Testimonial {
   constructor(props: TestimonialProps) {
     if (!props.content) throw new Error("Testimonial content cannot be empty");
     if (!props.authorName) throw new Error("Testimonial author name cannot be empty");
-    if (!props.projectId) throw new Error("Testimonial project ID cannot be empty");
+    if (!props.userId) throw new Error("Testimonial user ID cannot be empty");
 
     const source = props.source ?? 'form';
     if (source === 'form' && !props.formId) {
@@ -48,7 +48,7 @@ export class Testimonial {
     }
 
     this.id = props.id;
-    this.projectId = props.projectId;
+    this.userId = props.userId;
     this.content = props.content;
     this.authorName = props.authorName;
     this.status = props.status ?? 'pending';
@@ -67,7 +67,7 @@ export class Testimonial {
   public getProps(): TestimonialProps {
     return {
       id: this.id,
-      projectId: this.projectId,
+      userId: this.userId,
       content: this.content,
       authorName: this.authorName,
       status: this.status,

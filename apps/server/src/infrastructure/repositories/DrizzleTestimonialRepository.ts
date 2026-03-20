@@ -17,8 +17,8 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
     return this.mapToDomain(row);
   }
 
-  async findByProject(projectId: string, filters?: any): Promise<Testimonial[]> {
-    const whereConditions = [eq(testimonials.projectId, projectId)];
+  async findByUser(userId: string, filters?: any): Promise<Testimonial[]> {
+    const whereConditions = [eq(testimonials.userId, userId)];
     
     if (filters?.status) {
       whereConditions.push(eq(testimonials.status, filters.status));
@@ -35,7 +35,7 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
     const props = testimonial.getProps();
     await this.db.insert(testimonials).values({
       id: props.id,
-      projectId: props.projectId,
+      userId: props.userId,
       formId: props.formId,
       content: props.content,
       authorName: props.authorName,
@@ -77,7 +77,7 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
   private mapToDomain(row: any): Testimonial {
     return new Testimonial({
       id: row.id,
-      projectId: row.projectId,
+      userId: row.userId,
       content: row.content,
       authorName: row.authorName,
       status: row.status as any,

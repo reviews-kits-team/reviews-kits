@@ -1,9 +1,8 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { organization, bearer } from "better-auth/plugins";
+import { bearer } from "better-auth/plugins";
 import { db } from "../database/db";
 import * as schema from "../database/schema";
-import { ac, roles } from "./permissions";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -14,33 +13,12 @@ export const auth = betterAuth({
       session: schema.sessions,
       account: schema.accounts,
       verification: schema.verifications,
-      organization: schema.organizations,
-      member: schema.members,
-      invitation: schema.invitations,
     },
   }),
   emailAndPassword: {
     enabled: true,
   },
   plugins: [
-    organization({
-      // Configure roles with required properties for Better-auth v1.5+
-      roles,
-      ac,
-      allowSetDefaultOrganization: true,
-      sendInvitationEmail: async (data) => {
-        // Here we would integrate with an email provider (Resend, Postmark, etc.)
-        // For now, we'll log it for development purposes
-        console.log(`
-          📨 Invitation Email Sent:
-          To: ${data.email}
-          Role: ${data.role}
-          Organization: ${data.organization.name}
-          Inviter: ${data.inviter.user.name}
-          Link: ${process.env.BETTER_AUTH_URL}/accept-invitation/${data.id}
-        `);
-      },
-    }),
     bearer(),
   ],
   user: {

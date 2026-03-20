@@ -52,59 +52,12 @@ export const verifications = pgTable('verifications', {
 });
 
 // ═══════════════════════════════════════
-// ORGANIZATIONS & MEMBERSHIP
+// API KEYS
 // ═══════════════════════════════════════
-
-export const organizations = pgTable('organizations', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  name: text('name').notNull(),
-  slug: text('slug').unique().notNull(),
-  logo: text('logo'),
-  metadata: jsonb('metadata'),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
-});
-
-export const members = pgTable('members', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
-  role: text('role').notNull().default('member'), // owner | admin | editor | viewer
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
-}, (t) => ({
-  unq: unique().on(t.userId, t.organizationId),
-}));
-
-export const invitations = pgTable('invitations', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
-  email: text('email').notNull(),
-  role: text('role').notNull().default('member'),
-  status: text('status').notNull().default('pending'), // pending | accepted | rejected | expired
-  expiresAt: timestamp('expires_at').notNull(),
-  inviterId: uuid('inviter_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
-});
-
-// ═══════════════════════════════════════
-// PROJECTS & API KEYS
-// ═══════════════════════════════════════
-
-export const projects = pgTable('projects', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
-  name: text('name').notNull(),
-  slug: text('slug').unique().notNull(),
-  settings: jsonb('settings').default({}),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-});
 
 export const apiKeys = pgTable('api_keys', {
   id: uuid('id').primaryKey().defaultRandom(),
-  projectId: uuid('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   key: text('key').unique().notNull(),
   type: text('type').notNull(), // public | secret
   name: text('name'),
@@ -114,6 +67,7 @@ export const apiKeys = pgTable('api_keys', {
   createdAt: timestamp('created_at').defaultNow(),
 }, (t) => ({
   keyIdx: index('idx_api_keys_key').on(t.key),
+  userIdIdx: index('idx_api_keys_user').on(t.userId),
 }));
 
 // ═══════════════════════════════════════
@@ -122,7 +76,7 @@ export const apiKeys = pgTable('api_keys', {
 
 export const forms = pgTable('forms', {
   id: uuid('id').primaryKey().defaultRandom(),
-  projectId: uuid('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   slug: text('slug').unique().notNull(),
   description: text('description'),
@@ -133,7 +87,7 @@ export const forms = pgTable('forms', {
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 }, (t) => ({
-  projectIdx: index('idx_forms_project').on(t.projectId),
+  userIdIdx: index('idx_forms_user').on(t.userId),
 }));
 
 // ═══════════════════════════════════════
@@ -142,7 +96,7 @@ export const forms = pgTable('forms', {
 
 export const media = pgTable('media', {
   id: uuid('id').primaryKey().defaultRandom(),
-  projectId: uuid('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   uploadId: text('upload_id').unique().notNull(),
   originalFilename: text('original_filename').notNull(),
   originalSize: integer('original_size').notNull(), 
@@ -156,7 +110,7 @@ export const media = pgTable('media', {
 
 export const testimonials = pgTable('testimonials', {
   id: uuid('id').primaryKey().defaultRandom(),
-  projectId: uuid('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   formId: uuid('form_id').references(() => forms.id, { onDelete: 'set null' }),
   type: text('type').notNull().default('text'), // text | video
   status: text('status').notNull().default('pending'), // pending | approved | rejected
@@ -172,7 +126,7 @@ export const testimonials = pgTable('testimonials', {
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 }, (t) => ({
-  projectIdx: index('idx_testimonials_project').on(t.projectId),
+  userIdIdx: index('idx_testimonials_user').on(t.userId),
   statusIdx: index('idx_testimonials_status').on(t.status),
   formIdx: index('idx_testimonials_form').on(t.formId),
 }));
@@ -183,7 +137,7 @@ export const testimonials = pgTable('testimonials', {
 
 export const webhooks = pgTable('webhooks', {
   id: uuid('id').primaryKey().defaultRandom(),
-  projectId: uuid('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   url: text('url').notNull(),
   events: text('events').array().notNull(), 
   secret: text('secret').notNull(),

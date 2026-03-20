@@ -6,7 +6,7 @@ describe("Form Entity", () => {
   const validSlug = Slug.create("contact-form");
   const validProps: FormProps = {
     id: "form-1",
-    projectId: "project-1",
+    userId: "user-1",
     name: "Contact Form",
     slug: validSlug,
   };
@@ -16,7 +16,7 @@ describe("Form Entity", () => {
       const form = new Form(validProps);
       
       expect(form.id).toBe(validProps.id);
-      expect(form.projectId).toBe(validProps.projectId);
+      expect(form.userId).toBe(validProps.userId);
       expect(form.getName()).toBe(validProps.name);
       expect(form.getSlug()).toBe(validProps.slug.getValue());
       expect(form.createdAt).toBeInstanceOf(Date);

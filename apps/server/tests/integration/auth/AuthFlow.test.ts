@@ -10,7 +10,7 @@ import { db } from "../../../src/infrastructure/database/db";
 import * as schema from "../../../src/infrastructure/database/schema";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { hasRole, isSystemAdmin } from "../../../src/shared/middlewares/rbac";
+import { isSystemAdmin } from "../../../src/shared/middlewares/rbac";
 
 /**
  * Helper to simulate a real session in the database
@@ -89,74 +89,13 @@ describe("Auth & Membership Flow Integration", () => {
     expect(dbUser?.isSystemAdmin).toBe(false);
   });
 
-  test("3. Organization creation and member role (Direct Drizzle)", async () => {
-    const [user] = await db.select().from(schema.users).limit(1);
-    if (!user) throw new Error("No user found");
-    
-    // Create Org
-    const [org] = await db.insert(schema.organizations).values({
-      name: "Drizzle Org",
-      slug: "drizzle-org",
-    }).returning();
-
-    if (!org) throw new Error("Org creation failed");
-
-    // Create Member
-    const [member] = await db.insert(schema.members).values({
-      userId: user.id,
-      organizationId: org.id,
-      role: "owner",
-    }).returning();
-
-    if (!member) throw new Error("Member creation failed");
-
-    expect(org).toBeDefined();
-    expect(member.role).toBe("owner");
-    expect(member.userId).toBe(user.id);
-  });
-
   describe("RBAC Middlewares (with Real Sessions)", () => {
     const app = new Hono();
-    app.get("/protected/:organizationId", hasRole("admin"), (c) => c.json({ ok: true }));
     app.get("/sys-admin", isSystemAdmin, (c) => c.json({ ok: true }));
 
     // Clean DB before RBAC tests to guarantee isolation from other test files
     beforeAll(async () => {
       await clearDatabase();
-    });
-
-    test("4. hasRole('admin') should allow owner through header", async () => {
-      const { user, token } = await createTestSession("owner@example.com");
-      const [org] = await db.insert(schema.organizations).values({ name: "RBAC Org", slug: "rbac-org" }).returning();
-      if (!org) throw new Error("Org creation failed");
-      await db.insert(schema.members).values({ userId: user.id, organizationId: org.id, role: "owner" });
-
-      const res = await app.request(`/protected/${org.id}`, {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-        }
-      });
-      expect(res.status).toBe(200);
-    });
-
-    test("5. hasRole('owner') should deny editor", async () => {
-      const appOwner = new Hono();
-      appOwner.get("/owner-only", hasRole("owner"), (c) => c.json({ ok: true }));
-
-      const { user, token } = await createTestSession("editor@example.com");
-      const [org] = await db.insert(schema.organizations).values({ name: "Editor Org", slug: "editor-org" }).returning();
-      if (!org) throw new Error("Org creation failed");
-      await db.insert(schema.members).values({ userId: user.id, organizationId: org.id, role: "editor" });
-
-      const res = await appOwner.request("/owner-only", {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "X-Organization-Id": org.id,
-        }
-      });
-      expect(res.status).toBe(403);
-      const body = await res.json() as any;
-      expect(body.error).toContain("owner required");
     });
 
     test("6. isSystemAdmin middleware should allow sysadmin", async () => {

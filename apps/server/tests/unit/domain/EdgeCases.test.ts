@@ -1,5 +1,4 @@
 import { describe, expect, it } from "bun:test";
-import { Project } from "../../../src/domain/entities/Project";
 import { Form } from "../../../src/domain/entities/Form";
 import { Slug } from "../../../src/domain/value-objects/Slug";
 import { User } from "../../../src/domain/entities/User";
@@ -14,33 +13,11 @@ describe("Domain Hardening Edge Cases", () => {
     });
   });
 
-  describe("Deep Merge (Project & Form)", () => {
-    it("should perform deep merge of nested settings in Project", () => {
-      const project = new Project({
-        id: "p1",
-        organizationId: "o1",
-        name: "Test",
-        slug: Slug.create("test"),
-        settings: {
-          theme: { primary: "red", font: "Inter" },
-          features: { chat: true }
-        }
-      });
-
-      project.updateSettings({
-        theme: { primary: "blue" }
-      });
-
-      const settings = project.getSettings();
-      expect(settings.theme.primary).toBe("blue");
-      expect(settings.theme.font).toBe("Inter"); // Should NOT be lost
-      expect(settings.features.chat).toBe(true);  // Should NOT be lost
-    });
-
+  describe("Deep Merge (Form)", () => {
     it("should perform deep merge of nested config in Form", () => {
       const form = new Form({
         id: "f1",
-        projectId: "p1",
+        userId: "u1",
         name: "Form",
         slug: Slug.create("form"),
         config: {
@@ -71,20 +48,20 @@ describe("Domain Hardening Edge Cases", () => {
 
   describe("Props Immutability", () => {
     it("should not allow modifying internal state via props reference", () => {
-      const project = new Project({
-        id: "p1",
-        organizationId: "o1",
+      const form = new Form({
+        id: "f1",
+        userId: "u1",
         name: "Test",
         slug: Slug.create("test"),
-        settings: { theme: "dark" }
+        config: { theme: "dark" }
       });
 
-      const props = project.getProps();
-      if (props.settings) {
-        props.settings.theme = "light";
+      const props = form.getProps();
+      if (props.config) {
+        props.config.theme = "light";
       }
 
-      expect(project.getSettings().theme).toBe("dark"); // Internal state should remain dark
+      expect(form.getProps().config?.theme).toBe("dark"); // Internal state should remain dark
     });
   });
 

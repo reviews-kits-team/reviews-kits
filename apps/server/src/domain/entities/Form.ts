@@ -3,7 +3,7 @@ import { deepMerge } from "../../shared/utils/deepMerge";
 
 export interface FormProps {
   id: string;
-  projectId: string;
+  userId: string;
   name: string;
   slug: Slug;
   description?: string;
@@ -17,7 +17,7 @@ export interface FormProps {
 
 export class Form {
   public readonly id: string;
-  public readonly projectId: string;
+  public readonly userId: string;
   private name: string;
   private slug: Slug;
   private description?: string;
@@ -32,7 +32,7 @@ export class Form {
     if (!props.name) throw new Error("Form name cannot be empty");
 
     this.id = props.id;
-    this.projectId = props.projectId;
+    this.userId = props.userId;
     this.name = props.name;
     this.slug = props.slug;
     this.description = props.description;
@@ -47,7 +47,7 @@ export class Form {
   public getProps(): FormProps {
     return {
       id: this.id,
-      projectId: this.projectId,
+      userId: this.userId,
       name: this.name,
       slug: this.slug,
       description: this.description,

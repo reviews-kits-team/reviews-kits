@@ -1,42 +1,30 @@
 import { describe, expect, it, beforeEach, afterAll } from "bun:test";
 import { testDb, clearDatabase, closeConnection } from "../IntegrationSetup";
 import { DrizzleTestimonialRepository } from "../../../src/infrastructure/repositories/DrizzleTestimonialRepository";
-import { DrizzleProjectRepository } from "../../../src/infrastructure/repositories/DrizzleProjectRepository";
-import { DrizzleOrganizationRepository } from "../../../src/infrastructure/repositories/DrizzleOrganizationRepository";
 import { Testimonial } from "../../../src/domain/entities/Testimonial";
-import { Project } from "../../../src/domain/entities/Project";
-import { Organization } from "../../../src/domain/entities/Organization";
 import { Slug } from "../../../src/domain/value-objects/Slug";
 import { Rating } from "../../../src/domain/value-objects/Rating";
+import * as schema from "../../../src/infrastructure/database/schema";
 
 describe("DrizzleTestimonialRepository Integration", () => {
   const repository = new DrizzleTestimonialRepository(testDb);
-  const projectRepository = new DrizzleProjectRepository(testDb);
-  const orgRepository = new DrizzleOrganizationRepository(testDb);
+  const userId = crypto.randomUUID();
 
   beforeEach(async () => {
     await clearDatabase();
+    await testDb.insert(schema.users).values({
+      id: userId,
+      email: "test@example.com",
+      name: "Test User",
+      emailVerified: true,
+      isSystemAdmin: false
+    });
   });
 
-  async function setupProject() {
-    const org = new Organization({ id: crypto.randomUUID(), name: "Org", slug: Slug.create("org-" + Date.now()) });
-    await orgRepository.save(org);
-    const project = new Project({
-      id: crypto.randomUUID(),
-      organizationId: org.id,
-      name: "P",
-      slug: Slug.create("p-" + Date.now()),
-      settings: {}
-    });
-    await projectRepository.save(project);
-    return project;
-  }
-
   it("should save and find a testimonial by ID", async () => {
-    const project = await setupProject();
     const testimonial = new Testimonial({
       id: crypto.randomUUID(),
-      projectId: project.id,
+      userId: userId,
       content: "Great service!",
       authorName: "John Doe",
       rating: Rating.create(5),
@@ -52,11 +40,10 @@ describe("DrizzleTestimonialRepository Integration", () => {
     expect(found?.getProps().rating?.getValue()).toBe(5);
   });
 
-  it("should find testimonials by project ID and status filter", async () => {
-    const project = await setupProject();
+  it("should find testimonials by user ID and status filter", async () => {
     const t1 = new Testimonial({
       id: crypto.randomUUID(),
-      projectId: project.id,
+      userId: userId,
       content: "T1",
       authorName: "A1",
       status: "pending",
@@ -64,7 +51,7 @@ describe("DrizzleTestimonialRepository Integration", () => {
     });
     const t2 = new Testimonial({
       id: crypto.randomUUID(),
-      projectId: project.id,
+      userId: userId,
       content: "T2",
       authorName: "A2",
       status: "approved",
@@ -74,19 +61,18 @@ describe("DrizzleTestimonialRepository Integration", () => {
     await repository.save(t1);
     await repository.save(t2);
 
-    const all = await repository.findByProject(project.id);
+    const all = await repository.findByUser(userId);
     expect(all).toHaveLength(2);
 
-    const approved = await repository.findByProject(project.id, { status: "approved" });
+    const approved = await repository.findByUser(userId, { status: "approved" });
     expect(approved).toHaveLength(1);
     expect(approved[0]!.getProps().status).toBe("approved");
   });
 
   it("should update testimonial status and content", async () => {
-    const project = await setupProject();
     const testimonial = new Testimonial({
       id: crypto.randomUUID(),
-      projectId: project.id,
+      userId: userId,
       content: "Old content",
       authorName: "John",
       status: "pending",
@@ -105,10 +91,9 @@ describe("DrizzleTestimonialRepository Integration", () => {
   });
 
   it("should delete a testimonial", async () => {
-    const project = await setupProject();
     const testimonial = new Testimonial({
       id: crypto.randomUUID(),
-      projectId: project.id,
+      userId: userId,
       content: "Delete me",
       authorName: "Ghost",
       status: "pending",
