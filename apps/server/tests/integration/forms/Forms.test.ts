@@ -81,3 +81,78 @@ describe("Forms Integration", () => {
     expect(data[0].name).toBe("Form 1");
   });
 });
+
+describe("Form Actions Integration", () => {
+  const userId = "00000000-0000-0000-0000-000000000001";
+  const getSessionSpy = spyOn(auth.api, "getSession") as any;
+  let formId: string;
+
+  beforeEach(async () => {
+    await clearDatabase();
+    getSessionSpy.mockReset();
+    getSessionSpy.mockImplementation(async () => ({
+      user: { id: userId, email: "test@example.com" },
+      session: { userId }
+    }));
+    await testDb.execute(sql.raw(`INSERT INTO "users" (id, name, email) VALUES ('${userId}', 'Test User', 'test@example.com')`));
+    
+    // Create a base form for actions
+    const res = await formsRouter.request("/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "Base Form", slug: "base-form", description: "Original" }),
+    }, { session: { user: { id: userId } } } as any);
+    const data = await res.json() as any;
+    formId = data.id;
+  });
+
+  it("should delete a form", async () => {
+    const res = await formsRouter.request(`/${formId}`, {
+      method: "DELETE",
+    }, { session: { user: { id: userId } } } as any);
+
+    expect(res.status).toBe(200);
+    
+    // Verify it's gone
+    const listRes = await formsRouter.request("/", { method: "GET" }, { session: { user: { id: userId } } } as any);
+    const listData = await listRes.json() as any;
+    expect(listData).toHaveLength(0);
+  });
+
+  it("should toggle form status", async () => {
+    // Initial status should be true
+    const res = await formsRouter.request(`/${formId}/toggle`, {
+      method: "PATCH",
+    }, { session: { user: { id: userId } } } as any);
+
+    expect(res.status).toBe(200);
+    const data = await res.json() as any;
+    expect(data.isActive).toBe(false);
+
+    // Toggle again
+    const res2 = await formsRouter.request(`/${formId}/toggle`, {
+      method: "PATCH",
+    }, { session: { user: { id: userId } } } as any);
+    const data2 = await res2.json() as any;
+    expect(data2.isActive).toBe(true);
+  });
+
+  it("should duplicate a form", async () => {
+    const res = await formsRouter.request(`/${formId}/duplicate`, {
+      method: "POST",
+    }, { session: { user: { id: userId } } } as any);
+
+    expect(res.status).toBe(201);
+    const data = await res.json() as any;
+    expect(data.id).not.toBe(formId);
+    expect(data.name).toBe("Base Form (Copie)");
+    expect(data.slug).toContain("base-form-copy-");
+    expect(data.description).toBe("Original");
+  });
+
+  it("should return 404 when acting on non-existent form", async () => {
+    const fakeId = "00000000-0000-0000-0000-000000000999";
+    const res = await formsRouter.request(`/${fakeId}`, { method: "DELETE" }, { session: { user: { id: userId } } } as any);
+    expect(res.status).toBe(404);
+  });
+});
