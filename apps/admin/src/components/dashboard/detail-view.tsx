@@ -5,7 +5,8 @@ import {
   MessageSquare, 
   Star, 
   Users,
-  TrendingUp
+  TrendingUp,
+  Pencil
 } from 'lucide-react'
 import { StatCard } from './stat-card'
 import { Stars, Badge } from './ui'
@@ -53,28 +54,41 @@ export const DetailView = ({ form, onBack, onShare }: DetailViewProps) => {
           // formulaire
         </span>
         <div className="flex flex-wrap justify-between items-start gap-4">
-          <div>
-            <h1 className="text-[clamp(20px,2.5vw,28px)] font-extrabold tracking-tighter leading-tight text-[var(--v3-text)] mb-2">
+          <div className="flex-1">
+            <h1 className="text-[clamp(20px,2.5vw,28px)] font-extrabold tracking-tighter leading-tight text-[var(--v3-text)] mb-3">
               {form.name}
             </h1>
-            <div className="flex flex-wrap items-center gap-2.5">
-              <Badge status={form.isActive ? 'active' : 'draft'} />
-              {form.rating && (
-                <div className="flex items-center gap-1">
-                  <Stars rating={form.rating} />
-                  <span className="text-[13px] font-semibold text-[var(--v3-text)]">{form.rating}</span>
-                </div>
-              )}
+            
+            <div className="flex flex-wrap items-center gap-3">
+              <button 
+                className="flex items-center gap-2 bg-white/5 border border-white/10 text-[var(--v3-text)] px-4 py-2 rounded-xl text-xs font-bold hover:bg-white/10 hover:border-white/20 transition-all group"
+              >
+                <Pencil size={13} className="text-[var(--v3-muted2)] group-hover:text-[var(--v3-teal)] transition-colors" />
+                Modifier le formulaire
+              </button>
+
+              <button 
+                onClick={() => onShare(form.id)}
+                className="flex items-center gap-2 bg-[var(--v3-teal)] text-white px-4 py-2 rounded-xl text-xs font-bold hover:-translate-y-0.5 hover:shadow-[0_8px_24px_var(--v3-teal-glow)] transition-all overflow-hidden relative group"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                <Share2 size={13} />
+                Partager le formulaire
+              </button>
+
+              <div className="h-4 w-px bg-white/10 mx-1" />
+
+              <div className="flex items-center gap-2.5">
+                <Badge status={form.isActive ? 'active' : 'draft'} />
+                {form.rating && (
+                  <div className="flex items-center gap-1">
+                    <Stars rating={form.rating} />
+                    <span className="text-[13px] font-semibold text-[var(--v3-text)]">{form.rating}</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-          <button 
-            onClick={() => onShare(form.id)}
-            className="flex items-center gap-2 bg-[var(--v3-teal)] text-white px-5.5 py-2.5 rounded-lg text-sm font-semibold hover:-translate-y-0.5 hover:shadow-[0_8px_24px_var(--v3-teal-glow)] transition-all overflow-hidden relative group"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-            <Share2 size={13} />
-            Partager le formulaire
-          </button>
         </div>
       </div>
 

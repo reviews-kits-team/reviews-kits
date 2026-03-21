@@ -7,6 +7,7 @@ import { adminRouter } from './interface/routes/admin';
 import { meRouter } from './interface/routes/me';
 import { formsRouter } from './interface/routes/forms';
 import { apiKeysRouter } from './interface/routes/api-keys';
+import { publicRouter } from './interface/routes/public';
 
 const app = new OpenAPIHono();
 
@@ -59,6 +60,7 @@ app.route('/api/v1/me', meRouter);
 app.route('/api/v1/admin', adminRouter);
 app.route('/api/v1/forms', formsRouter);
 app.route('/api/v1/api-keys', apiKeysRouter);
+app.route('/api/v1/public', publicRouter);
 
 // Welcome Route
 app.get('/', (c) => {
