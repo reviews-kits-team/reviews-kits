@@ -15,7 +15,13 @@ export const formController = {
     const forms = await container.formRepository.findByUser(userId);
     return c.json(forms.map(f => {
       const props = f.getProps();
-      return { ...props, slug: props.slug.getValue() };
+      return { 
+        ...props, 
+        slug: props.slug.getValue(),
+        responses: 0,
+        rating: null,
+        completion: 0
+      };
     }));
   },
 
@@ -42,10 +48,17 @@ export const formController = {
       isActive: true,
     });
 
-    await container.formRepository.save(form);
-    
-    const props = form.getProps();
-    return c.json({ ...props, slug: props.slug.getValue() }, 201);
+    try {
+      await container.formRepository.save(form);
+      const props = form.getProps();
+      return c.json({ ...props, slug: props.slug.getValue() }, 201);
+    } catch (err: any) {
+      console.error("Failed to create form:", err);
+      if (err.message?.includes('unique constraint') && err.message?.includes('slug')) {
+        return c.json({ error: 'Ce slug est déjà utilisé par un autre formulaire.' }, 409);
+      }
+      return c.json({ error: err.message || 'Erreur lors de la création du formulaire' }, 500);
+    }
   },
 
   getFormDetails: async (c: Context) => {
@@ -63,6 +76,12 @@ export const formController = {
     }
 
     const props = form.getProps();
-    return c.json({ ...props, slug: props.slug.getValue() });
-  }
+    return c.json({ 
+      ...props, 
+      slug: props.slug.getValue(),
+      responses: 0,
+      rating: null,
+      completion: 0
+    });
+  },
 };

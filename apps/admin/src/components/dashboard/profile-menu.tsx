@@ -1,0 +1,212 @@
+import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import { 
+  User, 
+  Settings, 
+  LogOut, 
+  Key, 
+  Copy, 
+  RefreshCw, 
+  ShieldCheck,
+  ChevronRight,
+  ExternalLink
+} from 'lucide-react'
+import { authClient } from '../../lib/auth-client'
+
+interface ProfileMenuProps {
+  isOpen: boolean
+  onClose: () => void
+}
+
+interface ApiKeys {
+  publicKey: string
+  secretKey: string
+}
+
+export const ProfileMenu = ({ isOpen, onClose }: ProfileMenuProps) => {
+  const { data: session } = authClient.useSession()
+  const [apiKeys, setApiKeys] = useState<ApiKeys | null>(null)
+  const [showSecret, setShowSecret] = useState(false)
+  const [loadingKeys, setLoadingKeys] = useState(false)
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchApiKeys()
+    }
+  }, [isOpen])
+
+  const fetchApiKeys = async () => {
+    setLoadingKeys(true)
+    try {
+      const res = await fetch('/api/v1/api-keys')
+      if (res.ok) setApiKeys(await res.json())
+    } catch (error) {
+      console.error("Failed to fetch keys", error)
+    } finally {
+      setLoadingKeys(false)
+    }
+  }
+
+  const handleRotateKeys = async () => {
+    if (!confirm("Régénérer vos clés ? Les anciennes deviendront invalides.")) return
+    try {
+      const res = await fetch('/api/v1/api-keys/rotate', { method: 'POST' })
+      if (res.ok) setApiKeys(await res.json())
+    } catch (error) {
+      console.error("Failed to rotate keys", error)
+    }
+  }
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+    // We could add a toast here
+  }
+
+  const handleLogout = async () => {
+    await authClient.signOut()
+    window.location.href = '/login'
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <>
+      <div className="fixed inset-0 z-[250]" onClick={onClose} />
+      <div className="absolute top-full right-0 mt-2 w-80 bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-2xl shadow-[0_32px_80px_rgba(0,0,0,0.6)] overflow-hidden z-[300] animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+        {/* Header */}
+        <div className="p-5 border-b border-[var(--v3-border)] bg-white/[0.02]">
+           <div className="flex items-center gap-3 mb-1">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--v3-teal)] to-[#0a6e52] flex items-center justify-center text-sm font-bold text-white shadow-[0_0_20px_rgba(45,212,191,0.2)]">
+                {session?.user?.name?.[0] || 'U'}
+              </div>
+              <div className="min-w-0">
+                <div className="font-bold text-[var(--v3-text)] truncate">{session?.user?.name}</div>
+                <div className="text-[10px] text-[var(--v3-muted2)] truncate">{session?.user?.email}</div>
+              </div>
+           </div>
+        </div>
+
+        <div className="py-2">
+          {/* Section: Clés API */}
+          <div className="px-5 py-3">
+             <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.15em] text-[var(--v3-teal)]">
+                   <Key size={12} /> Clés API
+                </div>
+                {loadingKeys && <RefreshCw size={10} className="animate-spin text-[var(--v3-muted2)]" />}
+             </div>
+             
+             <div className="space-y-2.5">
+                <div className="bg-[var(--v3-bg)] border border-[var(--v3-border)] rounded-lg p-2.5 flex items-center justify-between group/key">
+                   <div className="min-w-0 pr-2">
+                      <div className="text-[8px] font-bold text-[var(--v3-muted2)] uppercase mb-0.5">Public Key</div>
+                      <div className="text-[11px] font-mono text-[var(--v3-text)] truncate opacity-60 group-hover/key:opacity-100 transition-opacity">
+                         {apiKeys?.publicKey || 'rk_pk_live_...'}
+                      </div>
+                   </div>
+                   <button 
+                    onClick={() => apiKeys && copyToClipboard(apiKeys.publicKey)}
+                    className="p-1.5 hover:bg-white/5 rounded-md text-[var(--v3-muted2)] hover:text-[var(--v3-teal)] transition-all"
+                   >
+                     <Copy size={12} />
+                   </button>
+                </div>
+
+                <div className="bg-[var(--v3-bg)] border border-[var(--v3-border)] rounded-lg p-2.5 flex items-center justify-between group/key">
+                   <div className="min-w-0 pr-2 cursor-pointer" onClick={() => setShowSecret(!showSecret)}>
+                      <div className="text-[8px] font-bold text-rose-400 uppercase mb-0.5">Secret Key</div>
+                      <div className="text-[11px] font-mono text-[var(--v3-text)] truncate opacity-60 group-hover/key:opacity-100 transition-opacity">
+                         {showSecret ? (apiKeys?.secretKey || 'rk_sk_...') : '••••••••••••••••'}
+                      </div>
+                   </div>
+                   <div className="flex items-center gap-1">
+                      <button 
+                        onClick={() => apiKeys && copyToClipboard(apiKeys.secretKey)}
+                        className="p-1.5 hover:bg-white/5 rounded-md text-[var(--v3-muted2)] hover:text-rose-400 transition-all"
+                      >
+                        <Copy size={12} />
+                      </button>
+                      <button 
+                        onClick={handleRotateKeys}
+                        className="p-1.5 hover:bg-white/5 rounded-md text-[var(--v3-muted2)] hover:text-[var(--v3-teal)] transition-all"
+                      >
+                        <RefreshCw size={12} />
+                      </button>
+                   </div>
+                </div>
+             </div>
+          </div>
+
+          <div className="h-px bg-[var(--v3-border)] mx-4 my-2" />
+
+          {/* Menu Items */}
+          <div className="px-2 space-y-0.5">
+            <Link 
+              to="/profile" 
+              onClick={onClose}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-[13px] font-medium text-[var(--v3-text)] hover:bg-white/[0.04] transition-all group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[var(--v3-muted2)] group-hover:text-[var(--v3-teal)] transition-colors">
+                  <User size={16} />
+                </div>
+                Mon Profil
+              </div>
+              <ChevronRight size={14} className="text-[var(--v3-muted)]" />
+            </Link>
+
+            <Link 
+              to="/settings" 
+              onClick={onClose}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-[13px] font-medium text-[var(--v3-text)] hover:bg-white/[0.04] transition-all group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[var(--v3-muted2)] group-hover:text-[var(--v3-teal)] transition-colors">
+                  <Settings size={16} />
+                </div>
+                Paramètres
+              </div>
+              <ChevronRight size={14} className="text-[var(--v3-muted)]" />
+            </Link>
+
+            <Link 
+              to="/security" 
+              onClick={onClose}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-[13px] font-medium text-[var(--v3-text)] hover:bg-white/[0.04] transition-all group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[var(--v3-muted2)] group-hover:text-[var(--v3-teal)] transition-colors">
+                  <ShieldCheck size={16} />
+                </div>
+                Sécurité
+              </div>
+              <ChevronRight size={14} className="text-[var(--v3-muted)]" />
+            </Link>
+          </div>
+
+          <div className="h-px bg-[var(--v3-border)] mx-4 my-2" />
+
+          <div className="px-2">
+            <button 
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium text-rose-400 hover:bg-rose-500/10 transition-all border border-transparent hover:border-rose-500/20"
+            >
+              <div className="w-8 h-8 rounded-lg bg-rose-500/5 flex items-center justify-center">
+                <LogOut size={16} />
+              </div>
+              Déconnexion
+            </button>
+          </div>
+        </div>
+
+        {/* Footer info */}
+        <div className="p-4 bg-black/20 flex items-center justify-between">
+           <span className="text-[10px] font-bold text-[var(--v3-muted2)] opacity-50 uppercase tracking-widest">v1.2.0</span>
+           <a href="#" className="text-[10px] font-bold text-[var(--v3-teal)] hover:underline flex items-center gap-1">
+              Docs <ExternalLink size={10} />
+           </a>
+        </div>
+      </div>
+    </>
+  )
+}

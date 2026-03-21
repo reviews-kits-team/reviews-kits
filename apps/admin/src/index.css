@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -96,28 +97,38 @@
 
   --sidebar-ring: oklch(0.708 0 0);
 
-  /* V3 DASHBOARD COLORS */
+  /* V3 DASHBOARD COLORS - Synced with Brand Config */
   --v3-bg: #0A0A0F;
-  --v3-bg2: #0A0A0A;
+  --v3-bg2: #111118;
   --v3-bg3: #16161F;
   --v3-teal: #0D9E75;
-  --v3-teal-dim: rgba(13, 158, 117, .12);
-  --v3-teal-glow: rgba(13, 158, 117, .25);
-  --v3-border: rgba(255, 255, 255, .07);
-  --v3-border2: rgba(255, 255, 255, .12);
+  --v3-teal-dim: rgba(13, 158, 117, 0.12);
+  --v3-teal-glow: rgba(13, 158, 117, 0.25);
+  --v3-border: rgba(255, 255, 255, 0.07);
+  --v3-border2: rgba(255, 255, 255, 0.12);
   --v3-text: #F2F0EB;
   --v3-muted: #6E6C7A;
   --v3-muted2: #9896A4;
   --v3-red: #E05454;
-  --v3-red-dim: rgba(224, 84, 84, .1);
+  --v3-red-dim: rgba(224, 84, 84, 0.1);
   --v3-yellow: #F4B730;
+
+  /* Avatar & Misc */
+  --avatar-teal-from: #0D9E75;
+  --avatar-teal-to: #0a6e52;
+  --code-bg-new: #0D0D14;
 }
 
 body {
   margin: 0;
   background-color: var(--v3-bg);
   color: var(--v3-text);
-  font-family: 'Inter', -apple-system, sans-serif;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .font-jakarta {
+  font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
 /* NOISE OVERLAY */

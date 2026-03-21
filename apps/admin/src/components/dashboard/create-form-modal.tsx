@@ -34,7 +34,10 @@ export function CreateFormModal({ isOpen, onClose, onCreated }: CreateFormModalP
       const data = await res.json()
 
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to create form')
+        const errorMessage = typeof data.error === 'object' 
+          ? (data.error.message || JSON.stringify(data.error))
+          : (data.error || 'Failed to create form')
+        throw new Error(errorMessage)
       }
 
       onCreated(data)
