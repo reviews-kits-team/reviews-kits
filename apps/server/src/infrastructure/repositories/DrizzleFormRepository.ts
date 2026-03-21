@@ -67,6 +67,18 @@ export class DrizzleFormRepository implements FormRepository {
     await this.db.delete(forms).where(eq(forms.id, id));
   }
 
+  async batchUpdateStatus(ids: string[], isActive: boolean): Promise<void> {
+    const { inArray } = await import('drizzle-orm');
+    await this.db.update(forms)
+      .set({ isActive, updatedAt: new Date() })
+      .where(inArray(forms.id, ids));
+  }
+
+  async batchDelete(ids: string[]): Promise<void> {
+    const { inArray } = await import('drizzle-orm');
+    await this.db.delete(forms).where(inArray(forms.id, ids));
+  }
+
   private mapToDomain(row: any): Form {
     return new Form({
       id: row.id,

@@ -7,4 +7,6 @@ export interface FormRepository {
   save(form: Form): Promise<void>;
   update(form: Form): Promise<void>;
   delete(id: string): Promise<void>;
+  batchUpdateStatus(ids: string[], isActive: boolean): Promise<void>;
+  batchDelete(ids: string[]): Promise<void>;
 }
