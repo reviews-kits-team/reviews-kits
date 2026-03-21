@@ -13,6 +13,15 @@ export interface DashboardForm {
   updatedAt?: string | Date
 }
 
+export interface ApiKey {
+  id: string
+  key: string
+  type: 'public' | 'secret'
+  name?: string
+  lastUsed?: string | Date
+  isActive: boolean
+}
+
 export interface ApiKeys {
   publicKey: string
   secretKey: string

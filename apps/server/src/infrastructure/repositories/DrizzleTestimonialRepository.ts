@@ -74,6 +74,30 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
     await this.db.delete(testimonials).where(eq(testimonials.id, id));
   }
 
+  async findApprovedByUser(userId: string, options?: { limit?: number; minRating?: number }): Promise<Testimonial[]> {
+    const { gte } = await import('drizzle-orm');
+    const whereConditions = [
+      eq(testimonials.userId, userId),
+      eq(testimonials.status, 'approved')
+    ];
+
+    if (options?.minRating) {
+      whereConditions.push(gte(testimonials.rating, options.minRating));
+    }
+
+    const query = this.db.select()
+      .from(testimonials)
+      .where(and(...whereConditions))
+      .orderBy(testimonials.createdAt);
+
+    if (options?.limit) {
+      query.limit(options.limit);
+    }
+
+    const rows = await query;
+    return rows.map(row => this.mapToDomain(row));
+  }
+
   private mapToDomain(row: any): Testimonial {
     return new Testimonial({
       id: row.id,
