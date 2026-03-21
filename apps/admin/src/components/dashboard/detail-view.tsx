@@ -44,10 +44,10 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
       <main className="max-w-[1140px] mx-auto px-6 py-12 pb-20 relative z-10">
         <button 
           onClick={onBack}
-          className="flex items-center gap-2 bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-lg px-4 py-2 text-[13px] font-medium text-[var(--v3-muted2)] hover:text-[var(--v3-text)] hover:border-[var(--v3-border2)] transition-all mb-8"
+          className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[var(--v3-muted2)] hover:text-[var(--v3-teal)] transition-colors mb-6"
         >
-          <ChevronLeft size={13} />
-          Retour aux formulaires
+          <ChevronLeft size={14} />
+          Retour au Dashboard
         </button>
 
         <div className="mb-8">

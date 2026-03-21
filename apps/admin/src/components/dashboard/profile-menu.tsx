@@ -28,6 +28,7 @@ export const ProfileMenu = ({ isOpen, onClose }: ProfileMenuProps) => {
   const [apiKeys, setApiKeys] = useState<ApiKeys | null>(null)
   const [showSecret, setShowSecret] = useState(false)
   const [loadingKeys, setLoadingKeys] = useState(false)
+  const [showApiKeys, setShowApiKeys] = useState(false)
 
   useEffect(() => {
     if (isOpen) {
@@ -71,7 +72,7 @@ export const ProfileMenu = ({ isOpen, onClose }: ProfileMenuProps) => {
 
   return (
     <>
-      <div className="fixed inset-0 z-[250]" onClick={onClose} />
+      <div className="fixed inset-0 z-[250]" onClick={(e) => { e.stopPropagation(); onClose(); }} />
       <div className="absolute top-full right-0 mt-2 w-80 bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-2xl shadow-[0_32px_80px_rgba(0,0,0,0.6)] overflow-hidden z-[300] animate-in fade-in zoom-in-95 duration-200 origin-top-right">
         {/* Header */}
         <div className="p-5 border-b border-[var(--v3-border)] bg-white/[0.02]">
@@ -87,57 +88,7 @@ export const ProfileMenu = ({ isOpen, onClose }: ProfileMenuProps) => {
         </div>
 
         <div className="py-2">
-          {/* Section: Clés API */}
-          <div className="px-5 py-3">
-             <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.15em] text-[var(--v3-teal)]">
-                   <Key size={12} /> Clés API
-                </div>
-                {loadingKeys && <RefreshCw size={10} className="animate-spin text-[var(--v3-muted2)]" />}
-             </div>
-             
-             <div className="space-y-2.5">
-                <div className="bg-[var(--v3-bg)] border border-[var(--v3-border)] rounded-lg p-2.5 flex items-center justify-between group/key">
-                   <div className="min-w-0 pr-2">
-                      <div className="text-[8px] font-bold text-[var(--v3-muted2)] uppercase mb-0.5">Public Key</div>
-                      <div className="text-[11px] font-mono text-[var(--v3-text)] truncate opacity-60 group-hover/key:opacity-100 transition-opacity">
-                         {apiKeys?.publicKey || 'rk_pk_live_...'}
-                      </div>
-                   </div>
-                   <button 
-                    onClick={() => apiKeys && copyToClipboard(apiKeys.publicKey)}
-                    className="p-1.5 hover:bg-white/5 rounded-md text-[var(--v3-muted2)] hover:text-[var(--v3-teal)] transition-all"
-                   >
-                     <Copy size={12} />
-                   </button>
-                </div>
-
-                <div className="bg-[var(--v3-bg)] border border-[var(--v3-border)] rounded-lg p-2.5 flex items-center justify-between group/key">
-                   <div className="min-w-0 pr-2 cursor-pointer" onClick={() => setShowSecret(!showSecret)}>
-                      <div className="text-[8px] font-bold text-rose-400 uppercase mb-0.5">Secret Key</div>
-                      <div className="text-[11px] font-mono text-[var(--v3-text)] truncate opacity-60 group-hover/key:opacity-100 transition-opacity">
-                         {showSecret ? (apiKeys?.secretKey || 'rk_sk_...') : '••••••••••••••••'}
-                      </div>
-                   </div>
-                   <div className="flex items-center gap-1">
-                      <button 
-                        onClick={() => apiKeys && copyToClipboard(apiKeys.secretKey)}
-                        className="p-1.5 hover:bg-white/5 rounded-md text-[var(--v3-muted2)] hover:text-rose-400 transition-all"
-                      >
-                        <Copy size={12} />
-                      </button>
-                      <button 
-                        onClick={handleRotateKeys}
-                        className="p-1.5 hover:bg-white/5 rounded-md text-[var(--v3-muted2)] hover:text-[var(--v3-teal)] transition-all"
-                      >
-                        <RefreshCw size={12} />
-                      </button>
-                   </div>
-                </div>
-             </div>
-          </div>
-
-          <div className="h-px bg-[var(--v3-border)] mx-4 my-2" />
+          <div className="h-px bg-[var(--v3-border)] mx-4 my-2 opacity-50" />
 
           {/* Menu Items */}
           <div className="px-2 space-y-0.5">
@@ -182,6 +133,67 @@ export const ProfileMenu = ({ isOpen, onClose }: ProfileMenuProps) => {
               </div>
               <ChevronRight size={14} className="text-[var(--v3-muted)]" />
             </Link>
+
+            {/* API Keys Item */}
+            <div className="space-y-1">
+              <button 
+                onClick={() => setShowApiKeys(!showApiKeys)}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-[13px] font-medium transition-all group ${showApiKeys ? 'bg-white/[0.04] text-[var(--v3-teal)]' : 'text-[var(--v3-text)] hover:bg-white/[0.04]'}`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center transition-colors ${showApiKeys ? 'text-[var(--v3-teal)]' : 'text-[var(--v3-muted2)] group-hover:text-[var(--v3-teal)]'}`}>
+                    <Key size={16} />
+                  </div>
+                  Clés API
+                </div>
+                <div className="flex items-center gap-2">
+                  {loadingKeys && <RefreshCw size={10} className="animate-spin text-[var(--v3-muted2)]" />}
+                  <ChevronRight size={14} className={`text-[var(--v3-muted)] transition-transform duration-200 ${showApiKeys ? 'rotate-90' : ''}`} />
+                </div>
+              </button>
+
+              {showApiKeys && (
+                <div className="px-3 pb-2 pt-1 space-y-2 animate-in slide-in-from-top-2 duration-200">
+                  <div className="bg-[var(--v3-bg)] border border-[var(--v3-border)] rounded-lg p-2.5 flex items-center justify-between group/key">
+                    <div className="min-w-0 pr-2">
+                        <div className="text-[8px] font-bold text-[var(--v3-muted2)] uppercase mb-0.5">Public Key</div>
+                        <div className="text-[10px] font-mono text-[var(--v3-text)] truncate opacity-60 group-hover/key:opacity-100 transition-opacity">
+                          {apiKeys?.publicKey || 'rk_pk_live_...'}
+                        </div>
+                    </div>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); if (apiKeys) copyToClipboard(apiKeys.publicKey); }}
+                      className="p-1.5 hover:bg-white/5 rounded-md text-[var(--v3-muted2)] hover:text-[var(--v3-teal)] transition-all"
+                    >
+                      <Copy size={12} />
+                    </button>
+                  </div>
+
+                  <div className="bg-[var(--v3-bg)] border border-[var(--v3-border)] rounded-lg p-2.5 flex items-center justify-between group/key">
+                    <div className="min-w-0 pr-2 cursor-pointer" onClick={(e) => { e.stopPropagation(); setShowSecret(!showSecret); }}>
+                        <div className="text-[8px] font-bold text-rose-400 uppercase mb-0.5">Secret Key</div>
+                        <div className="text-[10px] font-mono text-[var(--v3-text)] truncate opacity-60 group-hover/key:opacity-100 transition-opacity">
+                          {showSecret ? (apiKeys?.secretKey || 'rk_sk_...') : '••••••••••••••••'}
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); if (apiKeys) copyToClipboard(apiKeys.secretKey); }}
+                          className="p-1.5 hover:bg-white/5 rounded-md text-[var(--v3-muted2)] hover:text-rose-400 transition-all"
+                        >
+                          <Copy size={12} />
+                        </button>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); handleRotateKeys(); }}
+                          className="p-1.5 hover:bg-white/5 rounded-md text-[var(--v3-muted2)] hover:text-[var(--v3-teal)] transition-all"
+                        >
+                          <RefreshCw size={12} />
+                        </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="h-px bg-[var(--v3-border)] mx-4 my-2" />

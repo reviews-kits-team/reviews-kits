@@ -13,6 +13,7 @@ import { StatCard } from '../components/dashboard/stat-card'
 import { FormTable } from '../components/dashboard/form-table'
 import { DetailView } from '../components/dashboard/detail-view'
 import { CreateFormModal } from '../components/dashboard/create-form-modal'
+import { DeleteConfirmModal } from '../components/dashboard/delete-confirm-modal'
 import type { DashboardForm } from '../components/dashboard/types'
 import { authClient } from '../lib/auth-client'
 
@@ -22,6 +23,8 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [selectedFormId, setSelectedFormId] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [deletingFormId, setDeletingFormId] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,6 +44,51 @@ export default function DashboardPage() {
   const selectedForm = useMemo(() => 
     forms.find(f => f.id === selectedFormId), [selectedFormId, forms]
   )
+
+  const handleDeleteForm = (id: string) => {
+    setDeletingFormId(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingFormId) return;
+    
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/v1/forms/${deletingFormId}`, { method: 'DELETE' });
+      if (res.ok) {
+        setForms(forms.filter(f => f.id !== deletingFormId));
+        setDeletingFormId(null);
+      }
+    } catch (error) {
+      console.error("Failed to delete form", error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleToggleFormStatus = async (id: string) => {
+    try {
+      const res = await fetch(`/api/v1/forms/${id}/toggle`, { method: 'PATCH' });
+      if (res.ok) {
+        const updatedForm = await res.json();
+        setForms(forms.map(f => f.id === id ? { ...f, isActive: updatedForm.isActive } : f));
+      }
+    } catch (error) {
+      console.error("Failed to toggle form status", error);
+    }
+  };
+
+  const handleDuplicateForm = async (id: string) => {
+    try {
+      const res = await fetch(`/api/v1/forms/${id}/duplicate`, { method: 'POST' });
+      if (res.ok) {
+        const newForm = await res.json();
+        setForms([newForm, ...forms]);
+      }
+    } catch (error) {
+      console.error("Failed to duplicate form", error);
+    }
+  };
 
   if (selectedFormId && selectedForm) {
     return (
@@ -101,6 +149,9 @@ export default function DashboardPage() {
               forms={forms} 
               onReorder={setForms}
               onOpenForm={setSelectedFormId}
+              onDeleteForm={handleDeleteForm}
+              onToggleFormStatus={handleToggleFormStatus}
+              onDuplicateForm={handleDuplicateForm}
             />
           ) : (
             <div className="py-20 bg-[var(--v3-bg2)] border border-dashed border-white/5 rounded-2xl text-center">
@@ -119,6 +170,14 @@ export default function DashboardPage() {
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
           onCreated={(newForm) => setForms([newForm, ...forms])}
+        />
+
+        <DeleteConfirmModal 
+          isOpen={!!deletingFormId}
+          onClose={() => setDeletingFormId(null)}
+          onConfirm={confirmDelete}
+          formName={forms.find(f => f.id === deletingFormId)?.name || ''}
+          loading={isDeleting}
         />
       </main>
     </div>
