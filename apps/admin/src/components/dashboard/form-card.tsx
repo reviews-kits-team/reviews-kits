@@ -17,9 +17,11 @@ export const FormCard = ({ form, onClick }: { form: DashboardForm, onClick: () =
       </button>
     </div>
     <div className="text-[15px] font-bold tracking-tight text-[var(--v3-text)] mb-1">{form.name}</div>
-    <div className="text-xs text-[var(--v3-muted)] mb-3.5">Créé le {form.created}</div>
+    <div className="text-xs text-[var(--v3-muted)] mb-3.5">
+      Créé le {new Date(form.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+    </div>
     <div className="mb-4.5">
-      <Badge status={form.status} />
+      <Badge status={form.isActive ? 'active' : 'draft'} />
     </div>
     <div className="grid grid-cols-3 gap-2 mb-4.5">
       {[

@@ -5,6 +5,8 @@ import { authRouter } from './interface/routes/auth';
 import { adminRouter } from './interface/routes/admin';
 
 import { meRouter } from './interface/routes/me';
+import { formsRouter } from './interface/routes/forms';
+import { apiKeysRouter } from './interface/routes/api-keys';
 
 const app = new OpenAPIHono();
 
@@ -55,6 +57,8 @@ app.route('/api/auth', authRouter);
 // Mount Business API Routes (v1)
 app.route('/api/v1/me', meRouter);
 app.route('/api/v1/admin', adminRouter);
+app.route('/api/v1/forms', formsRouter);
+app.route('/api/v1/api-keys', apiKeysRouter);
 
 // Welcome Route
 app.get('/', (c) => {

@@ -13,6 +13,13 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 5180,
     strictPort: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
     watch: {
       ignored: ["**/playwright-report/**"],
     },

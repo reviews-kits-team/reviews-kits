@@ -60,7 +60,7 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
                 {form.name}
               </h1>
               <div className="flex flex-wrap items-center gap-2.5">
-                <Badge status={form.status} />
+                <Badge status={form.isActive ? 'active' : 'draft'} />
                 {form.rating && (
                   <div className="flex items-center gap-1">
                     <Stars rating={form.rating} />
@@ -78,10 +78,10 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <StatCard icon={<MessageSquare size={18} />} label="Total reviews" value={form.responses} delta="↑ +12%" colorClass="bg-[var(--v3-teal-dim)] border-[var(--v3-teal)]/20 text-[var(--v3-teal)]" />
-          <StatCard icon={<TrendingUp size={18} />} label="Complétion" value={`${form.completion}%`} delta="↑ +4%" colorClass="bg-sky-500/10 border-sky-500/20 text-sky-500" />
+          <StatCard icon={<MessageSquare size={18} />} label="Total reviews" value={form.responses || 0} delta="↑ +12%" colorClass="bg-[var(--v3-teal-dim)] border-[var(--v3-teal)]/20 text-[var(--v3-teal)]" />
+          <StatCard icon={<TrendingUp size={18} />} label="Complétion" value={`${form.completion || 0}%`} delta="↑ +4%" colorClass="bg-sky-500/10 border-sky-500/20 text-sky-500" />
           <StatCard icon={<Star size={18} />} label="Note moyenne" value={form.rating || "—"} colorClass="bg-amber-500/10 border-amber-500/20 text-amber-500" />
-          <StatCard icon={<Users size={18} />} label="Répondants uniques" value={Math.round(form.responses * 0.87)} colorClass="bg-purple-500/10 border-purple-500/20 text-purple-500" />
+          <StatCard icon={<Users size={18} />} label="Répondants uniques" value={Math.round((form.responses || 0) * 0.87)} colorClass="bg-purple-500/10 border-purple-500/20 text-purple-500" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-5 mb-6">
@@ -115,9 +115,9 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
               ))}
             </div>
             <div className="flex items-center gap-3 pt-4 border-t border-[var(--v3-border)] mt-2">
-              <span className="text-[36px] font-black tracking-tighter text-[var(--v3-text)]">{form.rating}</span>
+              <span className="text-[36px] font-black tracking-tighter text-[var(--v3-text)]">{form.rating || "0.0"}</span>
               <div>
-                <Stars rating={form.rating} size={14} />
+                <Stars rating={form.rating || 0} size={14} />
                 <div className="text-[11px] text-[var(--v3-muted)] mt-0.5">sur 5</div>
               </div>
             </div>
