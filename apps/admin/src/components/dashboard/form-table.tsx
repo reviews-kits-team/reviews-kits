@@ -25,7 +25,9 @@ import {
   Pause,
   Play,
   MessageSquare,
-  FileText
+  FileText,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { Badge, Stars } from './ui';
 import type { DashboardForm } from './types';
@@ -38,9 +40,10 @@ interface SortableRowProps {
   onDelete: (id: string) => void;
   onDuplicate: (id: string) => void;
   onTogglePause: (id: string) => void;
+  onShare: (id: string | null) => void;
 }
 
-const SortableRow = ({ form, isSelected, onSelect, onOpen, onDelete, onDuplicate, onTogglePause }: SortableRowProps) => {
+const SortableRow = ({ form, isSelected, onSelect, onOpen, onDelete, onDuplicate, onTogglePause, onShare }: SortableRowProps) => {
   const {
     attributes,
     listeners,
@@ -57,10 +60,6 @@ const SortableRow = ({ form, isSelected, onSelect, onOpen, onDelete, onDuplicate
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    // Could add toast here
-  };
 
   return (
     <tr
@@ -154,7 +153,7 @@ const SortableRow = ({ form, isSelected, onSelect, onOpen, onDelete, onDuplicate
           <button
             className="p-2 text-[var(--v3-muted2)] hover:text-sky-400 hover:bg-sky-500/10 rounded-lg transition-all group/btn"
             title="Partager"
-            onClick={() => copyToClipboard(`https://reviewskits.com/f/${form.slug}`)}
+            onClick={() => onShare(form.id)}
           >
             <Share2 size={14} className="group-hover/btn:scale-110 transition-transform" />
           </button>
@@ -187,6 +186,9 @@ interface FormTableProps {
   onDeleteForm: (id: string) => void;
   onToggleFormStatus: (id: string) => void;
   onDuplicateForm: (id: string) => void;
+  onShareForm: (id: string | null) => void;
+  onBatchToggleStatus: (ids: string[], isActive: boolean) => void;
+  onBulkDelete: (ids: string[]) => void;
 }
 
 export const FormTable = ({
@@ -195,9 +197,18 @@ export const FormTable = ({
   onOpenForm,
   onDeleteForm,
   onToggleFormStatus,
-  onDuplicateForm
+  onDuplicateForm,
+  onShareForm,
+  onBatchToggleStatus,
+  onBulkDelete
 }: FormTableProps) => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+
+  const totalPages = Math.ceil(forms.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedForms = forms.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -217,6 +228,11 @@ export const FormTable = ({
       const newIndex = forms.findIndex((f) => f.id === over.id);
       onReorder(arrayMove(forms, oldIndex, newIndex));
     }
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    setSelectedIds(new Set()); // Clear selection on page change
   };
 
   const toggleSelectAll = (checked: boolean) => {
@@ -242,13 +258,33 @@ export const FormTable = ({
           <div className="flex items-center gap-4">
             <span className="text-sm font-bold text-white">{selectedIds.size} sélectionné(s)</span>
             <div className="h-4 w-px bg-white/20" />
-            <button className="flex items-center gap-2 text-white/90 hover:text-white font-bold text-xs uppercase tracking-wider transition-all">
+            
+            <button 
+              onClick={() => onBatchToggleStatus(Array.from(selectedIds), true)}
+              className="flex items-center gap-2 text-white/90 hover:text-white font-bold text-xs uppercase tracking-wider transition-all cursor-pointer"
+            >
+              <Play size={14} /> Activer
+            </button>
+
+            <button 
+              onClick={() => onBatchToggleStatus(Array.from(selectedIds), false)}
+              className="flex items-center gap-2 text-white/90 hover:text-white font-bold text-xs uppercase tracking-wider transition-all cursor-pointer"
+            >
+              <Pause size={14} /> Pause
+            </button>
+
+            <div className="h-4 w-px bg-white/20" />
+
+            <button 
+              onClick={() => onBulkDelete(Array.from(selectedIds))}
+              className="flex items-center gap-2 text-white/90 hover:text-white font-bold text-xs uppercase tracking-wider transition-all cursor-pointer"
+            >
               <Trash2 size={14} /> Supprimer
             </button>
           </div>
           <button
             onClick={() => setSelectedIds(new Set())}
-            className="text-white/70 hover:text-white transition-all"
+            className="text-white/70 hover:text-white transition-all cursor-pointer"
           >
             Annuler
           </button>
@@ -261,7 +297,7 @@ export const FormTable = ({
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
         >
-          <SortableContext items={forms.map(f => f.id)} strategy={verticalListSortingStrategy}>
+          <SortableContext items={paginatedForms.map(f => f.id)} strategy={verticalListSortingStrategy}>
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-white/5 bg-white/[0.01]">
@@ -285,7 +321,7 @@ export const FormTable = ({
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/[0.04]">
-                {forms.map((form) => (
+                {paginatedForms.map((form) => (
                   <SortableRow
                     key={form.id}
                     form={form}
@@ -295,6 +331,7 @@ export const FormTable = ({
                     onDelete={onDeleteForm}
                     onTogglePause={onToggleFormStatus}
                     onDuplicate={onDuplicateForm}
+                    onShare={onShareForm}
                   />
                 ))}
               </tbody>
@@ -302,6 +339,48 @@ export const FormTable = ({
           </SortableContext>
         </DndContext>
       </div>
+
+      {/* Pagination Footer */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-6 py-4 border-t border-white/5 bg-white/[0.01]">
+          <div className="text-xs text-[var(--v3-muted2)]">
+            Affichage de <span className="text-[var(--v3-text)] font-bold">{startIndex + 1}</span> à <span className="text-[var(--v3-text)] font-bold">{Math.min(startIndex + ITEMS_PER_PAGE, forms.length)}</span> sur <span className="text-[var(--v3-text)] font-bold">{forms.length}</span> formulaires
+          </div>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="p-2 rounded-lg border border-white/5 text-[var(--v3-muted2)] hover:text-[var(--v3-text)] hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            
+            <div className="flex items-center gap-1 mx-2">
+              {[...Array(totalPages)].map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => handlePageChange(i + 1)}
+                  className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
+                    currentPage === i + 1 
+                    ? 'bg-[var(--v3-teal)]/20 border border-[var(--v3-teal)]/30 text-[var(--v3-teal)]' 
+                    : 'text-[var(--v3-muted2)] hover:text-[var(--v3-text)] hover:bg-white/5'
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="p-2 rounded-lg border border-white/5 text-[var(--v3-muted2)] hover:text-[var(--v3-text)] hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

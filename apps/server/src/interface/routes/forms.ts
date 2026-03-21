@@ -74,8 +74,53 @@ const duplicateFormRoute = createRoute({
   },
 });
 
+const batchToggleFormStatusRoute = createRoute({
+  method: 'patch',
+  path: '/batch-toggle',
+  summary: 'Batch toggle forms status',
+  tags: ['Forms'],
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            ids: z.array(z.string()),
+            isActive: z.boolean(),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    200: { description: 'Status updated' },
+  },
+});
+
+const batchDeleteFormsRoute = createRoute({
+  method: 'delete',
+  path: '/batch',
+  summary: 'Batch delete forms',
+  tags: ['Forms'],
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            ids: z.array(z.string()),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    200: { description: 'Forms deleted' },
+  },
+});
+
 formsRouter.openapi(listFormsRoute, formController.listForms);
 formsRouter.openapi(createFormRoute, formController.createForm);
+formsRouter.openapi(batchToggleFormStatusRoute, formController.batchToggleStatus);
+formsRouter.openapi(batchDeleteFormsRoute, formController.batchDeleteForms);
 formsRouter.openapi(deleteFormRoute, formController.deleteForm);
 formsRouter.openapi(toggleFormStatusRoute, formController.toggleFormStatus);
 formsRouter.openapi(duplicateFormRoute, formController.duplicateForm);
