@@ -44,5 +44,38 @@ const createFormRoute = createRoute({
   },
 });
 
+const deleteFormRoute = createRoute({
+  method: 'delete',
+  path: '/{id}',
+  summary: 'Delete a form',
+  tags: ['Forms'],
+  responses: {
+    200: { description: 'Form deleted' },
+  },
+});
+
+const toggleFormStatusRoute = createRoute({
+  method: 'patch',
+  path: '/{id}/toggle',
+  summary: 'Toggle form active status',
+  tags: ['Forms'],
+  responses: {
+    200: { description: 'Status toggled' },
+  },
+});
+
+const duplicateFormRoute = createRoute({
+  method: 'post',
+  path: '/{id}/duplicate',
+  summary: 'Duplicate a form',
+  tags: ['Forms'],
+  responses: {
+    201: { description: 'Form duplicated' },
+  },
+});
+
 formsRouter.openapi(listFormsRoute, formController.listForms);
 formsRouter.openapi(createFormRoute, formController.createForm);
+formsRouter.openapi(deleteFormRoute, formController.deleteForm);
+formsRouter.openapi(toggleFormStatusRoute, formController.toggleFormStatus);
+formsRouter.openapi(duplicateFormRoute, formController.duplicateForm);

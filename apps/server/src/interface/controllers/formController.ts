@@ -84,4 +84,74 @@ export const formController = {
       completion: 0
     });
   },
+
+  deleteForm: async (c: Context) => {
+    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const formId = c.req.param('id');
+
+    if (!userId || !formId) {
+      return c.json({ error: 'Unauthorized or missing ID' }, 401);
+    }
+
+    const form = await container.formRepository.findById(formId);
+    if (!form || form.userId !== userId) {
+      return c.json({ error: 'Form not found' }, 404);
+    }
+
+    await container.formRepository.delete(formId);
+    return c.json({ success: true });
+  },
+
+  toggleFormStatus: async (c: Context) => {
+    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const formId = c.req.param('id');
+
+    if (!userId || !formId) {
+      return c.json({ error: 'Unauthorized or missing ID' }, 401);
+    }
+
+    const form = await container.formRepository.findById(formId);
+    if (!form || form.userId !== userId) {
+      return c.json({ error: 'Form not found' }, 404);
+    }
+
+    form.toggleActive();
+    await container.formRepository.update(form);
+    
+    const props = form.getProps();
+    return c.json({ ...props, slug: props.slug.getValue() });
+  },
+
+  duplicateForm: async (c: Context) => {
+    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const formId = c.req.param('id');
+
+    if (!userId || !formId) {
+      return c.json({ error: 'Unauthorized or missing ID' }, 401);
+    }
+
+    const originalForm = await container.formRepository.findById(formId);
+    if (!originalForm || originalForm.userId !== userId) {
+      return c.json({ error: 'Form not found' }, 404);
+    }
+
+    const originalProps = originalForm.getProps();
+    const newSlugValue = `${originalProps.slug.getValue()}-copy-${Date.now().toString().slice(-4)}`;
+    
+    const newForm = new Form({
+      id: randomUUID(),
+      userId,
+      name: `${originalProps.name} (Copie)`,
+      slug: Slug.create(newSlugValue),
+      description: originalProps.description,
+      thankYouMessage: originalProps.thankYouMessage,
+      config: originalProps.config,
+      accentColor: originalProps.accentColor,
+      isActive: originalProps.isActive,
+    });
+
+    await container.formRepository.save(newForm);
+    const props = newForm.getProps();
+    return c.json({ ...props, slug: props.slug.getValue() }, 201);
+  },
 };

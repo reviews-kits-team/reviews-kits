@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { 
-  DndContext, 
+import {
+  DndContext,
   closestCenter,
   KeyboardSensor,
   PointerSensor,
@@ -16,11 +16,16 @@ import {
   useSortable
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { 
-  GripVertical, 
-  MoreHorizontal, 
-  Trash2, 
-  Copy
+import {
+  GripVertical,
+  Trash2,
+  Pencil,
+  Share2,
+  Layers,
+  Pause,
+  Play,
+  MessageSquare,
+  FileText
 } from 'lucide-react';
 import { Badge, Stars } from './ui';
 import type { DashboardForm } from './types';
@@ -30,9 +35,12 @@ interface SortableRowProps {
   isSelected: boolean;
   onSelect: (id: string, selected: boolean) => void;
   onOpen: (id: string) => void;
+  onDelete: (id: string) => void;
+  onDuplicate: (id: string) => void;
+  onTogglePause: (id: string) => void;
 }
 
-const SortableRow = ({ form, isSelected, onSelect, onOpen }: SortableRowProps) => {
+const SortableRow = ({ form, isSelected, onSelect, onOpen, onDelete, onDuplicate, onTogglePause }: SortableRowProps) => {
   const {
     attributes,
     listeners,
@@ -49,23 +57,28 @@ const SortableRow = ({ form, isSelected, onSelect, onOpen }: SortableRowProps) =
     opacity: isDragging ? 0.5 : 1,
   };
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    // Could add toast here
+  };
+
   return (
-    <tr 
-      ref={setNodeRef} 
+    <tr
+      ref={setNodeRef}
       style={style}
       className={`group border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors ${isSelected ? 'bg-[var(--v3-teal)]/[0.03]' : ''}`}
     >
       <td className="py-3.5 pl-4 w-10">
         <div className="flex items-center gap-3">
-          <div 
-            {...attributes} 
+          <div
+            {...attributes}
             {...listeners}
             className="cursor-grab active:cursor-grabbing text-[var(--v3-muted2)] hover:text-[var(--v3-text)] p-1 opacity-0 group-hover:opacity-100 transition-opacity"
           >
             <GripVertical size={16} />
           </div>
-          <input 
-            type="checkbox" 
+          <input
+            type="checkbox"
             checked={isSelected}
             onChange={(e) => onSelect(form.id, e.target.checked)}
             className="w-4 h-4 rounded border-[var(--v3-border)] bg-[var(--v3-bg)] text-[var(--v3-teal)] focus:ring-offset-0 focus:ring-0 cursor-pointer"
@@ -74,17 +87,19 @@ const SortableRow = ({ form, isSelected, onSelect, onOpen }: SortableRowProps) =
       </td>
       <td className="py-3.5 px-4 min-w-[240px]" onClick={() => onOpen(form.id)}>
         <div className="flex items-center gap-3 cursor-pointer">
-          <div className="w-8 h-8 rounded-lg bg-[var(--v3-teal-dim)] border border-[var(--v3-teal)]/20 flex items-center justify-center text-sm shrink-0">
-            📋
+          <div className="w-8 h-8 rounded-lg bg-[var(--v3-teal-dim)] border border-[var(--v3-teal)]/20 flex items-center justify-center shrink-0 text-[var(--v3-teal)]">
+            <FileText size={16} />
           </div>
-          <div className="min-w-0">
-            <div className="font-bold text-[var(--v3-text)] truncate">{form.name}</div>
-            <div className="text-[10px] text-[var(--v3-muted2)] font-mono truncate">/f/{form.slug}</div>
+          <div className="min-w-0 max-w-[140px] sm:max-w-[180px]">
+            <div className="font-bold text-[var(--v3-text)] truncate" title={form.name}>
+              {form.name.length > 25 ? form.name.substring(0, 25) + '...' : form.name}
+            </div>
+            <div className="text-[9px] text-[var(--v3-muted2)] font-mono truncate opacity-50">/f/{form.slug}</div>
           </div>
         </div>
       </td>
       <td className="py-3.5 px-4 hidden md:table-cell">
-        <Badge status={form.isActive ? 'active' : 'draft'} />
+        <Badge status={form.isActive ? 'active' : 'paused'} />
       </td>
       <td className="py-3.5 px-4 text-center">
         <div className="flex flex-col items-center">
@@ -107,21 +122,58 @@ const SortableRow = ({ form, isSelected, onSelect, onOpen }: SortableRowProps) =
             <span className="text-[9px] font-bold text-[var(--v3-teal)]">{form.completion ?? 0}%</span>
           </div>
           <div className="h-1 bg-white/[0.05] rounded-full overflow-hidden">
-             <div className="h-full bg-[var(--v3-teal)] transition-all" style={{ width: `${form.completion ?? 0}%` }} />
+            <div className="h-full bg-[var(--v3-teal)] transition-all" style={{ width: `${form.completion ?? 0}%` }} />
           </div>
         </div>
       </td>
-      <td className="py-3.5 px-4 text-right pr-6">
-        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-           <button className="p-2 text-[var(--v3-muted2)] hover:text-[var(--v3-text)] hover:bg-white/5 rounded-lg transition-all">
-              <Copy size={14} />
-           </button>
-           <button className="p-2 text-[var(--v3-muted2)] hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-all">
-              <Trash2 size={14} />
-           </button>
-           <button className="p-2 text-[var(--v3-muted2)] hover:text-[var(--v3-teal)] hover:bg-[var(--v3-teal)]/10 rounded-lg transition-all">
-              <MoreHorizontal size={14} />
-           </button>
+      <td className="py-3.5 px-4 text-right pr-6 whitespace-nowrap">
+        <div className="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            className="p-2 text-[var(--v3-muted2)] hover:text-[var(--v3-text)] hover:bg-white/5 rounded-lg transition-all group/btn"
+            title="Témoignages"
+            onClick={() => onOpen(form.id)}
+          >
+            <MessageSquare size={14} className="group-hover/btn:scale-110 transition-transform" />
+          </button>
+
+          <button
+            className="p-2 text-[var(--v3-muted2)] hover:text-[var(--v3-teal)] hover:bg-[var(--v3-teal)]/10 rounded-lg transition-all group/btn"
+            title="Éditer"
+          >
+            <Pencil size={14} className="group-hover/btn:scale-110 transition-transform" />
+          </button>
+
+          <button
+            className="p-2 text-[var(--v3-muted2)] hover:text-purple-400 hover:bg-purple-500/10 rounded-lg transition-all group/btn"
+            title="Dupliquer"
+            onClick={() => onDuplicate(form.id)}
+          >
+            <Layers size={14} className="group-hover/btn:scale-110 transition-transform" />
+          </button>
+
+          <button
+            className="p-2 text-[var(--v3-muted2)] hover:text-sky-400 hover:bg-sky-500/10 rounded-lg transition-all group/btn"
+            title="Partager"
+            onClick={() => copyToClipboard(`https://reviewskits.com/f/${form.slug}`)}
+          >
+            <Share2 size={14} className="group-hover/btn:scale-110 transition-transform" />
+          </button>
+
+          <button
+            className={`p-2 rounded-lg transition-all group/btn ${form.isActive ? 'text-[var(--v3-muted2)] hover:text-amber-400 hover:bg-amber-500/10' : 'text-emerald-500 hover:bg-emerald-500/10'}`}
+            title={form.isActive ? "Mettre en pause" : "Activer"}
+            onClick={() => onTogglePause(form.id)}
+          >
+            {form.isActive ? <Pause size={14} className="group-hover/btn:scale-110 transition-transform" /> : <Play size={14} className="group-hover/btn:scale-110 transition-transform" />}
+          </button>
+
+          <button
+            className="p-2 text-[var(--v3-muted2)] hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-all group/btn"
+            title="Supprimer"
+            onClick={() => onDelete(form.id)}
+          >
+            <Trash2 size={14} className="group-hover/btn:scale-110 transition-transform" />
+          </button>
         </div>
       </td>
     </tr>
@@ -132,9 +184,19 @@ interface FormTableProps {
   forms: DashboardForm[];
   onReorder: (newForms: DashboardForm[]) => void;
   onOpenForm: (id: string) => void;
+  onDeleteForm: (id: string) => void;
+  onToggleFormStatus: (id: string) => void;
+  onDuplicateForm: (id: string) => void;
 }
 
-export const FormTable = ({ forms, onReorder, onOpenForm }: FormTableProps) => {
+export const FormTable = ({
+  forms,
+  onReorder,
+  onOpenForm,
+  onDeleteForm,
+  onToggleFormStatus,
+  onDuplicateForm
+}: FormTableProps) => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const sensors = useSensors(
@@ -176,27 +238,27 @@ export const FormTable = ({ forms, onReorder, onOpenForm }: FormTableProps) => {
     <div className="relative overflow-hidden bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-2xl shadow-2xl">
       {/* Bulk Toolbar */}
       {selectedIds.size > 0 && (
-         <div className="absolute top-0 left-0 right-0 z-20 h-14 bg-[var(--v3-teal)] flex items-center justify-between px-6 animate-in slide-in-from-top duration-300">
-            <div className="flex items-center gap-4">
-              <span className="text-sm font-bold text-white">{selectedIds.size} sélectionné(s)</span>
-              <div className="h-4 w-px bg-white/20" />
-              <button className="flex items-center gap-2 text-white/90 hover:text-white font-bold text-xs uppercase tracking-wider transition-all">
-                <Trash2 size={14} /> Supprimer
-              </button>
-            </div>
-            <button 
-              onClick={() => setSelectedIds(new Set())}
-              className="text-white/70 hover:text-white transition-all"
-            >
-              Annuler
+        <div className="absolute top-0 left-0 right-0 z-20 h-14 bg-[var(--v3-teal)] flex items-center justify-between px-6 animate-in slide-in-from-top duration-300">
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-bold text-white">{selectedIds.size} sélectionné(s)</span>
+            <div className="h-4 w-px bg-white/20" />
+            <button className="flex items-center gap-2 text-white/90 hover:text-white font-bold text-xs uppercase tracking-wider transition-all">
+              <Trash2 size={14} /> Supprimer
             </button>
-         </div>
+          </div>
+          <button
+            onClick={() => setSelectedIds(new Set())}
+            className="text-white/70 hover:text-white transition-all"
+          >
+            Annuler
+          </button>
+        </div>
       )}
 
       <div className="overflow-x-auto">
-        <DndContext 
-          sensors={sensors} 
-          collisionDetection={closestCenter} 
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
         >
           <SortableContext items={forms.map(f => f.id)} strategy={verticalListSortingStrategy}>
@@ -206,8 +268,8 @@ export const FormTable = ({ forms, onReorder, onOpenForm }: FormTableProps) => {
                   <th className="py-4 pl-4 w-10">
                     <div className="flex items-center gap-3">
                       <div className="w-6 h-6 shrink-0" /> {/* Space for grip */}
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         checked={forms.length > 0 && selectedIds.size === forms.length}
                         onChange={(e) => toggleSelectAll(e.target.checked)}
                         className="w-4 h-4 rounded border-[var(--v3-border)] bg-[var(--v3-bg)] text-[var(--v3-teal)] focus:ring-offset-0 focus:ring-0 cursor-pointer"
@@ -224,12 +286,15 @@ export const FormTable = ({ forms, onReorder, onOpenForm }: FormTableProps) => {
               </thead>
               <tbody className="divide-y divide-white/[0.04]">
                 {forms.map((form) => (
-                  <SortableRow 
-                    key={form.id} 
-                    form={form} 
+                  <SortableRow
+                    key={form.id}
+                    form={form}
                     isSelected={selectedIds.has(form.id)}
                     onSelect={toggleSelect}
                     onOpen={onOpenForm}
+                    onDelete={onDeleteForm}
+                    onTogglePause={onToggleFormStatus}
+                    onDuplicate={onDuplicateForm}
                   />
                 ))}
               </tbody>
