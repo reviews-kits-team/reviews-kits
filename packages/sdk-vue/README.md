@@ -30,6 +30,10 @@ app.use(createReviewsKit({
 app.mount('#app')
 ```
 
+### Nuxt 3 Support
+
+If you are using Nuxt 3, please refer to our [Nuxt Integration Guide](./docs/nuxt-guide.md) for instructions on setting up the plugin and using runtime configuration.
+
 ## Usage
 
 ### Fetching Reviews
@@ -56,6 +60,10 @@ const { data, isLoading, error } = useReviews({
       <h3>{{ review.author.name }}</h3>
       <p>{{ review.content }}</p>
       <span>Rating: {{ review.rating }}</span>
+      <div class="metadata">
+        <span>Date: {{ new Date(review.createdAt).toLocaleDateString() }}</span>
+        <span>Source: {{ review.source }}</span>
+      </div>
     </div>
   </div>
 </template>

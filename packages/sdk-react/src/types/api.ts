@@ -13,6 +13,8 @@ export interface RawReview {
   authorEmail?: string;
   authorTitle?: string;
   authorUrl?: string;
+  createdAt: string;
+  type: string;
   metadata?: Record<string, any>;
 }
 

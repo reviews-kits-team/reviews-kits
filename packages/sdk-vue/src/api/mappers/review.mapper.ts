@@ -11,6 +11,8 @@ export const mapReview = (raw: RawReview): Review => {
       title: raw.authorTitle,
       url: raw.authorUrl,
     },
+    createdAt: raw.createdAt,
+    source: raw.type,
     metadata: raw.metadata,
   };
 };

@@ -12,6 +12,8 @@ describe('Review Mapper', () => {
       authorEmail: 'john@example.com',
       authorTitle: 'CEO',
       authorUrl: 'https://example.com',
+      createdAt: '2024-03-22T10:00:00Z',
+      type: 'google',
       metadata: { source: 'google' }
     };
 
@@ -27,6 +29,8 @@ describe('Review Mapper', () => {
         title: 'CEO',
         url: 'https://example.com'
       },
+      createdAt: '2024-03-22T10:00:00Z',
+      source: 'google',
       metadata: { source: 'google' }
     });
   });
@@ -36,7 +40,9 @@ describe('Review Mapper', () => {
       id: '2',
       content: 'Good',
       rating: 4,
-      authorName: 'Jane Doe'
+      authorName: 'Jane Doe',
+      createdAt: '2024-03-22T11:00:00Z',
+      type: 'direct'
     };
 
     const result = mapReview(raw);

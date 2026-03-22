@@ -10,5 +10,7 @@ export interface Review {
   content: string;
   rating: number;
   author: ReviewAuthor;
+  createdAt: string;
+  source: string;
   metadata?: Record<string, any>;
 }

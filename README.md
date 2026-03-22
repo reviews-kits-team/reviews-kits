@@ -66,59 +66,24 @@ That's it. No external dependencies, no cloud account required.
 
 ---
 
-## SDK
+## SDKs
 
-> **Note:** The React SDK is currently in development and will be released soon. The code below is a preview of the upcoming API.
+We provide official, zero-dependency SDKs to easily integrate Reviewskits into your frontend.
 
-### React / Next.js
+### [React / Next.js](./packages/sdk-react/README.md)
+Lightweight hooks and context for React applications. Optimized for Next.js App Router.
+- [Next.js Integration Guide](./packages/sdk-react/docs/nextjs-guide.md)
 
 ```bash
-npm install @reviews-kits/react
+bun add @reviewskits/react
 ```
 
-```tsx
-import { useReviews } from '@reviews-kits/react'
+### [Vue / Nuxt 3](./packages/sdk-vue/README.md)
+Lightweight composables and plugin for Vue 3 applications.
+- [Nuxt 3 Integration Guide](./packages/sdk-vue/docs/nuxt-guide.md)
 
-export function Reviews() {
-  const { data, isLoading } = useReviews({
-    host: 'https://reviews.your-domain.com',
-    token: 'pk_xxxx',
-    limit: 12,
-    minRating: 4,
-  })
-
-  if (isLoading) return <p>Loading...</p>
-
-  return (
-    <div>
-      {data.map(t => (
-        <div key={t.id}>
-          <p>{t.content}</p>
-          <span>{t.author.name} — {t.author.title}</span>
-        </div>
-      ))}
-    </div>
-  )
-}
-```
-
-The hook handles fetching, pagination, caching, and loading states. **Zero opinion on design.**
-
-### Submit a review
-
-```tsx
-import { useSubmitTestimonial } from '@reviews-kits/react'
-
-const { submit, isLoading } = useSubmitTestimonial({
-  host: 'https://reviews.your-domain.com',
-  formSlug: 'my-product',
-})
-
-await submit({
-  author_name: 'Alice',
-  content: 'This tool saved us hours every week.',
-  rating: 5,
-})
+```bash
+bun add @reviewskits/vue
 ```
 
 ---
@@ -162,7 +127,7 @@ Full OpenAPI documentation available at `/api/docs` once deployed.
 | Database | PostgreSQL + Drizzle ORM |
 | Auth | Better-Auth |
 | Dashboard | React + Shadcn UI |
-| SDK | React hooks + TypeScript |
+| SDKs | React & Vue (Zero-dependency) |
 | Media storage | S3-compatible (Minio for self-host) |
 | Deployment | Docker Compose |
 
@@ -178,8 +143,8 @@ reviews-kits/
 │   └── docs/          ← Public documentation
 ├── packages/
 │   ├── types/         ← @reviewskits/types — shared TypeScript types
-│   ├── sdk-react/     ← @reviewskits/react — React hooks (WIP)
-│   └── sdk-vue/       ← @reviewskits/vue — Vue composables (post-MVP)
+│   ├── sdk-react/     ← @reviewskits/react — React hooks & Provider
+│   └── sdk-vue/       ← @reviewskits/vue — Vue composables & Plugin
 ├── infra/
 │   ├── docker-compose.yml
 │   └── docker-compose.dev.yml
@@ -195,15 +160,13 @@ reviews-kits/
 - [x] Admin dashboard — approve, reject, manage
 - [x] REST API with public and admin keys
 - [x] Docker Compose one-command deploy
-- [ ] React SDK — `useTestimonials`, `useSubmitTestimonial`
+- [x] React SDK — `useReviews`, `useInfiniteReviews`
+- [x] Vue.js SDK — `useReviews`, `useInfiniteReviews`
 - [ ] CSV import (migrate from Senja / Testimonial.to)
 
 **v0.2.0**
-- [ ] Vue.js SDK
 - [ ] Webhooks
 - [ ] Advanced analytics
-
-**v1.0.0**
 - [ ] Video testimonials
 - [ ] AI-assisted moderation
 - [ ] Zapier / Slack integrations
