@@ -1,20 +1,25 @@
-import { ref, onMounted } from 'vue';
-import type { Testimonial } from '@reviewskits/types';
+import { useQuery } from '@tanstack/vue-query';
+import { reviewsApi } from '../api/reviews';
+import { mapReviews } from '../api/mappers/review.mapper';
+import { QUERY_KEYS } from '../core/queryKeys';
+import { ReviewApiParams } from '../types';
 
-export interface UseReviewsOptions {
-  host: string;
-  formSlug?: string;
-  limit?: number;
-}
-
-export function useReviews(options: UseReviewsOptions) {
-  const data = ref<Testimonial[]>([]);
-  const isLoading = ref(false);
-  const error = ref<Error | null>(null);
-
-  onMounted(() => {
-    console.log('useReviews composable initialized with host:', options.host);
+export const useReviews = (params: ReviewApiParams = {}) => {
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: [QUERY_KEYS.REVIEWS, params],
+    queryFn: async () => {
+      const response = await reviewsApi.getReviews(params);
+      return {
+        reviews: mapReviews(response.data),
+        meta: response.meta,
+      };
+    },
   });
 
-  return { data, isLoading, error };
-}
+  return {
+    data,
+    isLoading,
+    error,
+    refetch,
+  };
+};

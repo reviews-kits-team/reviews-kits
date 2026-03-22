@@ -1,4 +1,16 @@
-export * from './composables/useReviews';
+// SDK Models
+export * from './types';
 
-// Re-export shared types for convenience
-export type { Testimonial, User } from '@reviewskits/types';
+// Composables
+export { useReviews } from './composables/useReviews';
+export { useInfiniteReviews } from './composables/useInfiniteReviews';
+
+// Plugin
+export { createReviewsKit } from './plugin/createReviewsKit';
+
+// Errors
+export {
+  ReviewsKitError,
+  ReviewsKitConfigError,
+  ReviewsKitApiError,
+} from './core/errors';
