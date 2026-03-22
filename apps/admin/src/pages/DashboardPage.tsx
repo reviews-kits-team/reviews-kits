@@ -164,7 +164,6 @@ export default function DashboardPage() {
         <DetailView 
           form={selectedForm} 
           onBack={() => setSelectedFormId(null)} 
-          onShare={setSharingFormId}
         />
       ) : (
         <main className="max-w-[1140px] mx-auto px-6 py-12 pb-20 relative z-10">

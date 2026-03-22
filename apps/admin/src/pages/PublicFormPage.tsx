@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { Star, CheckCircle, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react'
+import { Star, ArrowRight, ArrowLeft, Plus, CheckCircle, Loader2 } from 'lucide-react'
+import confetti from 'canvas-confetti'
 
 // Types (Must match backend)
 interface FormStep {
@@ -18,7 +19,6 @@ interface FormBranding {
   primaryColor?: string
   headingFont?: string
   bodyFont?: string
-  showPoweredBy: boolean
 }
 
 interface FormData {
@@ -44,6 +44,8 @@ export default function PublicFormPage() {
   const [content, setContent] = useState('')
   const [authorName, setAuthorName] = useState('')
   const [authorEmail, setAuthorEmail] = useState('')
+  const [authorTitle, setAuthorTitle] = useState('')
+  const [authorUrl, setAuthorUrl] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
@@ -69,7 +71,38 @@ export default function PublicFormPage() {
 
   const steps = form?.config?.steps || []
   const currentStep = steps[currentStepIndex]
-  const primaryColor = form?.config?.branding?.primaryColor || '#0D9E75'
+  const branding = form?.config?.branding
+  const primaryColor = branding?.primaryColor || '#0D9E75'
+
+  // Trigger confetti on success
+  useEffect(() => {
+    if (currentStep?.type === 'success') {
+      const duration = 3 * 1000
+      const animationEnd = Date.now() + duration
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 }
+
+      const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min
+
+      const interval = setInterval(function() {
+        const timeLeft = animationEnd - Date.now()
+
+        if (timeLeft <= 0) {
+          return clearInterval(interval)
+        }
+
+        const particleCount = 50 * (timeLeft / duration)
+        confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }, colors: [primaryColor, '#ffffff'] })
+        confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }, colors: [primaryColor, '#ffffff'] })
+      }, 250)
+
+      return () => clearInterval(interval)
+    }
+  }, [currentStep?.type, primaryColor])
+
+  const headingFont = branding?.headingFont || 'Inter'
+  const bodyFont = branding?.bodyFont || 'Inter'
+
+  const getFontUrl = (font: string) => `https://fonts.googleapis.com/css2?family=${font.replace(/ /g, '+')}:wght@400;700;900&display=swap`
 
   const handleNext = async () => {
     if (currentStep?.type === 'attribution') {
@@ -91,11 +124,20 @@ export default function PublicFormPage() {
           content,
           authorName,
           authorEmail,
+          authorTitle,
+          authorUrl,
           rating
         })
       })
       if (res.ok) {
-        setCurrentStepIndex(steps.length - 1) // Go to success step (last one)
+        // Find success step if it exists, otherwise just show success UI
+        const successIdx = steps.findIndex(s => s.type === 'success')
+        if (successIdx !== -1) {
+          setCurrentStepIndex(successIdx)
+        } else {
+           // Fallback to last step
+           setCurrentStepIndex(steps.length - 1)
+        }
       } else {
         const data = await res.json()
         alert(data.error || "Une erreur est survenue lors de l'envoi.")
@@ -122,12 +164,19 @@ export default function PublicFormPage() {
   )
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] flex flex-col items-center py-12 px-6">
-      <div className="w-full max-w-xl bg-white shadow-xl shadow-gray-200/50 rounded-[2.5rem] overflow-hidden border border-gray-100 flex flex-col min-h-[500px]">
+    <div className="min-h-screen bg-[#F9FAFB] flex flex-col items-center justify-center p-6" style={{ fontFamily: bodyFont }}>
+      <style>
+        {`
+          @import url('${getFontUrl(headingFont)}');
+          @import url('${getFontUrl(bodyFont)}');
+        `}
+      </style>
+
+      <div className="w-full max-w-xl bg-white rounded-[3rem] overflow-hidden border border-gray-100 flex flex-col min-h-[650px] relative transition-all duration-500">
         {/* Progress Bar */}
         <div className="h-1.5 w-full bg-gray-50 flex">
           <div 
-            className="h-full transition-all duration-500" 
+            className="h-full transition-all duration-700 ease-out" 
             style={{ 
               backgroundColor: primaryColor,
               width: `${((currentStepIndex + 1) / steps.length) * 100}%` 
@@ -135,135 +184,225 @@ export default function PublicFormPage() {
           />
         </div>
 
-        <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
+        <div className="flex-1 flex flex-col items-center justify-center p-10 md:p-16 text-center w-full">
+          {/* Logo Rendering */}
+          {branding?.logoUrl && (
+            <div className="mb-8 flex justify-center w-full animate-in fade-in duration-700">
+              <img src={branding.logoUrl} alt="Logo" className="max-h-16 object-contain pointer-events-none" />
+            </div>
+          )}
+
+          {/* Welcome Step */}
+          {currentStep?.type === 'welcome' && (
+            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 w-full flex flex-col items-center">
+              <h1 className="text-4xl font-black tracking-tighter text-gray-900 mb-6" style={{ fontFamily: headingFont }}>
+                {currentStep.title}
+              </h1>
+              <p className="text-gray-500 mb-10 text-xl leading-relaxed max-w-md">
+                {currentStep.description}
+              </p>
+              <button 
+                onClick={handleNext}
+                style={{ backgroundColor: primaryColor }}
+                className="w-full py-5 rounded-2xl text-white font-bold text-lg shadow-[0_10px_30px_rgba(0,0,0,0.1)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+              >
+                {(currentStep.config as Record<string, string | boolean>)?.buttonText || 'Commencer'} <ArrowRight size={22} />
+              </button>
+            </div>
+          )}
+
+          {/* Informative Step */}
+          {currentStep?.type === 'informative' && (
+            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 w-full flex flex-col items-center">
+              <h1 className="text-4xl font-black tracking-tighter text-gray-900 mb-6" style={{ fontFamily: headingFont }}>
+                {currentStep.title}
+              </h1>
+              <p className="text-gray-500 mb-10 text-xl leading-relaxed max-w-md">
+                {currentStep.description}
+              </p>
+              <button 
+                onClick={handleNext}
+                style={{ backgroundColor: primaryColor }}
+                className="w-full py-5 rounded-2xl text-white font-bold text-lg shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+              >
+                {(currentStep.config as Record<string, string | boolean>)?.buttonText || 'Continuer'} <ArrowRight size={22} />
+              </button>
+            </div>
+          )}
+
+          {/* Rating Step */}
           {currentStep?.type === 'rating' && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
-              <h1 className="text-xl font-black tracking-tight text-gray-900 mb-4">{currentStep.title}</h1>
-              <p className="text-gray-500 mb-10 text-lg leading-relaxed">{currentStep.description}</p>
+            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 w-full flex flex-col items-center">
+              <h1 className="text-4xl font-black tracking-tighter text-gray-900 mb-6" style={{ fontFamily: headingFont }}>
+                {currentStep.title}
+              </h1>
+              <p className="text-gray-500 mb-10 text-xl leading-relaxed">{currentStep.description}</p>
               
-              <div className="flex gap-2 justify-center mb-12">
-                {[1, 2, 3, 4, 5].map((val) => (
-                  <button
-                    key={val}
-                    onClick={() => setRating(val)}
-                    onDoubleClick={() => {setRating(val); handleNext();}}
-                    className="p-1 transition-all hover:scale-110 group focus:outline-none"
-                  >
-                    <Star 
-                      size={48} 
-                      className={`transition-all ${rating >= val ? 'fill-yellow-400 text-yellow-400 shadow-yellow-200' : 'text-gray-200 group-hover:text-gray-300'}`} 
-                    />
-                  </button>
-                ))}
+              <div className="flex gap-4 justify-center mb-12">
+                {(currentStep.config as Record<string, string | boolean>)?.ratingType === 'emojis' ? (
+                  ['😠', '🙁', '😐', '🙂', '😍'].map((emoji, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setRating(i + 1)}
+                      className={`text-5xl transition-all hover:scale-125 ${rating === i + 1 ? 'scale-125 grayscale-0' : 'grayscale opacity-40 hover:opacity-100 hover:grayscale-0'}`}
+                    >
+                      {emoji}
+                    </button>
+                  ))
+                ) : (
+                  [1, 2, 3, 4, 5].map((val) => (
+                    <button
+                      key={val}
+                      onClick={() => setRating(val)}
+                      className="p-1 transition-all hover:scale-110 group focus:outline-none"
+                    >
+                      <Star 
+                        size={52} 
+                        className={`transition-all ${rating >= val ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200 group-hover:text-gray-300'}`} 
+                      />
+                    </button>
+                  )))}
               </div>
 
               <button 
                 disabled={rating === 0}
                 onClick={handleNext}
                 style={{ backgroundColor: rating > 0 ? primaryColor : '#E5E7EB' }}
-                className="w-full py-3 rounded-xl text-white font-bold text-base shadow-lg hover:scale-[1.02] active:scale-100 transition-all disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-5 rounded-2xl text-white font-bold text-lg shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all disabled:cursor-not-allowed flex items-center justify-center gap-3"
               >
-                Continuer <ArrowRight size={18} />
+                {(currentStep.config as Record<string, string | boolean>)?.buttonText || 'Continuer'} <ArrowRight size={22} />
               </button>
             </div>
           )}
 
+          {/* Textarea Step */}
           {currentStep?.type === 'textarea' && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
-              <h1 className="text-xl font-black tracking-tight text-gray-900 mb-4">{currentStep.title}</h1>
-              <p className="text-gray-500 mb-8 text-lg">{currentStep.description}</p>
+            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 w-full flex flex-col items-center">
+              <h1 className="text-4xl font-black tracking-tighter text-gray-900 mb-6" style={{ fontFamily: headingFont }}>
+                {currentStep.title}
+              </h1>
+              <p className="text-gray-500 mb-8 text-xl leading-relaxed">{currentStep.description}</p>
               
               <textarea
                 autoFocus
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder="Ex: J'adore cet outil, il a changé ma façon de travailler..."
-                className="w-full h-40 p-6 rounded-2xl border border-gray-200 bg-gray-50 mb-8 focus:ring-4 focus:ring-gray-100 focus:border-gray-300 outline-none transition-all text-gray-700 text-lg resize-none"
+                placeholder={((currentStep.config as Record<string, string | boolean>)?.placeholder as string) || "Tapez votre témoignage ici..."}
+                className="w-full h-48 p-8 rounded-[2rem] border-2 border-gray-100 bg-gray-50 mb-8 focus:ring-4 focus:ring-gray-100 focus:border-gray-200 outline-none transition-all text-gray-700 text-lg resize-none placeholder:text-gray-300"
               />
 
-              <div className="flex gap-4">
+              <div className="flex gap-4 w-full">
                 <button 
                   onClick={() => setCurrentStepIndex(prev => prev - 1)}
-                  className="px-5 py-3 rounded-xl bg-gray-100 text-gray-400 hover:bg-gray-200 transition-all font-bold"
+                  className="px-6 py-5 rounded-2xl bg-gray-100 text-gray-400 hover:bg-gray-200 transition-all font-bold"
                 >
-                  <ArrowLeft size={18} />
+                  <ArrowLeft size={22} />
                 </button>
                 <button 
                   disabled={content.length < 5}
                   onClick={handleNext}
                   style={{ backgroundColor: content.length >= 5 ? primaryColor : '#E5E7EB' }}
-                  className="flex-1 py-3 rounded-xl text-white font-bold text-base shadow-lg hover:scale-[1.02] active:scale-100 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 py-5 rounded-2xl text-white font-bold text-lg shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
                 >
-                  Suivant <ArrowRight size={18} />
+                  {(currentStep.config as Record<string, string | boolean>)?.buttonText || 'Suivant'} <ArrowRight size={22} />
                 </button>
               </div>
             </div>
           )}
 
+          {/* Attribution Step */}
           {currentStep?.type === 'attribution' && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
-              <h1 className="text-xl font-black tracking-tight text-gray-900 mb-4">{currentStep.title}</h1>
-              <p className="text-gray-500 mb-10 text-lg">{currentStep.description}</p>
+            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 w-full flex flex-col items-center">
+              <h1 className="text-4xl font-black tracking-tighter text-gray-900 mb-6" style={{ fontFamily: headingFont }}>
+                {currentStep.title}
+              </h1>
+              <p className="text-gray-500 mb-10 text-xl leading-relaxed">{currentStep.description}</p>
               
-              <div className="space-y-4 mb-10">
-                <input
-                  required
-                  type="text"
-                  placeholder="Votre nom complet"
-                  value={authorName}
-                  onChange={(e) => setAuthorName(e.target.value)}
-                  className="w-full px-6 py-4 rounded-2xl border border-gray-200 bg-gray-50 focus:ring-4 focus:ring-gray-100 outline-none transition-all text-lg"
-                />
-                <input
-                  required
-                  type="email"
-                  placeholder="votre@email.com"
-                  value={authorEmail}
-                  onChange={(e) => setAuthorEmail(e.target.value)}
-                  className="w-full px-6 py-4 rounded-2xl border border-gray-200 bg-gray-50 focus:ring-4 focus:ring-gray-100 outline-none transition-all text-lg"
-                />
+              <div className="w-full space-y-4 mb-10">
+                <div className="flex flex-col gap-4">
+                  <div className="w-full h-32 rounded-[2rem] bg-gray-50 border-2 border-dashed border-gray-100 flex flex-col items-center justify-center gap-2 text-gray-300 hover:bg-gray-100 hover:border-gray-200 transition-all cursor-pointer group">
+                    <Plus size={32} className="group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-black uppercase tracking-widest">Ajouter une photo</span>
+                  </div>
+                  
+                  <input
+                    required
+                    type="text"
+                    placeholder="Votre nom complet"
+                    value={authorName}
+                    onChange={(e) => setAuthorName(e.target.value)}
+                    className="w-full px-8 py-5 rounded-2xl border-2 border-gray-50 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-gray-100 focus:border-gray-100 outline-none transition-all text-lg"
+                  />
+                </div>
+
+                {(currentStep.config as Record<string, string | boolean>)?.collectEmail !== false && (
+                  <input
+                    required
+                    type="email"
+                    placeholder="votre@email.com"
+                    value={authorEmail}
+                    onChange={(e) => setAuthorEmail(e.target.value)}
+                    className="w-full px-8 py-5 rounded-2xl border-2 border-gray-50 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-gray-100 focus:border-gray-100 outline-none transition-all text-lg"
+                  />
+                )}
+
+                {(currentStep.config as Record<string, string | boolean>)?.collectCompany && (
+                  <div className="flex gap-4">
+                    <input
+                      type="text"
+                      placeholder="Votre entreprise"
+                      value={authorTitle}
+                      onChange={(e) => setAuthorTitle(e.target.value)}
+                      className="w-full px-8 py-5 rounded-2xl border-2 border-gray-50 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-gray-100 focus:border-100 outline-none transition-all text-lg"
+                    />
+                    <input
+                      type="url"
+                      placeholder="Site web"
+                      value={authorUrl}
+                      onChange={(e) => setAuthorUrl(e.target.value)}
+                      className="w-full px-8 py-5 rounded-2xl border-2 border-gray-50 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-gray-100 focus:border-100 outline-none transition-all text-lg"
+                    />
+                  </div>
+                )}
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex gap-4 w-full">
                  <button 
                   onClick={() => setCurrentStepIndex(prev => prev - 1)}
-                  className="px-5 py-3 rounded-xl bg-gray-100 text-gray-400 hover:bg-gray-200 transition-all font-bold"
+                  className="px-6 py-5 rounded-2xl bg-gray-100 text-gray-400 hover:bg-gray-200 transition-all font-bold"
                 >
-                  <ArrowLeft size={18} />
+                  <ArrowLeft size={22} />
                 </button>
                 <button 
-                  disabled={!authorName || !authorEmail || submitting}
+                  disabled={!authorName || submitting}
                   onClick={handleNext}
-                  style={{ backgroundColor: (authorName && authorEmail) ? primaryColor : '#E5E7EB' }}
-                  className="flex-1 py-4 rounded-2xl text-white font-bold text-lg shadow-lg hover:scale-[1.02] active:scale-100 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                  style={{ backgroundColor: authorName ? primaryColor : '#E5E7EB' }}
+                  className="flex-1 py-5 rounded-2xl text-white font-bold text-lg shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
                 >
-                  {submitting ? <Loader2 size={24} className="animate-spin" /> : 'Terminer'}
+                  {submitting ? <Loader2 size={28} className="animate-spin" /> : (currentStep.config as Record<string, string | boolean>)?.buttonText || 'Terminer'}
                 </button>
               </div>
             </div>
           )}
 
+          {/* Success Step */}
           {currentStep?.type === 'success' && (
-            <div className="animate-in zoom-in duration-700 w-full">
+            <div className="animate-in zoom-in-95 duration-1000 w-full flex flex-col items-center">
               <div 
                 style={{ backgroundColor: `${primaryColor}15`, color: primaryColor }}
-                className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner"
+                className="w-32 h-32 rounded-full flex items-center justify-center mx-auto mb-10 shadow-inner animate-bounce"
               >
-                <CheckCircle size={56} />
+                <CheckCircle size={64} />
               </div>
-              <h1 className="text-3xl font-black tracking-tighter text-gray-900 mb-4">{currentStep.title}</h1>
-              <p className="text-gray-500 text-lg leading-relaxed">{currentStep.description}</p>
+              <h1 className="text-4xl font-black tracking-tighter text-gray-900 mb-6" style={{ fontFamily: headingFont }}>
+                {currentStep.title}
+              </h1>
+              <p className="text-gray-500 text-xl leading-relaxed max-w-md">
+                {currentStep.description}
+              </p>
             </div>
           )}
         </div>
-
-        {form.config.branding.showPoweredBy && (
-          <div className="p-8 flex justify-center opacity-30">
-             <div className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-gray-500 flex items-center gap-2">
-               <span style={{ color: primaryColor }}>❤</span> Powered by Reviewskits
-             </div>
-          </div>
-        )}
       </div>
     </div>
   )

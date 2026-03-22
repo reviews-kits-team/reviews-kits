@@ -24,15 +24,15 @@ export const Badge = ({ status }: { status: string }) => {
   const { label, active, color } = config[status.toLowerCase()] || config.draft
   
   return (
-    <div className={`inline-flex items-center gap-2 px-3 py-[1px] rounded-full text-[8px] font-black uppercase tracking-[0.15em] border backdrop-blur-md transition-all ${
+    <div className={`inline-flex items-center gap-1 px-3 py-0 rounded-full text-[6px] font-black uppercase tracking-[0.15em] border backdrop-blur-md transition-all whitespace-nowrap ${
       active 
         ? `bg-[${color}]/10 text-[${color}] border-[${color}]/20 shadow-[0_0_15px_rgba(45,212,191,0.05)]` 
         : 'bg-white/5 text-[var(--v3-muted2)] border-white/10'
     }`} style={{ color: active ? color : undefined, borderColor: active ? `${color}33` : undefined, backgroundColor: active ? `${color}1a` : undefined }}>
       <div className="relative flex items-center justify-center">
-        <div className={`w-1 h-1 rounded-full ${active ? '' : 'bg-white/20'}`} style={{ backgroundColor: active ? color : undefined }} />
+        <div className={`w-[3px] h-[3px] rounded-full ${active ? '' : 'bg-white/20'}`} style={{ backgroundColor: active ? color : undefined }} />
         {active && (
-          <div className="absolute w-1 h-1 rounded-full animate-ping opacity-60" style={{ backgroundColor: color }} />
+          <div className="absolute w-[3px] h-[3px] rounded-full animate-ping opacity-60" style={{ backgroundColor: color }} />
         )}
       </div>
       {label}
