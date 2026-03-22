@@ -1,4 +1,4 @@
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql, count, avg, countDistinct } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import * as schema from '../database/schema';
 import { testimonials } from '../database/schema';
@@ -74,7 +74,7 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
     await this.db.delete(testimonials).where(eq(testimonials.id, id));
   }
 
-  async findApprovedByUser(userId: string, options?: { limit?: number; minRating?: number }): Promise<Testimonial[]> {
+  async findApprovedByUser(userId: string, options: { limit?: number; minRating?: number; formId: string }): Promise<Testimonial[]> {
     const { gte } = await import('drizzle-orm');
     const whereConditions = [
       eq(testimonials.userId, userId),
@@ -83,6 +83,10 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
 
     if (options?.minRating) {
       whereConditions.push(gte(testimonials.rating, options.minRating));
+    }
+
+    if (options?.formId) {
+      whereConditions.push(eq(testimonials.formId, options.formId));
     }
 
     const query = this.db.select()
@@ -96,6 +100,26 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
 
     const rows = await query;
     return rows.map(row => this.mapToDomain(row));
+  }
+
+  async getStatsByUser(userId: string): Promise<{
+    totalReviews: number;
+    averageRating: number;
+    uniqueRespondents: number;
+  }> {
+    const [result] = await this.db.select({
+      totalReviews: count(testimonials.id),
+      averageRating: avg(testimonials.rating),
+      uniqueRespondents: countDistinct(testimonials.authorEmail),
+    })
+    .from(testimonials)
+    .where(eq(testimonials.userId, userId));
+
+    return {
+      totalReviews: Number(result?.totalReviews) || 0,
+      averageRating: Number(result?.averageRating) || 0,
+      uniqueRespondents: Number(result?.uniqueRespondents) || 0,
+    };
   }
 
   private mapToDomain(row: any): Testimonial {

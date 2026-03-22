@@ -18,4 +18,13 @@ export class ApiKeyGenerator {
   public static isSecretKey(key: string): boolean {
     return key.startsWith('rk_sk_');
   }
+
+  /**
+   * Generates a public ID for a resource (e.g., rk_frm_...).
+   */
+  public static generatePublicId(prefix: string, environment: 'live' | 'test' = 'live'): string {
+    const fullPrefix = `rk_${prefix}_${environment}_`;
+    const randomPart = randomBytes(12).toString('hex'); // Shorter than API keys
+    return `${fullPrefix}${randomPart}`;
+  }
 }

@@ -20,6 +20,7 @@ describe("Domain Hardening Edge Cases", () => {
         userId: "u1",
         name: "Form",
         slug: Slug.create("form"),
+        publicId: "rk_frm_live_f1",
         config: {
           styles: { color: "black", margin: 10 }
         }
@@ -53,6 +54,7 @@ describe("Domain Hardening Edge Cases", () => {
         userId: "u1",
         name: "Test",
         slug: Slug.create("test"),
+        publicId: "rk_frm_live_f1",
         config: { theme: "dark" }
       });
 

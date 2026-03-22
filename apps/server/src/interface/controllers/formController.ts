@@ -3,6 +3,7 @@ import { container } from '@/infrastructure/container';
 import { Form } from '@/domain/entities/Form';
 import { Slug } from '@/domain/value-objects/Slug';
 import { randomUUID } from 'node:crypto';
+import { ApiKeyGenerator } from '@/shared/utils/ApiKeyGenerator';
 
 export const formController = {
   listForms: async (c: Context) => {
@@ -18,6 +19,7 @@ export const formController = {
       return { 
         ...props, 
         slug: props.slug.getValue(),
+        publicId: props.publicId,
         responses: 0,
         rating: null,
         completion: 0
@@ -44,6 +46,7 @@ export const formController = {
       userId,
       name,
       slug: Slug.create(slug),
+      publicId: ApiKeyGenerator.generatePublicId('frm'),
       description,
       isActive: true,
     });
@@ -143,6 +146,7 @@ export const formController = {
       userId,
       name: `${originalProps.name} (Copie)`,
       slug: Slug.create(newSlugValue),
+      publicId: ApiKeyGenerator.generatePublicId('frm'),
       description: originalProps.description,
       thankYouMessage: originalProps.thankYouMessage,
       config: originalProps.config,

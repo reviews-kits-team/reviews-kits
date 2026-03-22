@@ -3,6 +3,7 @@ export interface DashboardForm {
   userId: string
   name: string
   slug: string
+  publicId: string
   description?: string
   status?: string
   isActive?: boolean

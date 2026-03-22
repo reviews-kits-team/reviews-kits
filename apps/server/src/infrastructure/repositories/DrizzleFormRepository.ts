@@ -25,6 +25,13 @@ export class DrizzleFormRepository implements FormRepository {
     return this.mapToDomain(row);
   }
 
+  async findByPublicId(publicId: string): Promise<Form | null> {
+    const [row] = await this.db.select().from(forms).where(eq(forms.publicId, publicId));
+    if (!row) return null;
+
+    return this.mapToDomain(row);
+  }
+
   async findByUser(userId: string): Promise<Form[]> {
     const rows = await this.db.select().from(forms).where(eq(forms.userId, userId));
     return rows.map(row => this.mapToDomain(row));
@@ -37,6 +44,7 @@ export class DrizzleFormRepository implements FormRepository {
       userId: props.userId,
       name: props.name,
       slug: props.slug.getValue(),
+      publicId: props.publicId,
       description: props.description,
       thankYouMessage: props.thankYouMessage,
       config: props.config,
@@ -53,6 +61,7 @@ export class DrizzleFormRepository implements FormRepository {
       .set({
         name: props.name,
         slug: props.slug.getValue(),
+        publicId: props.publicId,
         description: props.description,
         thankYouMessage: props.thankYouMessage,
         config: props.config,
@@ -85,6 +94,7 @@ export class DrizzleFormRepository implements FormRepository {
       userId: row.userId,
       name: row.name,
       slug: Slug.create(row.slug),
+      publicId: row.publicId,
       description: row.description || undefined,
       thankYouMessage: row.thankYouMessage || undefined,
       config: row.config as Record<string, any>,

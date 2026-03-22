@@ -6,5 +6,10 @@ export interface TestimonialRepository {
   save(testimonial: Testimonial): Promise<void>;
   update(testimonial: Testimonial): Promise<void>;
   delete(id: string): Promise<void>;
-  findApprovedByUser(userId: string, options?: { limit?: number; minRating?: number }): Promise<Testimonial[]>;
+  findApprovedByUser(userId: string, options: { limit?: number; minRating?: number; formId: string }): Promise<Testimonial[]>;
+  getStatsByUser(userId: string): Promise<{
+    totalReviews: number;
+    averageRating: number;
+    uniqueRespondents: number;
+  }>;
 }
