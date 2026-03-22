@@ -1,17 +1,13 @@
 import { createApp } from 'vue'
-import { VueQueryPlugin } from '@tanstack/vue-query'
 import { createReviewsKit } from '@reviewskits/vue'
 import './style.css'
 import App from './App.vue'
 
 const app = createApp(App)
 
-// Initialize Vue Query
-app.use(VueQueryPlugin)
-
 // Initialize ReviewsKit SDK
 app.use(createReviewsKit({
-  pk: 'rk_pk_live_19727b7243871582c69867cc39e3826953b1b11671e58bcd',
+  pk: 'rk_pk_live_4f70bb4ac05c2188f9ae1977466812bb4f9cf44421f2ef91',
   host: 'http://localhost:3000'
 }))
 

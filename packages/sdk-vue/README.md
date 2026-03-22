@@ -5,7 +5,7 @@ The official Vue 3 SDK for **Reviewskits**.
 ## Installation
 
 ```bash
-bun add @reviewskits/vue @tanstack/vue-query
+bun add @reviewskits/vue
 ```
 
 ## Setup
@@ -17,13 +17,9 @@ In your main entry file (e.g., `main.ts`):
 ```typescript
 import { createApp } from 'vue'
 import { createReviewsKit } from '@reviewskits/vue'
-import { VueQueryPlugin } from '@tanstack/vue-query'
 import App from './App.vue'
 
 const app = createApp(App)
-
-// Required for the SDK
-app.use(VueQueryPlugin)
 
 // Initialize Reviewskits
 app.use(createReviewsKit({

@@ -21,7 +21,7 @@ bun link @reviewskits/vue
 ```
 
 > [!WARNING]
-> `bun link` peut parfois causer des problèmes avec les dépendances partagées (comme `vue` ou `@tanstack/vue-query`). Si vous voyez des erreurs de type "Multiple instances of Vue", utilisez la méthode `yalc`.
+> `bun link` peut parfois causer des problèmes avec les dépendances partagées (comme `vue`). Si vous voyez des erreurs de type "Multiple instances of Vue", utilisez la méthode `yalc`.
 
 ---
 

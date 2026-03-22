@@ -20,13 +20,15 @@ export const fetcher = async <T>(
 
   if (!response.ok) {
     let errorMessage = 'An error occurred while fetching data.';
+    let errorDetails = null;
     try {
       const errorData = await response.json();
-      errorMessage = errorData.message || errorMessage;
+      errorMessage = errorData.error?.message || errorData.message || errorMessage;
+      errorDetails = errorData.error || errorData;
     } catch (e) {
       // Ignore if response is not JSON
     }
-    throw new ReviewsKitApiError(errorMessage, response.status);
+    throw new ReviewsKitApiError(errorMessage, response.status, errorDetails);
   }
 
   return response.json();

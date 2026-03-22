@@ -12,7 +12,12 @@ export class ReviewsKitConfigError extends ReviewsKitError {
 }
 
 export class ReviewsKitApiError extends ReviewsKitError {
-  constructor(message: string, public status: number) {
-    super(message, 'API_ERROR');
+  constructor(
+    message: string, 
+    public status: number, 
+    public details?: any
+  ) {
+    super(`[API Error ${status}] ${message}`, 'API_ERROR');
+    this.name = 'ReviewsKitApiError';
   }
 }

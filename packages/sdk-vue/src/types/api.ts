@@ -16,12 +16,14 @@ export interface RawReview {
   metadata?: Record<string, any>;
 }
 
+export interface ReviewApiResponseMeta {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 export interface ReviewApiResponse {
   data: RawReview[];
-  meta: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
+  meta: ReviewApiResponseMeta;
 }

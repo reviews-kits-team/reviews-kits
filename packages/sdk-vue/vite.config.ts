@@ -11,11 +11,10 @@ export default defineConfig({
       fileName: 'index',
     },
     rollupOptions: {
-      external: ['vue', '@tanstack/vue-query'],
+      external: ['vue'],
       output: {
         globals: {
           vue: 'Vue',
-          '@tanstack/vue-query': 'VueQuery',
         },
       },
     },
