@@ -527,36 +527,36 @@ export const DetailView = ({ form, onBack, onShare }: DetailViewProps) => {
         </div>
         
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="border-b border-[var(--v3-border)] text-left bg-white/[0.01]">
-                <th className="px-6 py-4 w-10">
-                  <Checkbox 
-                    checked={testimonials.length > 0 && selectedIds.length === testimonials.length} 
-                    onChange={toggleSelectAll} 
-                  />
-                </th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--v3-muted2)] cursor-pointer hover:text-[var(--v3-teal)] transition-colors" onClick={() => handleSort('authorName')}>
-                  <div className="flex items-center">Auteur <SortIcon field="authorName" sortConfig={sortConfig} /></div>
-                </th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--v3-muted2)]">Avis</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--v3-muted2)] text-center cursor-pointer hover:text-[var(--v3-teal)] transition-colors" onClick={() => handleSort('rating')}>
-                  <div className="flex items-center justify-center">Note <SortIcon field="rating" sortConfig={sortConfig} /></div>
-                </th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--v3-muted2)] text-center cursor-pointer hover:text-[var(--v3-teal)] transition-colors" onClick={() => handleSort('status')}>
-                  <div className="flex items-center justify-center">Statut <SortIcon field="status" sortConfig={sortConfig} /></div>
-                </th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--v3-muted2)] text-right cursor-pointer hover:text-[var(--v3-teal)] transition-colors" onClick={() => handleSort('createdAt')}>
-                  <div className="flex items-center justify-end">Date <SortIcon field="createdAt" sortConfig={sortConfig} /></div>
-                </th>
-              </tr>
-            </thead>
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext items={testimonials.map(t => t.id)} strategy={verticalListSortingStrategy}>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext items={testimonials.map(t => t.id)} strategy={verticalListSortingStrategy}>
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="border-b border-[var(--v3-border)] text-left bg-white/[0.01]">
+                    <th className="px-6 py-4 w-10">
+                      <Checkbox 
+                        checked={testimonials.length > 0 && selectedIds.length === testimonials.length} 
+                        onChange={toggleSelectAll} 
+                      />
+                    </th>
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--v3-muted2)] cursor-pointer hover:text-[var(--v3-teal)] transition-colors" onClick={() => handleSort('authorName')}>
+                      <div className="flex items-center">Auteur <SortIcon field="authorName" sortConfig={sortConfig} /></div>
+                    </th>
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--v3-muted2)]">Avis</th>
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--v3-muted2)] text-center cursor-pointer hover:text-[var(--v3-teal)] transition-colors" onClick={() => handleSort('rating')}>
+                      <div className="flex items-center justify-center">Note <SortIcon field="rating" sortConfig={sortConfig} /></div>
+                    </th>
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--v3-muted2)] text-center cursor-pointer hover:text-[var(--v3-teal)] transition-colors" onClick={() => handleSort('status')}>
+                      <div className="flex items-center justify-center">Statut <SortIcon field="status" sortConfig={sortConfig} /></div>
+                    </th>
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--v3-muted2)] text-right cursor-pointer hover:text-[var(--v3-teal)] transition-colors" onClick={() => handleSort('createdAt')}>
+                      <div className="flex items-center justify-end">Date <SortIcon field="createdAt" sortConfig={sortConfig} /></div>
+                    </th>
+                  </tr>
+                </thead>
                 <tbody className="divide-y divide-[var(--v3-border)]">
                   {testimonials.length === 0 ? (
                     <tr>
@@ -580,9 +580,9 @@ export const DetailView = ({ form, onBack, onShare }: DetailViewProps) => {
                     ))
                   )}
                 </tbody>
-              </SortableContext>
-            </DndContext>
-          </table>
+              </table>
+            </SortableContext>
+          </DndContext>
         </div>
 
         {/* Floating Bulk Action Bar */}

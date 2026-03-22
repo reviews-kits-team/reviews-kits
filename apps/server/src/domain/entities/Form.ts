@@ -1,6 +1,24 @@
 import { Slug } from "../value-objects/Slug";
 import { deepMerge } from "../../shared/utils/deepMerge";
 
+export interface FormStep {
+  id: string;
+  type: 'welcome' | 'rating' | 'textarea' | 'attribution' | 'success' | 'informative';
+  title: string;
+  description?: string;
+  isEnabled: boolean;
+  config?: Record<string, any>;
+}
+
+export interface FormBranding {
+  logoUrl?: string;
+  avatarUrl?: string;
+  primaryColor?: string;
+  headingFont?: string;
+  bodyFont?: string;
+  showPoweredBy: boolean;
+}
+
 export interface FormProps {
   id: string;
   userId: string;
@@ -9,7 +27,11 @@ export interface FormProps {
   publicId: string;
   description?: string;
   thankYouMessage?: string;
-  config?: Record<string, any>;
+  config?: {
+    steps?: FormStep[];
+    branding?: FormBranding;
+    [key: string]: any;
+  };
   accentColor?: string;
   isActive?: boolean;
   createdAt?: Date;
@@ -24,7 +46,11 @@ export class Form {
   public readonly publicId: string;
   private description?: string;
   private thankYouMessage?: string;
-  private config: Record<string, any>;
+  private config: {
+    steps?: FormStep[];
+    branding?: FormBranding;
+    [key: string]: any;
+  };
   private accentColor?: string;
   private isActive: boolean;
   public readonly createdAt: Date;
@@ -41,6 +67,18 @@ export class Form {
     this.description = props.description;
     this.thankYouMessage = props.thankYouMessage;
     this.config = props.config ?? {};
+    
+    // Ensure default steps and branding exist if not provided
+    if (!this.config.steps || this.config.steps.length === 0) {
+      this.config.steps = this.getDefaultSteps();
+    }
+    if (!this.config.branding) {
+      this.config.branding = {
+        showPoweredBy: true,
+        primaryColor: props.accentColor || '#0D9E75'
+      };
+    }
+
     this.accentColor = props.accentColor;
     this.isActive = props.isActive ?? true;
     this.createdAt = props.createdAt ?? new Date();
@@ -78,6 +116,48 @@ export class Form {
   public updateConfig(config: Record<string, any>): void {
     this.config = deepMerge(this.config, config);
     this.updatedAt = new Date();
+  }
+
+  public getSteps(): FormStep[] {
+    return this.config.steps || [];
+  }
+
+  public getBranding(): FormBranding | undefined {
+    return this.config.branding;
+  }
+
+  private getDefaultSteps(): FormStep[] {
+    const { randomUUID } = require('node:crypto');
+    return [
+      {
+        id: randomUUID(),
+        type: 'rating',
+        title: 'Quelle note nous donneriez-vous ?',
+        description: 'Sur une échelle de 1 à 5, comment évalueriez-vous notre service ?',
+        isEnabled: true
+      },
+      {
+        id: randomUUID(),
+        type: 'textarea',
+        title: 'Dites-nous en plus !',
+        description: 'Votre avis nous aide à nous améliorer.',
+        isEnabled: true
+      },
+      {
+        id: randomUUID(),
+        type: 'attribution',
+        title: 'À propos de vous',
+        description: 'Ces informations seront affichées avec votre témoignage.',
+        isEnabled: true
+      },
+      {
+        id: randomUUID(),
+        type: 'success',
+        title: 'Merci !',
+        description: 'Votre témoignage a été envoyé avec succès.',
+        isEnabled: true
+      }
+    ];
   }
 
   public getName(): string {

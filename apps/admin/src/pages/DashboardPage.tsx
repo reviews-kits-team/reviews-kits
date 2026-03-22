@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { 
   Plus, 
   MessageSquare, 
@@ -20,6 +21,7 @@ import type { DashboardForm } from '../components/dashboard/types'
 import { authClient } from '../lib/auth-client'
 
 export default function DashboardPage() {
+  const navigate = useNavigate()
   const { data: session } = authClient.useSession()
   const [forms, setForms] = useState<DashboardForm[]>([])
   const [loading, setLoading] = useState(true)
@@ -108,6 +110,10 @@ export default function DashboardPage() {
     } catch (error) {
       console.error("Failed to duplicate form", error);
     }
+  };
+
+  const handleEditForm = (id: string) => {
+    navigate(`/forms/${id}/edit`);
   };
 
   const handleBatchToggleStatus = async (ids: string[], isActive: boolean) => {
@@ -233,6 +239,7 @@ export default function DashboardPage() {
                 onShareForm={setSharingFormId}
                 onBatchToggleStatus={handleBatchToggleStatus}
                 onBulkDelete={setBulkDeletingIds}
+                onEditForm={handleEditForm}
               />
             ) : (
               <div className="py-20 bg-[var(--v3-bg2)] border border-dashed border-white/5 rounded-2xl text-center">

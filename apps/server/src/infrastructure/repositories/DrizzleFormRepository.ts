@@ -16,10 +16,10 @@ export class DrizzleFormRepository implements FormRepository {
     return this.mapToDomain(row);
   }
 
-  async findBySlug(userId: string, slug: string): Promise<Form | null> {
+  async findBySlug(slug: string): Promise<Form | null> {
     const [row] = await this.db.select()
       .from(forms)
-      .where(and(eq(forms.userId, userId), eq(forms.slug, slug)));
+      .where(eq(forms.slug, slug));
     if (!row) return null;
 
     return this.mapToDomain(row);

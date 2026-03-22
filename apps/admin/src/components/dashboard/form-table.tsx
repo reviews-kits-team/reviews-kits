@@ -43,9 +43,10 @@ interface SortableRowProps {
   onDuplicate: (id: string) => void;
   onTogglePause: (id: string) => void;
   onShare: (id: string | null) => void;
+  onEdit: (id: string) => void;
 }
 
-const SortableRow = ({ form, isSelected, onSelect, onOpen, onDelete, onDuplicate, onTogglePause, onShare }: SortableRowProps) => {
+const SortableRow = ({ form, isSelected, onSelect, onOpen, onDelete, onDuplicate, onTogglePause, onShare, onEdit }: SortableRowProps) => {
   const {
     attributes,
     listeners,
@@ -158,6 +159,10 @@ const SortableRow = ({ form, isSelected, onSelect, onOpen, onDelete, onDuplicate
           <button
             className="p-2 text-[var(--v3-muted2)] hover:text-[var(--v3-teal)] hover:bg-[var(--v3-teal)]/10 rounded-lg transition-all group/btn"
             title="Éditer"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(form.id);
+            }}
           >
             <Pencil size={14} className="group-hover/btn:scale-110 transition-transform" />
           </button>
@@ -209,6 +214,7 @@ interface FormTableProps {
   onShareForm: (id: string | null) => void;
   onBatchToggleStatus: (ids: string[], isActive: boolean) => void;
   onBulkDelete: (ids: string[]) => void;
+  onEditForm: (id: string) => void;
 }
 
 export const FormTable = ({
@@ -220,7 +226,8 @@ export const FormTable = ({
   onDuplicateForm,
   onShareForm,
   onBatchToggleStatus,
-  onBulkDelete
+  onBulkDelete,
+  onEditForm
 }: FormTableProps) => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
@@ -352,6 +359,7 @@ export const FormTable = ({
                     onTogglePause={onToggleFormStatus}
                     onDuplicate={onDuplicateForm}
                     onShare={onShareForm}
+                    onEdit={onEditForm}
                   />
                 ))}
               </tbody>

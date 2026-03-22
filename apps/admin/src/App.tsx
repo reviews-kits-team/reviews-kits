@@ -6,6 +6,8 @@ import DashboardPage from './pages/DashboardPage'
 import ProfilePage from './pages/ProfilePage'
 import SettingsPage from './pages/SettingsPage'
 import SecurityPage from './pages/SecurityPage'
+import FormEditorPage from './pages/FormEditorPage'
+import PublicFormPage from './pages/PublicFormPage'
 import './App.css'
 
 function App() {
@@ -17,6 +19,9 @@ function App() {
         path="/login" 
         element={session ? <Navigate to="/" replace /> : <LoginPage />} 
       />
+
+      {/* Public Form Route */}
+      <Route path="/f/:slug" element={<PublicFormPage />} />
       
       {/* Protected Routes */}
       <Route element={<AuthGuard />}>
@@ -24,6 +29,7 @@ function App() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/security" element={<SecurityPage />} />
+        <Route path="/forms/:id/edit" element={<FormEditorPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to={session ? "/" : "/login"} replace />} />

@@ -32,7 +32,7 @@ describe("DrizzleFormRepository Integration", () => {
 
     await repository.save(form);
 
-    const found = await repository.findBySlug(userId, "contact");
+    const found = await repository.findBySlug("contact");
     expect(found).not.toBeNull();
     expect(found?.getName()).toBe("Contact");
   });
@@ -55,16 +55,16 @@ describe("DrizzleFormRepository Integration", () => {
       name: "Survey",
       slug: Slug.create("survey"),
       publicId: "rk_frm_live_survey",
-      config: { steps: 1 }
+      config: { steps: [] }
     });
 
     await repository.save(form);
 
-    form.updateConfig({ steps: 2 });
+    form.updateConfig({ steps: [{}, {}] as any });
     await repository.update(form);
 
     const found = await repository.findById(form.id);
-    expect(found?.getProps().config?.steps).toBe(2);
+    expect(found?.getProps().config?.steps).toHaveLength(2);
   });
 
   it("should delete a form", async () => {
