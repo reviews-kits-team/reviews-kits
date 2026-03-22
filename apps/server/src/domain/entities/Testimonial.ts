@@ -15,6 +15,7 @@ export interface TestimonialProps {
   authorUrl?: string;
   formId?: string;
   mediaId?: string;
+  position?: number;
   createdAt?: Date;
   updatedAt?: Date;
   metadata?: Record<string, any>;
@@ -33,6 +34,7 @@ export class Testimonial {
   private authorUrl?: string;
   private formId?: string;
   private mediaId?: string;
+  private position: number;
   public readonly createdAt: Date;
   private updatedAt: Date;
   private metadata: Record<string, any>;
@@ -59,6 +61,7 @@ export class Testimonial {
     this.authorUrl = props.authorUrl;
     this.formId = props.formId;
     this.mediaId = props.mediaId;
+    this.position = props.position ?? 0;
     this.createdAt = props.createdAt ?? new Date();
     this.updatedAt = props.updatedAt ?? new Date();
     this.metadata = props.metadata ?? {};
@@ -78,10 +81,16 @@ export class Testimonial {
       authorUrl: this.authorUrl,
       formId: this.formId,
       mediaId: this.mediaId,
+      position: this.position,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
       metadata: this.metadata,
     };
+  }
+
+  public updatePosition(position: number): void {
+    this.position = position;
+    this.updatedAt = new Date();
   }
 
   public approve(): void {

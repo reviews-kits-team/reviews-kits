@@ -21,7 +21,7 @@ export const SettingsLayout = ({ children, title, subtitle }: SettingsLayoutProp
   return (
     <div className="min-h-screen bg-[var(--v3-bg)]">
       <TopBar />
-      <main className="max-w-[1000px] mx-auto px-6 py-12">
+      <main className="max-w-[1140px] mx-auto px-6 py-12">
         <div className="mb-10">
            <Link 
             to="/" 
@@ -58,7 +58,7 @@ export const SettingsLayout = ({ children, title, subtitle }: SettingsLayoutProp
           </aside>
 
           {/* Content */}
-          <div className="flex-1 max-w-2xl">
+          <div className="flex-1">
             {children}
           </div>
         </div>

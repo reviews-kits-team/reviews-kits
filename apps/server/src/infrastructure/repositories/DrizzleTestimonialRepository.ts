@@ -46,6 +46,7 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
       authorTitle: props.authorTitle,
       authorUrl: props.authorUrl,
       mediaId: props.mediaId,
+      position: props.position,
       metadata: props.metadata,
       createdAt: props.createdAt,
       updatedAt: props.updatedAt,
@@ -64,6 +65,7 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
         authorTitle: props.authorTitle,
         authorUrl: props.authorUrl,
         mediaId: props.mediaId,
+        position: props.position,
         metadata: props.metadata,
         updatedAt: props.updatedAt,
       })
@@ -102,6 +104,55 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
     return rows.map(row => this.mapToDomain(row));
   }
 
+  async findByFormId(formId: string, options?: { limit?: number; offset?: number; sort?: string; order?: 'asc' | 'desc' }): Promise<Testimonial[]> {
+    const { asc, desc } = await import('drizzle-orm');
+    
+    const query = this.db.select()
+      .from(testimonials)
+      .where(eq(testimonials.formId, formId));
+
+    // Handle dynamic sorting
+    const sortField = options?.sort;
+    const sortOrder = options?.order || 'desc';
+    
+    if (sortField) {
+      const column = (testimonials as any)[sortField] || testimonials.createdAt;
+      query.orderBy(sortOrder === 'desc' ? desc(column) : asc(column));
+    } else {
+      // Default order: position ASC (manual order), then createdAt DESC (newest first)
+      query.orderBy(asc(testimonials.position), desc(testimonials.createdAt));
+    }
+
+    if (options?.limit) query.limit(options.limit);
+    if (options?.offset) query.offset(options.offset);
+
+    const rows = await query;
+    return rows.map(row => this.mapToDomain(row));
+  }
+
+  async batchUpdateStatus(ids: string[], status: 'approved' | 'rejected' | 'pending'): Promise<void> {
+    const { inArray } = await import('drizzle-orm');
+    await this.db.update(testimonials)
+      .set({ status, updatedAt: new Date() })
+      .where(inArray(testimonials.id, ids));
+  }
+
+  async batchDelete(ids: string[]): Promise<void> {
+    const { inArray } = await import('drizzle-orm');
+    await this.db.delete(testimonials)
+      .where(inArray(testimonials.id, ids));
+  }
+
+  async updatePositions(positions: { id: string; position: number }[]): Promise<void> {
+    await this.db.transaction(async (tx) => {
+      for (const { id, position } of positions) {
+        await tx.update(testimonials)
+          .set({ position, updatedAt: new Date() })
+          .where(eq(testimonials.id, id));
+      }
+    });
+  }
+
   async getStatsByUser(userId: string): Promise<{
     totalReviews: number;
     averageRating: number;
@@ -122,6 +173,67 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
     };
   }
 
+  async getStatsByFormId(formId: string): Promise<{
+    totalReviews: number;
+    averageRating: number;
+    uniqueRespondents: number;
+    ratingDistribution: { rating: number; count: number }[];
+    reviewVolume: { label: string; value: number }[];
+  }> {
+    // Basic stats
+    const [basicStats] = await this.db.select({
+      totalReviews: count(testimonials.id),
+      averageRating: avg(testimonials.rating),
+      uniqueRespondents: countDistinct(testimonials.authorEmail),
+    })
+    .from(testimonials)
+    .where(eq(testimonials.formId, formId));
+
+    // Rating distribution
+    const distributionRows = await this.db.select({
+      rating: testimonials.rating,
+      count: count(testimonials.id),
+    })
+    .from(testimonials)
+    .where(eq(testimonials.formId, formId))
+    .groupBy(testimonials.rating);
+
+    const ratingDistribution = Array.from({ length: 5 }, (_, i) => ({
+      rating: 5 - i,
+      count: Number(distributionRows.find(r => r.rating === (5 - i))?.count) || 0,
+    }));
+
+    // Review volume (Last 12 weeks)
+    // Using simple approach: group by date_trunc 'week'
+    const volumeRows = await this.db.select({
+      week: sql`date_trunc('week', ${testimonials.createdAt})`.as('week'),
+      count: count(testimonials.id),
+    })
+    .from(testimonials)
+    .where(and(
+      eq(testimonials.formId, formId),
+      sql`${testimonials.createdAt} >= NOW() - INTERVAL '12 weeks'`
+    ))
+    .groupBy(sql`week`)
+    .orderBy(sql`week ASC`);
+
+    const reviewVolume = volumeRows.map(row => ({
+      label: new Date(row.week as string).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }),
+      value: Number(row.count) || 0,
+    }));
+
+    // Ensure we have 12 entries if possible, or just return what we have
+    // For simplicity, we'll just return the actual rows found in the last 12 weeks
+
+    return {
+      totalReviews: Number(basicStats?.totalReviews) || 0,
+      averageRating: Number(basicStats?.averageRating) || 0,
+      uniqueRespondents: Number(basicStats?.uniqueRespondents) || 0,
+      ratingDistribution,
+      reviewVolume,
+    };
+  }
+
   private mapToDomain(row: any): Testimonial {
     return new Testimonial({
       id: row.id,
@@ -136,6 +248,7 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
       authorUrl: row.authorUrl || undefined,
       formId: row.formId || undefined,
       mediaId: row.mediaId || undefined,
+      position: row.position || 0,
       metadata: row.metadata as any,
       createdAt: row.createdAt || undefined,
       updatedAt: row.updatedAt || undefined,

@@ -9,7 +9,8 @@ import {
   RefreshCw, 
   ShieldCheck,
   ChevronRight,
-  ExternalLink
+  ExternalLink,
+  Check
 } from 'lucide-react'
 import { authClient } from '../../lib/auth-client'
 
@@ -29,6 +30,7 @@ export const ProfileMenu = ({ isOpen, onClose }: ProfileMenuProps) => {
   const [showSecret, setShowSecret] = useState(false)
   const [loadingKeys, setLoadingKeys] = useState(false)
   const [showApiKeys, setShowApiKeys] = useState(false)
+  const [copiedKey, setCopiedKey] = useState<'public' | 'secret' | null>(null)
 
   useEffect(() => {
     if (isOpen) {
@@ -58,9 +60,10 @@ export const ProfileMenu = ({ isOpen, onClose }: ProfileMenuProps) => {
     }
   }
 
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = (text: string, type: 'public' | 'secret') => {
     navigator.clipboard.writeText(text)
-    // We could add a toast here
+    setCopiedKey(type)
+    setTimeout(() => setCopiedKey(null), 2000)
   }
 
   const handleLogout = async () => {
@@ -162,10 +165,10 @@ export const ProfileMenu = ({ isOpen, onClose }: ProfileMenuProps) => {
                         </div>
                     </div>
                     <button 
-                      onClick={(e) => { e.stopPropagation(); if (apiKeys) copyToClipboard(apiKeys.publicKey); }}
-                      className="p-1.5 hover:bg-white/5 rounded-md text-[var(--v3-muted2)] hover:text-[var(--v3-teal)] transition-all"
+                      onClick={(e) => { e.stopPropagation(); if (apiKeys) copyToClipboard(apiKeys.publicKey, 'public'); }}
+                      className={`p-1.5 rounded-md transition-all ${copiedKey === 'public' ? 'text-emerald-500 bg-emerald-500/10' : 'hover:bg-white/5 text-[var(--v3-muted2)] hover:text-[var(--v3-teal)]'}`}
                     >
-                      <Copy size={12} />
+                      {copiedKey === 'public' ? <Check size={12} /> : <Copy size={12} />}
                     </button>
                   </div>
 
@@ -178,10 +181,10 @@ export const ProfileMenu = ({ isOpen, onClose }: ProfileMenuProps) => {
                     </div>
                     <div className="flex items-center gap-1">
                         <button 
-                          onClick={(e) => { e.stopPropagation(); if (apiKeys) copyToClipboard(apiKeys.secretKey); }}
-                          className="p-1.5 hover:bg-white/5 rounded-md text-[var(--v3-muted2)] hover:text-rose-400 transition-all"
+                          onClick={(e) => { e.stopPropagation(); if (apiKeys) copyToClipboard(apiKeys.secretKey, 'secret'); }}
+                          className={`p-1.5 rounded-md transition-all ${copiedKey === 'secret' ? 'text-emerald-500 bg-emerald-500/10' : 'hover:bg-white/5 text-[var(--v3-muted2)] hover:text-rose-400'}`}
                         >
-                          <Copy size={12} />
+                          {copiedKey === 'secret' ? <Check size={12} /> : <Copy size={12} />}
                         </button>
                         <button 
                           onClick={(e) => { e.stopPropagation(); handleRotateKeys(); }}
