@@ -1,9 +1,6 @@
 import { ReviewsKitConfigError } from './errors';
-
-export interface ReviewsKitConfig {
-  host: string;
-  pk: string;
-}
+export type { ReviewsKitConfig } from '@reviewskits/types';
+import type { ReviewsKitConfig } from '@reviewskits/types';
 
 let config: ReviewsKitConfig | null = null;
 
