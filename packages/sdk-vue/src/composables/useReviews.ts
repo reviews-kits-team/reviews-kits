@@ -4,7 +4,7 @@ import { mapReviews } from '../api/mappers/review.mapper';
 import { QUERY_KEYS } from '../core/queryKeys';
 import { ReviewApiParams } from '../types';
 
-export const useReviews = (params: ReviewApiParams = {}) => {
+export const useReviews = (params: ReviewApiParams) => {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: [QUERY_KEYS.REVIEWS, params],
     queryFn: async () => {

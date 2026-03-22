@@ -1,4 +1,5 @@
 export interface ReviewApiParams {
+  formId: string;
   page?: number;
   limit?: number;
   minRating?: number;
@@ -8,10 +9,10 @@ export interface RawReview {
   id: string;
   content: string;
   rating: number;
-  author_name: string;
-  author_email?: string;
-  author_title?: string;
-  author_url?: string;
+  authorName: string;
+  authorEmail?: string;
+  authorTitle?: string;
+  authorUrl?: string;
   metadata?: Record<string, any>;
 }
 

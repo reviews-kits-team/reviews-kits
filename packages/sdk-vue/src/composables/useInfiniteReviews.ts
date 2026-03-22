@@ -4,7 +4,7 @@ import { mapReviews } from '../api/mappers/review.mapper';
 import { QUERY_KEYS } from '../core/queryKeys';
 import { ReviewApiParams } from '../types';
 
-export const useInfiniteReviews = (params: Omit<ReviewApiParams, 'page'> = {}) => {
+export const useInfiniteReviews = (params: Omit<ReviewApiParams, 'page'>) => {
   const {
     data,
     isLoading,

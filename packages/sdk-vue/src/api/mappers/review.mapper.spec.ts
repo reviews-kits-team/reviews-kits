@@ -8,10 +8,10 @@ describe('Review Mapper', () => {
       id: '1',
       content: 'Excellent service!',
       rating: 5,
-      author_name: 'John Doe',
-      author_email: 'john@example.com',
-      author_title: 'CEO',
-      author_url: 'https://example.com',
+      authorName: 'John Doe',
+      authorEmail: 'john@example.com',
+      authorTitle: 'CEO',
+      authorUrl: 'https://example.com',
       metadata: { source: 'google' }
     };
 
@@ -36,7 +36,7 @@ describe('Review Mapper', () => {
       id: '2',
       content: 'Good',
       rating: 4,
-      author_name: 'Jane Doe'
+      authorName: 'Jane Doe'
     };
 
     const result = mapReview(raw);

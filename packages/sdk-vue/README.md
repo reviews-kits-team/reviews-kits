@@ -45,6 +45,7 @@ Use the `useReviews` composable for standard pagination.
 import { useReviews } from '@reviewskits/vue'
 
 const { data, isLoading, error } = useReviews({
+  formId: 'your_form_id', // Now required here
   limit: 10,
   minRating: 4,
   page: 1
@@ -77,7 +78,10 @@ const {
   fetchNextPage, 
   hasNextPage, 
   isLoading 
-} = useInfiniteReviews({ limit: 5 })
+} = useInfiniteReviews({ 
+  formId: 'your_form_id',
+  limit: 5 
+})
 </script>
 
 <template>
@@ -97,6 +101,22 @@ const {
     </button>
   </div>
 </template>
+```
+
+### Advanced: Multi-form Support
+
+If your application needs to display reviews from different forms, you can override the global `formId` by passing it directly to the composable.
+
+```vue
+<script setup>
+import { useReviews } from '@reviewskits/vue'
+
+// This will use the 'form-a-id' instead of the global default
+const { data, isLoading } = useReviews({ 
+  formId: 'form-a-id',
+  limit: 5 
+})
+</script>
 ```
 
 ## License

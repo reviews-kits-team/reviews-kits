@@ -11,8 +11,8 @@ app.use(VueQueryPlugin)
 
 // Initialize ReviewsKit SDK
 app.use(createReviewsKit({
-  pk: 'test_public_key',
-  host: 'http://localhost:3000' // Change to your local or staging API
+  pk: 'rk_pk_live_19727b7243871582c69867cc39e3826953b1b11671e58bcd',
+  host: 'http://localhost:3000'
 }))
 
 app.mount('#app')

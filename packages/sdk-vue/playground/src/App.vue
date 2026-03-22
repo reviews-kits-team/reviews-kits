@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useReviews } from '@reviewskits/vue'
 
-const { data, isLoading, error } = useReviews()
+const { data, isLoading, error } = useReviews({ formId: 'rk_frm_live_2abfcdef2ad3cd2babf9cf86' })
 </script>
 
 <template>

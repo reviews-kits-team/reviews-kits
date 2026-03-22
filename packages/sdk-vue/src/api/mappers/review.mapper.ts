@@ -6,10 +6,10 @@ export const mapReview = (raw: RawReview): Review => {
     content: raw.content,
     rating: raw.rating,
     author: {
-      name: raw.author_name,
-      email: raw.author_email,
-      title: raw.author_title,
-      url: raw.author_url,
+      name: raw.authorName,
+      email: raw.authorEmail,
+      title: raw.authorTitle,
+      url: raw.authorUrl,
     },
     metadata: raw.metadata,
   };
