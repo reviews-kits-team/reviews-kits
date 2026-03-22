@@ -9,6 +9,7 @@ describe("Form Entity", () => {
     userId: "user-1",
     name: "Contact Form",
     slug: validSlug,
+    publicId: "rk_frm_live_test123",
   };
 
   describe("Creation", () => {

@@ -13,11 +13,23 @@ export const publicReviewController = {
 
     const limit = parseInt(c.req.query('limit') || '10', 10);
     const minRating = parseInt(c.req.query('minRating') || '0', 10);
+    const publicId = c.req.query('formId');
+
+    if (!publicId) {
+      return c.json({ error: 'Missing formId query parameter' }, 400);
+    }
 
     try {
-      const testimonials = await container.testimonialRepository.findApprovedByUser(userId, {
+      // Resolve internal ID from public ID
+      const form = await container.formRepository.findByPublicId(publicId);
+      if (!form || form.userId !== userId) {
+        return c.json({ error: 'Form not found or invalid public ID' }, 404);
+      }
+
+      const testimonials = await container.testimonialRepository.findApprovedByUser(userId as string, {
         limit: Math.min(limit, 50), // Cap at 50 for performance
-        minRating: minRating > 0 ? minRating : undefined
+        minRating: minRating > 0 ? minRating : undefined,
+        formId: form.id
       });
 
       return c.json({

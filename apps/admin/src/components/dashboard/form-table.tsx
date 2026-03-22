@@ -27,7 +27,9 @@ import {
   MessageSquare,
   FileText,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Copy,
+  Check
 } from 'lucide-react';
 import { Badge, Stars } from './ui';
 import type { DashboardForm } from './types';
@@ -53,11 +55,20 @@ const SortableRow = ({ form, isSelected, onSelect, onOpen, onDelete, onDuplicate
     isDragging
   } = useSortable({ id: form.id });
 
+  const [isCopied, setIsCopied] = useState(false);
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? 50 : 'auto',
     opacity: isDragging ? 0.5 : 1,
+  };
+
+  const copyId = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(form.publicId);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
   };
 
 
@@ -93,7 +104,16 @@ const SortableRow = ({ form, isSelected, onSelect, onOpen, onDelete, onDuplicate
             <div className="font-bold text-[var(--v3-text)] truncate" title={form.name}>
               {form.name.length > 25 ? form.name.substring(0, 25) + '...' : form.name}
             </div>
-            <div className="text-[9px] text-[var(--v3-muted2)] font-mono truncate opacity-50">/f/{form.slug}</div>
+            <div className="flex items-center gap-1.5 mt-0.5 group/id">
+              <div className="text-[9px] text-[var(--v3-muted2)] font-mono truncate opacity-40">ID: {form.publicId.substring(0, 10)}...</div>
+              <button 
+                onClick={copyId}
+                className={`opacity-0 group-hover/id:opacity-100 p-0.5 rounded transition-all ${isCopied ? 'text-emerald-500' : 'text-[var(--v3-muted2)] hover:text-[var(--v3-teal)] hover:bg-white/5'}`}
+                title="Copier l'ID"
+              >
+                {isCopied ? <Check size={10} /> : <Copy size={10} />}
+              </button>
+            </div>
           </div>
         </div>
       </td>

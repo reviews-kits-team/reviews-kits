@@ -6,6 +6,7 @@ export interface FormProps {
   userId: string;
   name: string;
   slug: Slug;
+  publicId: string;
   description?: string;
   thankYouMessage?: string;
   config?: Record<string, any>;
@@ -20,6 +21,7 @@ export class Form {
   public readonly userId: string;
   private name: string;
   private slug: Slug;
+  public readonly publicId: string;
   private description?: string;
   private thankYouMessage?: string;
   private config: Record<string, any>;
@@ -35,6 +37,7 @@ export class Form {
     this.userId = props.userId;
     this.name = props.name;
     this.slug = props.slug;
+    this.publicId = props.publicId;
     this.description = props.description;
     this.thankYouMessage = props.thankYouMessage;
     this.config = props.config ?? {};
@@ -50,6 +53,7 @@ export class Form {
       userId: this.userId,
       name: this.name,
       slug: this.slug,
+      publicId: this.publicId,
       description: this.description,
       thankYouMessage: this.thankYouMessage,
       config: { ...this.config },

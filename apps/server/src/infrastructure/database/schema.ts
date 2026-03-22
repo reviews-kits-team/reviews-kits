@@ -79,6 +79,7 @@ export const forms = pgTable('forms', {
   userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   slug: text('slug').unique().notNull(),
+  publicId: text('public_id').unique().notNull(),
   description: text('description'),
   thankYouMessage: text('thank_you_message'),
   config: jsonb('config').default({}),

@@ -26,6 +26,7 @@ describe("DrizzleFormRepository Integration", () => {
       userId: userId,
       name: "Contact",
       slug: Slug.create("contact"),
+      publicId: "rk_frm_live_contact",
       config: { title: "Contact Us" }
     });
 
@@ -37,8 +38,8 @@ describe("DrizzleFormRepository Integration", () => {
   });
 
   it("should find forms by user ID", async () => {
-    const f1 = new Form({ id: crypto.randomUUID(), userId: userId, name: "F1", slug: Slug.create("f1"), config: {} });
-    const f2 = new Form({ id: crypto.randomUUID(), userId: userId, name: "F2", slug: Slug.create("f2"), config: {} });
+    const f1 = new Form({ id: crypto.randomUUID(), userId: userId, name: "F1", slug: Slug.create("f1"), publicId: "rk_frm_live_f1", config: {} });
+    const f2 = new Form({ id: crypto.randomUUID(), userId: userId, name: "F2", slug: Slug.create("f2"), publicId: "rk_frm_live_f2", config: {} });
 
     await repository.save(f1);
     await repository.save(f2);
@@ -53,6 +54,7 @@ describe("DrizzleFormRepository Integration", () => {
       userId: userId,
       name: "Survey",
       slug: Slug.create("survey"),
+      publicId: "rk_frm_live_survey",
       config: { steps: 1 }
     });
 
@@ -66,12 +68,30 @@ describe("DrizzleFormRepository Integration", () => {
   });
 
   it("should delete a form", async () => {
-    const form = new Form({ id: crypto.randomUUID(), userId: userId, name: "D", slug: Slug.create("d"), config: {} });
+    const form = new Form({ id: crypto.randomUUID(), userId: userId, name: "D", slug: Slug.create("d"), publicId: "rk_frm_live_d", config: {} });
 
     await repository.save(form);
     await repository.delete(form.id);
 
     const found = await repository.findById(form.id);
     expect(found).toBeNull();
+  });
+
+  it("should find a form by its public ID", async () => {
+    const publicId = "rk_frm_live_findme";
+    const form = new Form({
+      id: crypto.randomUUID(),
+      userId: userId,
+      name: "Find Me",
+      slug: Slug.create("find-me"),
+      publicId,
+      config: {}
+    });
+
+    await repository.save(form);
+    const found = await repository.findByPublicId(publicId);
+    
+    expect(found).not.toBeNull();
+    expect(found?.getName()).toBe("Find Me");
   });
 });

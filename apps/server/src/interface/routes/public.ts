@@ -40,6 +40,14 @@ const getReviewsRoute = createRoute({
         },
         example: 'rk_pk_live_...',
       }),
+      formId: z.string().openapi({
+        param: {
+          name: 'formId',
+          in: 'query',
+          required: true,
+        },
+        example: 'rk_frm_live_abc123...',
+      }),
     }),
     headers: z.object({
       'x-api-key': z.string().optional().openapi({

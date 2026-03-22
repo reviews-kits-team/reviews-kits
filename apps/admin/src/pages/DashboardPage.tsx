@@ -29,6 +29,12 @@ export default function DashboardPage() {
   const [bulkDeletingIds, setBulkDeletingIds] = useState<string[] | null>(null)
   const [sharingFormId, setSharingFormId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [stats, setStats] = useState({
+    totalReviews: 0,
+    completionRate: 0,
+    averageRating: 0.0,
+    uniqueRespondents: 0
+  })
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,7 +48,17 @@ export default function DashboardPage() {
       }
     };
 
+    const fetchStats = async () => {
+      try {
+        const res = await fetch('/api/v1/dashboard/stats');
+        if (res.ok) setStats(await res.json());
+      } catch (error) {
+        console.error("Failed to fetch dashboard stats", error);
+      }
+    };
+
     fetchData();
+    fetchStats();
   }, [])
 
   const selectedForm = useMemo(() => 
@@ -157,10 +173,33 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-14">
-            <StatCard icon={<MessageSquare size={18} />} label="Total reviews" value="0" delta="↑ 0%" colorClass="bg-[var(--v3-teal-dim)] border-[var(--v3-teal)]/20 text-[var(--v3-teal)]" />
-            <StatCard icon={<CheckCircle2 size={18} />} label="Taux de complétion" value="0%" delta="↑ 0%" colorClass="bg-emerald-500/10 border-emerald-500/20 text-emerald-500" />
-            <StatCard icon={<Star size={18} />} label="Note moyenne" value="0.0" colorClass="bg-amber-500/10 border-amber-500/20 text-amber-500" />
-            <StatCard icon={<Users size={18} />} label="Répondants uniques" value="0" delta="↑ 0%" colorClass="bg-sky-500/10 border-sky-500/20 text-sky-500" />
+            <StatCard 
+              icon={<MessageSquare size={18} />} 
+              label="Total reviews" 
+              value={stats.totalReviews.toString()} 
+              delta="↑ 0%" 
+              colorClass="bg-[var(--v3-teal-dim)] border-[var(--v3-teal)]/20 text-[var(--v3-teal)]" 
+            />
+            <StatCard 
+              icon={<CheckCircle2 size={18} />} 
+              label="Taux de complétion" 
+              value={`${stats.completionRate}%`} 
+              delta="↑ 0%" 
+              colorClass="bg-emerald-500/10 border-emerald-500/20 text-emerald-500" 
+            />
+            <StatCard 
+              icon={<Star size={18} />} 
+              label="Note moyenne" 
+              value={stats.averageRating.toFixed(1)} 
+              colorClass="bg-amber-500/10 border-amber-500/20 text-amber-500" 
+            />
+            <StatCard 
+              icon={<Users size={18} />} 
+              label="Répondants uniques" 
+              value={stats.uniqueRespondents.toString()} 
+              delta="↑ 0%" 
+              colorClass="bg-sky-500/10 border-sky-500/20 text-sky-500" 
+            />
           </div>
 
           <div className="flex justify-between items-center mb-6 gap-4 flex-wrap">
@@ -237,6 +276,7 @@ export default function DashboardPage() {
         onClose={() => setSharingFormId(null)}
         formName={forms.find(f => f.id === sharingFormId)?.name || ''}
         formSlug={forms.find(f => f.id === sharingFormId)?.slug || ''}
+        publicId={forms.find(f => f.id === sharingFormId)?.publicId || ''}
       />
     </div>
   )

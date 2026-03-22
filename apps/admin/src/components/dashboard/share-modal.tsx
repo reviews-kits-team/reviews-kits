@@ -1,15 +1,17 @@
 import { useState } from 'react';
-import { X, Copy, Check, Globe, Twitter, Linkedin, Facebook } from 'lucide-react';
+import { X, Copy, Check, Globe, Twitter, Linkedin, Facebook, FileText } from 'lucide-react';
 
 interface ShareModalProps {
   isOpen: boolean;
   onClose: () => void;
   formName: string;
   formSlug: string;
+  publicId: string;
 }
 
-export const ShareModal = ({ isOpen, onClose, formName, formSlug }: ShareModalProps) => {
+export const ShareModal = ({ isOpen, onClose, formName, formSlug, publicId }: ShareModalProps) => {
   const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedId, setCopiedId] = useState(false);
 
   if (!isOpen) return null;
 
@@ -19,6 +21,12 @@ export const ShareModal = ({ isOpen, onClose, formName, formSlug }: ShareModalPr
     navigator.clipboard.writeText(shareUrl);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
+  };
+
+  const copyId = () => {
+    navigator.clipboard.writeText(publicId);
+    setCopiedId(true);
+    setTimeout(() => setCopiedId(false), 2000);
   };
 
   const shareSocial = (platform: 'twitter' | 'linkedin' | 'facebook') => {
@@ -67,6 +75,31 @@ export const ShareModal = ({ isOpen, onClose, formName, formSlug }: ShareModalPr
                   {copiedLink ? 'Copié' : 'Copier'}
                 </button>
               </div>
+            </div>
+
+            {/* Form ID for API */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <FileText size={14} className="text-purple-400" />
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--v3-muted2)]">ID du formulaire (API)</span>
+              </div>
+              <div className="flex gap-2">
+                <input 
+                  readOnly 
+                  value={publicId}
+                  className="flex-1 bg-black/20 border border-white/5 rounded-xl px-4 py-3 text-sm text-[var(--v3-muted2)] focus:outline-none focus:border-purple-500/30 transition-all font-mono"
+                />
+                <button 
+                  onClick={copyId}
+                  className={`px-4 rounded-xl flex items-center gap-2 font-bold text-xs uppercase transition-all ${copiedId ? 'bg-emerald-500 text-white' : 'bg-purple-600/80 text-white hover:bg-purple-600 hover:shadow-[0_8px_20px_rgba(147,51,234,0.2)]'}`}
+                >
+                  {copiedId ? <Check size={16} /> : <Copy size={16} />}
+                  {copiedId ? 'Copié' : 'Copier'}
+                </button>
+              </div>
+              <p className="mt-2 text-[10px] text-[var(--v3-muted2)] italic">
+                Utilise cet ID pour tes requêtes API publiques.
+              </p>
             </div>
 
             {/* Social Sharing */}
