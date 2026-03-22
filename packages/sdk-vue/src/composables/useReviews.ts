@@ -1,20 +1,45 @@
-import { ref, onMounted } from 'vue';
-import type { Testimonial } from '@reviewskits/types';
+import { ref, watch, onMounted } from 'vue';
+import { reviewsApi } from '../api/reviews';
+import { mapReviews } from '../api/mappers/review.mapper';
+import { ReviewApiParams, Review } from '../types';
 
-export interface UseReviewsOptions {
-  host: string;
-  formSlug?: string;
-  limit?: number;
-}
+export const useReviews = (params: ReviewApiParams) => {
+  const data = ref<{ reviews: Review[] } | null>(null);
+  const isLoading = ref(true);
+  const error = ref<any>(null);
 
-export function useReviews(options: UseReviewsOptions) {
-  const data = ref<Testimonial[]>([]);
-  const isLoading = ref(false);
-  const error = ref<Error | null>(null);
+  const fetchReviews = async () => {
+    isLoading.value = true;
+    error.value = null;
+    try {
+      const response = await reviewsApi.getReviews(params);
+      data.value = {
+        reviews: mapReviews(response.data),
+      };
+    } catch (err: any) {
+      error.value = err;
+    } finally {
+      isLoading.value = false;
+    }
+  };
 
   onMounted(() => {
-    console.log('useReviews composable initialized with host:', options.host);
+    fetchReviews();
   });
 
-  return { data, isLoading, error };
-}
+  // Re-fetch when params change
+  watch(
+    () => params,
+    () => {
+      fetchReviews();
+    },
+    { deep: true }
+  );
+
+  return {
+    data,
+    isLoading,
+    error,
+    refetch: fetchReviews,
+  };
+};

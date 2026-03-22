@@ -1,4 +1,11 @@
+export * from './types';
 export * from './hooks/useReviews';
+export * from './hooks/useInfiniteReviews';
+export * from './context/ReviewsKitProvider';
 
-// Re-export shared types for convenience
-export type { Testimonial, User } from '@reviewskits/types';
+// Errors
+export {
+  ReviewsKitError,
+  ReviewsKitConfigError,
+  ReviewsKitApiError,
+} from './core/errors';

@@ -17,7 +17,7 @@ const app = new OpenAPIHono();
 app.use('*', cors({
   origin: ['http://172.20.0.1:5180', 'http://localhost:5174', 'http://localhost:5180', 'http://localhost:3000'], // Allow frontend and self (swagger)
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization'],
+  allowHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
   exposeHeaders: ['Content-Length', 'Set-Cookie'],
   credentials: true,
 }));

@@ -1,21 +1,40 @@
-import { useState, useEffect } from 'react';
-import type { Testimonial } from '@reviewskits/types';
+import { useState, useEffect, useCallback } from 'react';
+import { reviewsApi } from '../api/reviews';
+import { mapReviews } from '../api/mappers/review.mapper';
+import type { ReviewApiParams, Review } from '../types';
+import { useReviewsKitConfig } from '../context/ReviewsKitProvider';
 
-export interface UseReviewsOptions {
-  host: string;
-  formSlug?: string;
-  limit?: number;
-}
+export function useReviews(params: ReviewApiParams) {
+  const config = useReviewsKitConfig();
+  const [data, setData] = useState<{ reviews: Review[] } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<any>(null);
 
-export function useReviews(options: UseReviewsOptions) {
-  const [data, setData] = useState<Testimonial[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const fetchReviews = useCallback(async () => {
+    if (!config) return;
 
-  // Placeholder implementation
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await reviewsApi.getReviews(params, config);
+      setData({
+        reviews: mapReviews(response.data),
+      });
+    } catch (err: any) {
+      setError(err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [config, JSON.stringify(params)]);
+
   useEffect(() => {
-    console.log('useReviews hook initialized with host:', options.host);
-  }, [options.host, options.formSlug]);
+    fetchReviews();
+  }, [fetchReviews]);
 
-  return { data, isLoading, error };
+  return {
+    data,
+    isLoading,
+    error,
+    refetch: fetchReviews,
+  };
 }
