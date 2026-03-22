@@ -91,6 +91,24 @@ const submitReviewRoute = createRoute({
   description: 'Submit a new testimonial/review for a specific form.',
   tags: ['Public'],
   request: {
+    query: z.object({
+      token: z.string().optional().openapi({
+        param: {
+          name: 'token',
+          in: 'query',
+        },
+        example: 'rk_pk_live_...',
+      }),
+    }),
+    headers: z.object({
+      'x-api-key': z.string().optional().openapi({
+        param: {
+          name: 'x-api-key',
+          in: 'header',
+        },
+        example: 'rk_pk_live_...',
+      }),
+    }),
     body: {
       content: {
         'application/json': {
