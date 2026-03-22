@@ -120,6 +120,9 @@ const submitReviewRoute = createRoute({
   },
 });
 
+// Apply Public API Key check to reviews path
+publicRouter.use('/reviews', pkCheck);
+
 // Register routes
-publicRouter.openapi(getReviewsRoute, publicReviewController.getReviews as any, pkCheck as any);
-publicRouter.openapi(submitReviewRoute, publicReviewController.submitReview as any);
+publicRouter.openapi(getReviewsRoute, (c) => publicReviewController.getReviews(c));
+publicRouter.openapi(submitReviewRoute, (c) => publicReviewController.submitReview(c));

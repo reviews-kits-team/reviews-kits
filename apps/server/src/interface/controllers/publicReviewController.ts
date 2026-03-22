@@ -10,6 +10,12 @@ export const publicReviewController = {
    * Fetch approved reviews for a user based on public API key context
    */
   getReviews: async (c: Context) => {
+    // Defensive check to avoid TypeError: c.get is not a function
+    if (!c || typeof c.get !== 'function') {
+      console.error('[API Error] Context c is invalid in getReviews:', typeof c, Object.keys(c || {}));
+      return (c as any)?.json ? (c as any).json({ error: 'Internal context error' }, 500) : new Response('Internal context error', { status: 500 });
+    }
+
     const userId = c.get('userId');
     if (!userId) {
       return c.json({ error: 'Unauthorized' }, 401);
