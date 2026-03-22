@@ -15,6 +15,9 @@ export interface TestimonialRepository {
     totalReviews: number;
     averageRating: number;
     uniqueRespondents: number;
+    reviewsGrowth?: number;
+    completionRate?: number;
+    completionGrowth?: number;
   }>;
   getStatsByFormId(formId: string): Promise<{
     totalReviews: number;
@@ -22,5 +25,8 @@ export interface TestimonialRepository {
     uniqueRespondents: number;
     ratingDistribution: { rating: number; count: number }[];
     reviewVolume: { label: string; value: number }[];
+    reviewsGrowth?: number;
+    completionRate?: number;
+    completionGrowth?: number;
   }>;
 }

@@ -46,6 +46,9 @@ interface FormStats {
   uniqueRespondents: number
   ratingDistribution: { rating: number; count: number }[]
   reviewVolume: { label: string; value: number }[]
+  reviewsGrowth?: number
+  completionRate?: number
+  completionGrowth?: number
 }
 
 interface Testimonial {
@@ -503,8 +506,20 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard icon={<MessageSquare size={18} />} label="Total reviews" value={totReviews.toString()} delta="↑ +12%" colorClass="bg-[var(--v3-teal-dim)] border-[var(--v3-teal)]/20 text-[var(--v3-teal)]" />
-        <StatCard icon={<TrendingUp size={18} />} label="Complétion" value={`${form.completion || 100}%`} delta="↑ +4%" colorClass="bg-sky-500/10 border-sky-500/20 text-sky-500" />
+        <StatCard 
+          icon={<MessageSquare size={18} />} 
+          label="Total reviews" 
+          value={totReviews.toString()} 
+          delta={stats?.reviewsGrowth !== undefined ? (stats.reviewsGrowth > 0 ? `↑ +${stats.reviewsGrowth}%` : stats.reviewsGrowth < 0 ? `↓ ${stats.reviewsGrowth}%` : "0%") : "—"} 
+          colorClass="bg-[var(--v3-teal-dim)] border-[var(--v3-teal)]/20 text-[var(--v3-teal)]" 
+        />
+        <StatCard 
+          icon={<TrendingUp size={18} />} 
+          label="Complétion" 
+          value={`${stats?.completionRate ?? form.completion ?? 100}%`} 
+          delta={stats?.completionGrowth !== undefined ? (stats.completionGrowth > 0 ? `↑ +${stats.completionGrowth}%` : stats.completionGrowth < 0 ? `↓ ${stats.completionGrowth}%` : "0%") : "—"} 
+          colorClass="bg-sky-500/10 border-sky-500/20 text-sky-500" 
+        />
         <StatCard icon={<Star size={18} />} label="Note moyenne" value={avgRating > 0 ? avgRating.toFixed(1) : "—"} colorClass="bg-amber-500/10 border-amber-500/20 text-amber-500" />
         <StatCard icon={<Users size={18} />} label="Répondants uniques" value={(stats?.uniqueRespondents || 0).toString()} colorClass="bg-purple-500/10 border-purple-500/20 text-purple-500" />
       </div>

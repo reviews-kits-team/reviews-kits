@@ -1,7 +1,7 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import * as schema from '../database/schema';
-import { forms } from '../database/schema';
+import { forms, formVisits } from '../database/schema';
 import { Form } from '../../domain/entities/Form';
 import type { FormRepository } from '../../domain/repositories/FormRepository';
 import { Slug } from '../../domain/value-objects/Slug';
@@ -86,6 +86,16 @@ export class DrizzleFormRepository implements FormRepository {
   async batchDelete(ids: string[]): Promise<void> {
     const { inArray } = await import('drizzle-orm');
     await this.db.delete(forms).where(inArray(forms.id, ids));
+  }
+
+  async incrementVisits(formId: string): Promise<void> {
+    const today = new Date().toISOString().split('T')[0];
+    await this.db.insert(formVisits)
+      .values({ formId, date: today, visits: 1 } as any)
+      .onConflictDoUpdate({
+        target: [formVisits.formId, formVisits.date],
+        set: { visits: sql`${formVisits.visits} + 1`, updatedAt: new Date() }
+      });
   }
 
   private mapToDomain(row: any): Form {

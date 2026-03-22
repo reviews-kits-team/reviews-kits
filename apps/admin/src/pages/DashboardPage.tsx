@@ -31,7 +31,14 @@ export default function DashboardPage() {
   const [bulkDeletingIds, setBulkDeletingIds] = useState<string[] | null>(null)
   const [sharingFormId, setSharingFormId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<{
+    totalReviews: number;
+    completionRate: number;
+    averageRating: number;
+    uniqueRespondents: number;
+    reviewsGrowth?: number;
+    completionGrowth?: number;
+  }>({
     totalReviews: 0,
     completionRate: 0,
     averageRating: 0.0,
@@ -182,14 +189,14 @@ export default function DashboardPage() {
               icon={<MessageSquare size={18} />} 
               label="Total reviews" 
               value={stats.totalReviews.toString()} 
-              delta="↑ 0%" 
+              delta={stats.reviewsGrowth !== undefined ? (stats.reviewsGrowth > 0 ? `↑ +${stats.reviewsGrowth}%` : stats.reviewsGrowth < 0 ? `↓ ${stats.reviewsGrowth}%` : "0%") : "—"} 
               colorClass="bg-[var(--v3-teal-dim)] border-[var(--v3-teal)]/20 text-[var(--v3-teal)]" 
             />
             <StatCard 
               icon={<CheckCircle2 size={18} />} 
               label="Taux de complétion" 
               value={`${stats.completionRate}%`} 
-              delta="↑ 0%" 
+              delta={stats.completionGrowth !== undefined ? (stats.completionGrowth > 0 ? `↑ +${stats.completionGrowth}%` : stats.completionGrowth < 0 ? `↓ ${stats.completionGrowth}%` : "0%") : "—"} 
               colorClass="bg-emerald-500/10 border-emerald-500/20 text-emerald-500" 
             />
             <StatCard 
@@ -202,7 +209,7 @@ export default function DashboardPage() {
               icon={<Users size={18} />} 
               label="Répondants uniques" 
               value={stats.uniqueRespondents.toString()} 
-              delta="↑ 0%" 
+              delta="—" 
               colorClass="bg-sky-500/10 border-sky-500/20 text-sky-500" 
             />
           </div>

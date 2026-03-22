@@ -159,7 +159,7 @@ export default function PublicFormPage() {
   if (error || !form) return (
     <div className="min-h-screen bg-[#F9FAFB] flex flex-col items-center justify-center p-6 text-center">
       <h1 className="text-2xl font-bold text-gray-900 mb-2">Oups !</h1>
-      <p className="text-gray-500">{error || 'Le formulaire est introuvable.'}</p>
+      <p className="text-gray-600">{error || 'Le formulaire est introuvable.'}</p>
     </div>
   )
 
@@ -195,10 +195,10 @@ export default function PublicFormPage() {
           {/* Welcome Step */}
           {currentStep?.type === 'welcome' && (
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 w-full flex flex-col items-center">
-              <h1 className="text-4xl font-black tracking-tighter text-gray-900 mb-6" style={{ fontFamily: headingFont }}>
+              <h1 className="text-4xl font-black tracking-tighter text-black mb-6" style={{ fontFamily: headingFont, color: '#000000' }}>
                 {currentStep.title}
               </h1>
-              <p className="text-gray-500 mb-10 text-xl leading-relaxed max-w-md">
+              <p className="text-gray-600 mb-10 text-xl leading-relaxed max-w-md">
                 {currentStep.description}
               </p>
               <button 
@@ -214,10 +214,10 @@ export default function PublicFormPage() {
           {/* Informative Step */}
           {currentStep?.type === 'informative' && (
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 w-full flex flex-col items-center">
-              <h1 className="text-4xl font-black tracking-tighter text-gray-900 mb-6" style={{ fontFamily: headingFont }}>
+              <h1 className="text-4xl font-black tracking-tighter text-black mb-6" style={{ fontFamily: headingFont, color: '#000000' }}>
                 {currentStep.title}
               </h1>
-              <p className="text-gray-500 mb-10 text-xl leading-relaxed max-w-md">
+              <p className="text-gray-600 mb-10 text-xl leading-relaxed max-w-md">
                 {currentStep.description}
               </p>
               <button 
@@ -233,10 +233,10 @@ export default function PublicFormPage() {
           {/* Rating Step */}
           {currentStep?.type === 'rating' && (
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 w-full flex flex-col items-center">
-              <h1 className="text-4xl font-black tracking-tighter text-gray-900 mb-6" style={{ fontFamily: headingFont }}>
+              <h1 className="text-4xl font-black tracking-tighter text-black mb-6" style={{ fontFamily: headingFont, color: '#000000' }}>
                 {currentStep.title}
               </h1>
-              <p className="text-gray-500 mb-10 text-xl leading-relaxed">{currentStep.description}</p>
+              <p className="text-gray-600 mb-10 text-xl leading-relaxed">{currentStep.description}</p>
               
               <div className="flex gap-4 justify-center mb-12">
                 {(currentStep.config as Record<string, string | boolean>)?.ratingType === 'emojis' ? (
@@ -258,7 +258,7 @@ export default function PublicFormPage() {
                     >
                       <Star 
                         size={52} 
-                        className={`transition-all ${rating >= val ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200 group-hover:text-gray-300'}`} 
+                        className={`transition-all ${rating >= val ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 group-hover:text-gray-400 fill-gray-200'}`} 
                       />
                     </button>
                   )))}
@@ -278,23 +278,23 @@ export default function PublicFormPage() {
           {/* Textarea Step */}
           {currentStep?.type === 'textarea' && (
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 w-full flex flex-col items-center">
-              <h1 className="text-4xl font-black tracking-tighter text-gray-900 mb-6" style={{ fontFamily: headingFont }}>
+              <h1 className="text-4xl font-black tracking-tighter text-black mb-6" style={{ fontFamily: headingFont, color: '#000000' }}>
                 {currentStep.title}
               </h1>
-              <p className="text-gray-500 mb-8 text-xl leading-relaxed">{currentStep.description}</p>
+              <p className="text-gray-600 mb-8 text-xl leading-relaxed">{currentStep.description}</p>
               
               <textarea
                 autoFocus
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder={((currentStep.config as Record<string, string | boolean>)?.placeholder as string) || "Tapez votre témoignage ici..."}
-                className="w-full h-48 p-8 rounded-[2rem] border-2 border-gray-100 bg-gray-50 mb-8 focus:ring-4 focus:ring-gray-100 focus:border-gray-200 outline-none transition-all text-gray-700 text-lg resize-none placeholder:text-gray-300"
+                className="w-full h-48 p-8 rounded-[2rem] border-2 border-gray-100 bg-gray-50 mb-8 focus:ring-4 focus:ring-gray-100 focus:border-gray-200 outline-none transition-all text-black text-lg resize-none placeholder:text-gray-400"
               />
 
               <div className="flex gap-4 w-full">
                 <button 
                   onClick={() => setCurrentStepIndex(prev => prev - 1)}
-                  className="px-6 py-5 rounded-2xl bg-gray-100 text-gray-400 hover:bg-gray-200 transition-all font-bold"
+                  className="px-6 py-5 rounded-2xl bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-700 transition-all font-bold"
                 >
                   <ArrowLeft size={22} />
                 </button>
@@ -313,14 +313,14 @@ export default function PublicFormPage() {
           {/* Attribution Step */}
           {currentStep?.type === 'attribution' && (
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 w-full flex flex-col items-center">
-              <h1 className="text-4xl font-black tracking-tighter text-gray-900 mb-6" style={{ fontFamily: headingFont }}>
+              <h1 className="text-4xl font-black tracking-tighter text-black mb-6" style={{ fontFamily: headingFont, color: '#000000' }}>
                 {currentStep.title}
               </h1>
-              <p className="text-gray-500 mb-10 text-xl leading-relaxed">{currentStep.description}</p>
+              <p className="text-gray-600 mb-10 text-xl leading-relaxed">{currentStep.description}</p>
               
               <div className="w-full space-y-4 mb-10">
                 <div className="flex flex-col gap-4">
-                  <div className="w-full h-32 rounded-[2rem] bg-gray-50 border-2 border-dashed border-gray-100 flex flex-col items-center justify-center gap-2 text-gray-300 hover:bg-gray-100 hover:border-gray-200 transition-all cursor-pointer group">
+                  <div className="w-full h-32 rounded-[2rem] bg-gray-50 border-2 border-dashed border-gray-100 flex flex-col items-center justify-center gap-2 text-gray-500 hover:bg-gray-100 hover:border-gray-200 transition-all cursor-pointer group">
                     <Plus size={32} className="group-hover:scale-110 transition-transform" />
                     <span className="text-xs font-black uppercase tracking-widest">Ajouter une photo</span>
                   </div>
@@ -331,7 +331,7 @@ export default function PublicFormPage() {
                     placeholder="Votre nom complet"
                     value={authorName}
                     onChange={(e) => setAuthorName(e.target.value)}
-                    className="w-full px-8 py-5 rounded-2xl border-2 border-gray-50 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-gray-100 focus:border-gray-100 outline-none transition-all text-lg"
+                    className="w-full px-8 py-5 rounded-2xl border-2 border-gray-50 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-gray-100 focus:border-gray-100 outline-none transition-all text-lg text-black placeholder:text-gray-400"
                   />
                 </div>
 
@@ -342,7 +342,7 @@ export default function PublicFormPage() {
                     placeholder="votre@email.com"
                     value={authorEmail}
                     onChange={(e) => setAuthorEmail(e.target.value)}
-                    className="w-full px-8 py-5 rounded-2xl border-2 border-gray-50 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-gray-100 focus:border-gray-100 outline-none transition-all text-lg"
+                    className="w-full px-8 py-5 rounded-2xl border-2 border-gray-50 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-gray-100 focus:border-gray-100 outline-none transition-all text-lg text-black placeholder:text-gray-400"
                   />
                 )}
 
@@ -353,14 +353,14 @@ export default function PublicFormPage() {
                       placeholder="Votre entreprise"
                       value={authorTitle}
                       onChange={(e) => setAuthorTitle(e.target.value)}
-                      className="w-full px-8 py-5 rounded-2xl border-2 border-gray-50 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-gray-100 focus:border-100 outline-none transition-all text-lg"
+                      className="w-full px-8 py-5 rounded-2xl border-2 border-gray-50 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-gray-100 focus:border-gray-100 outline-none transition-all text-lg text-black placeholder:text-gray-400"
                     />
                     <input
                       type="url"
                       placeholder="Site web"
                       value={authorUrl}
                       onChange={(e) => setAuthorUrl(e.target.value)}
-                      className="w-full px-8 py-5 rounded-2xl border-2 border-gray-50 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-gray-100 focus:border-100 outline-none transition-all text-lg"
+                      className="w-full px-8 py-5 rounded-2xl border-2 border-gray-50 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-gray-100 focus:border-gray-100 outline-none transition-all text-lg text-black placeholder:text-gray-400"
                     />
                   </div>
                 )}
@@ -369,7 +369,7 @@ export default function PublicFormPage() {
               <div className="flex gap-4 w-full">
                  <button 
                   onClick={() => setCurrentStepIndex(prev => prev - 1)}
-                  className="px-6 py-5 rounded-2xl bg-gray-100 text-gray-400 hover:bg-gray-200 transition-all font-bold"
+                  className="px-6 py-5 rounded-2xl bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-700 transition-all font-bold"
                 >
                   <ArrowLeft size={22} />
                 </button>
@@ -394,10 +394,10 @@ export default function PublicFormPage() {
               >
                 <CheckCircle size={64} />
               </div>
-              <h1 className="text-4xl font-black tracking-tighter text-gray-900 mb-6" style={{ fontFamily: headingFont }}>
+              <h1 className="text-4xl font-black tracking-tighter text-black mb-6" style={{ fontFamily: headingFont, color: '#000000' }}>
                 {currentStep.title}
               </h1>
-              <p className="text-gray-500 text-xl leading-relaxed max-w-md">
+              <p className="text-gray-600 text-xl leading-relaxed max-w-md">
                 {currentStep.description}
               </p>
             </div>
