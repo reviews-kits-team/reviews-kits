@@ -133,6 +133,8 @@ export const publicReviewController = {
         return c.json({ error: 'This form is currently inactive' }, 403);
       }
 
+      await container.formRepository.incrementVisits(form.id).catch(console.error);
+
       const props = form.getProps();
       return c.json({
         id: props.id,

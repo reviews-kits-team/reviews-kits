@@ -62,7 +62,8 @@ export default function FormEditorPage() {
   const [selectedElement, setSelectedElement] = useState<string | null>(null)
   const [showSharePopover, setShowSharePopover] = useState(false)
   const [copied, setCopied] = useState(false)
-  
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false)
+
   const canvasRef = useRef<HTMLDivElement>(null)
   const stepRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
   const sidebarRefs = useRef<{ [key: string]: HTMLInputElement | HTMLTextAreaElement | null }>({})
@@ -71,7 +72,7 @@ export default function FormEditorPage() {
     setActiveStepId(stepId)
     setSelectedElement(elementKey)
     scrollToStep(stepId)
-    
+
     // Focus the sidebar input
     setTimeout(() => {
       const input = sidebarRefs.current[elementKey]
@@ -144,16 +145,16 @@ export default function FormEditorPage() {
     if (!form) return
     const newSteps = [...form.config.steps]
     const targetIndex = direction === 'up' ? index - 1 : index + 1
-    
+
     if (targetIndex < 0 || targetIndex >= newSteps.length) return
-    
+
     // Swap
     const temp = newSteps[index]
     newSteps[index] = newSteps[targetIndex]
     newSteps[targetIndex] = temp
-    
+
     setForm({ ...form, config: { ...form.config, steps: newSteps } })
-    
+
     // Scroll to the moved step
     setTimeout(() => scrollToStep(temp.id), 100)
   }
@@ -162,7 +163,7 @@ export default function FormEditorPage() {
     const newSteps = [...form.config.steps]
     const stepIdx = newSteps.findIndex(s => s.id === stepId)
     if (stepIdx === -1) return
-    
+
     newSteps[stepIdx] = { ...newSteps[stepIdx], ...updates }
     setForm({ ...form, config: { ...form.config, steps: newSteps } })
   }
@@ -210,11 +211,13 @@ export default function FormEditorPage() {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          name: form.name,
           config: form.config
         })
       })
       if (res.ok) {
-        alert("Modifications enregistrées !")
+        setShowSaveSuccess(true)
+        setTimeout(() => setShowSaveSuccess(false), 3000)
       }
     } catch (error) {
       console.error("Failed to save form", error)
@@ -254,8 +257,8 @@ export default function FormEditorPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="flex items-center bg-white/5 rounded-lg p-1 border border-white/5">
+          <div className="flex items-center gap-2 md:gap-4">
+            <div className="hidden lg:flex items-center bg-white/5 rounded-lg p-1 border border-white/5">
               <button
                 onClick={() => setPreviewMode('mobile')}
                 className={`p-1.5 rounded-md transition-all ${previewMode === 'mobile' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white/60'}`}
@@ -291,16 +294,16 @@ export default function FormEditorPage() {
                       <span className="text-[10px] text-white/40 truncate flex-1">
                         {`${window.location.origin}/f/${form.publicId}`}
                       </span>
-                      <button 
+                      <button
                         onClick={handleCopyLink}
                         className={`p-1.5 rounded-lg transition-all ${copied ? 'bg-[#0D9E75] text-white' : 'hover:bg-white/10 text-white/40'}`}
                       >
                         {copied ? <Check size={12} /> : <Copy size={12} />}
                       </button>
                     </div>
-                    <a 
-                      href={`/f/${form.publicId}`} 
-                      target="_blank" 
+                    <a
+                      href={`/f/${form.publicId}`}
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="text-[10px] font-bold text-[#0D9E75] hover:underline flex items-center gap-1 mt-1"
                     >
@@ -320,11 +323,11 @@ export default function FormEditorPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8 items-start">
-          <section 
+        <div className="flex flex-col lg:grid lg:grid-cols-[1fr_340px] gap-6 lg:gap-8 items-start">
+          <section
             ref={canvasRef}
-            className="bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-3xl shadow-2xl h-[calc(100vh-140px)] overflow-y-auto p-12 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] bg-fixed custom-scrollbar snap-y snap-mandatory"
-            style={{ 
+            className="order-last lg:order-first w-full bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-2xl lg:rounded-3xl shadow-2xl h-[60vh] lg:h-[calc(100vh-140px)] overflow-y-auto p-4 md:p-8 lg:p-12 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] bg-fixed custom-scrollbar snap-y snap-mandatory"
+            style={{
               scrollBehavior: 'smooth',
               scrollbarWidth: 'none',
               msOverflowStyle: 'none'
@@ -341,7 +344,7 @@ export default function FormEditorPage() {
             {/* Fixed Minimalist Reorder Buttons (Top-Right of Canvas) */}
             <div className="sticky top-0 right-0 z-50 flex justify-end p-0 pointer-events-none">
               <div className="flex gap-1 bg-[#0A0A0A]/60 backdrop-blur-md p-1 rounded-bl-xl border-l border-b border-white/10 pointer-events-auto shadow-2xl overflow-hidden">
-                <button 
+                <button
                   disabled={form.config.steps.findIndex(s => s.id === activeStepId) <= 0}
                   onClick={() => moveStep(form.config.steps.findIndex(s => s.id === activeStepId), 'up')}
                   className="p-2 text-[#0D9E75] hover:bg-[#0D9E75]/10 rounded-lg transition-all disabled:opacity-20"
@@ -349,7 +352,7 @@ export default function FormEditorPage() {
                 >
                   <ChevronUp size={16} strokeWidth={3} />
                 </button>
-                <button 
+                <button
                   disabled={form.config.steps.findIndex(s => s.id === activeStepId) >= form.config.steps.length - 1}
                   onClick={() => moveStep(form.config.steps.findIndex(s => s.id === activeStepId), 'down')}
                   className="p-2 text-[#0D9E75] hover:bg-[#0D9E75]/10 rounded-lg transition-all disabled:opacity-20"
@@ -362,19 +365,19 @@ export default function FormEditorPage() {
 
             <div className="flex flex-col items-center">
               {form.config.steps.map((step, index) => (
-                <div 
-                  key={step.id} 
+                <div
+                  key={step.id}
                   ref={el => { stepRefs.current[step.id] = el }}
                   data-step-id={step.id}
-                  className="flex flex-col items-center w-full min-h-[1100px] snap-center justify-center py-20 relative"
+                  className="flex flex-col items-center w-full min-h-[500px] md:min-h-[1100px] snap-center justify-center py-10 md:py-20 relative"
                 >
                   {/* Step Card Container */}
-                  <div 
+                  <div
                     onClick={() => scrollToStep(step.id)}
                     className={`
-                      transition-all duration-500 shadow-2xl relative bg-white overflow-hidden rounded-3xl cursor-pointer
-                      ${previewMode === 'mobile' ? 'w-[375px] h-[1067px]' : 'w-full max-w-[800px] h-[920px]'}
-                      ${activeStepId === step.id ? 'ring-4 ring-[#0D9E75] ring-offset-4 ring-offset-[#0A0A0A]' : 'opacity-40 hover:opacity-100 hover:ring-2 hover:ring-white/20 scale-95'}
+                      transition-all duration-500 shadow-2xl relative bg-white overflow-hidden rounded-2xl md:rounded-3xl cursor-pointer
+                      ${previewMode === 'mobile' ? 'w-full max-w-[375px] h-[75vh] md:h-[812px]' : 'w-full max-w-[800px] h-[75vh] md:h-[920px]'}
+                      ${activeStepId === step.id ? 'ring-4 ring-[#0D9E75] ring-offset-4 ring-offset-[#0A0A0A]' : 'opacity-40 hover:opacity-100 hover:ring-2 hover:ring-white/20 scale-95 lg:scale-95'}
                       ${!step.isEnabled ? 'grayscale-[1]' : ''}
                     `}
                   >
@@ -396,8 +399,8 @@ export default function FormEditorPage() {
                       const getFontUrl = (font: string) => `https://fonts.googleapis.com/css2?family=${font.replace(/ /g, '+')}:wght@400;700;900&display=swap`;
 
                       return (
-                        <div 
-                          className="h-full w-full flex flex-col items-center justify-center p-8 text-[#1a1a1a] gap-y-6 relative"
+                        <div
+                          className="h-full w-full flex flex-col items-center justify-center p-4 md:p-8 text-[#1a1a1a] gap-y-4 md:gap-y-6 relative overflow-y-auto"
                           style={{ fontFamily: bodyFont }}
                         >
                           {/* Dynamic Font Loading */}
@@ -410,33 +413,34 @@ export default function FormEditorPage() {
 
                           {branding.logoUrl && (
                             <div className="mb-4 flex justify-center w-full">
-                              <img 
-                                src={branding.logoUrl} 
-                                alt="Logo" 
-                                className="max-h-16 w-auto object-contain" 
+                              <img
+                                src={branding.logoUrl}
+                                alt="Logo"
+                                className="max-h-16 w-auto object-contain"
                               />
                             </div>
                           )}
                           {(step.type === 'welcome' || step.type === 'informative') && (
                             <div className="flex flex-col items-center gap-y-6 text-center w-full">
-                              <h2 
+                              <h2
                                 onClick={() => handleElementClick('title', step.id)}
-                                style={{ 
-                                  borderColor: selectedElement === 'title' && activeStepId === step.id ? primaryColor : 'transparent',
-                                  fontFamily: headingFont
+                                style={{
+                                  borderColor: selectedElement === 'title' && activeStepId === step.id ? '#000000' : 'transparent',
+                                  fontFamily: headingFont,
+                                  color: '#000000'
                                 }}
-                                className={`text-4xl font-black tracking-tighter text-balance cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                                className={`text-black text-2xl md:text-4xl font-black tracking-tighter cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
                               >
                                 {step.title}
                               </h2>
-                              <p 
+                              <p
                                 onClick={() => handleElementClick('description', step.id)}
-                                style={{ borderColor: selectedElement === 'description' && activeStepId === step.id ? primaryColor : 'transparent' }}
-                                className={`text-gray-500 cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'description' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                                style={{ borderColor: selectedElement === 'description' && activeStepId === step.id ? '#000000' : 'transparent' }}
+                                className={`text-gray-600 cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'description' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
                               >
                                 {step.description}
                               </p>
-                              <button 
+                              <button
                                 onClick={() => handleElementClick('buttonText', step.id)}
                                 style={{ backgroundColor: primaryColor, fontFamily: bodyFont }}
                                 className={`text-white w-full py-4 rounded-xl text-xs font-bold shadow-xl transition-all border-2 ${selectedElement === 'buttonText' && activeStepId === step.id ? 'border-dashed border-white ring-4 ring-black/10' : 'border-transparent'}`}
@@ -448,20 +452,21 @@ export default function FormEditorPage() {
 
                           {step.type === 'rating' && (
                             <div className="flex flex-col items-center gap-y-6 text-center w-full">
-                              <h2 
+                              <h2
                                 onClick={() => handleElementClick('title', step.id)}
-                                style={{ 
-                                  borderColor: selectedElement === 'title' && activeStepId === step.id ? primaryColor : 'transparent',
-                                  fontFamily: headingFont
+                                style={{
+                                  borderColor: selectedElement === 'title' && activeStepId === step.id ? '#000000' : 'transparent',
+                                  fontFamily: headingFont,
+                                  color: '#000000'
                                 }}
-                                className={`text-4xl font-black tracking-tighter text-balance cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                                className={`text-black text-2xl md:text-4xl font-black tracking-tighter text-balance cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
                               >
                                 {step.title}
                               </h2>
-                              <p 
+                              <p
                                 onClick={() => handleElementClick('description', step.id)}
-                                style={{ borderColor: selectedElement === 'description' && activeStepId === step.id ? primaryColor : 'transparent' }}
-                                className={`text-gray-500 cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'description' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                                style={{ borderColor: selectedElement === 'description' && activeStepId === step.id ? '#000000' : 'transparent' }}
+                                className={`text-gray-600 cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'description' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
                               >
                                 {step.description}
                               </p>
@@ -475,12 +480,12 @@ export default function FormEditorPage() {
                                 ) : (
                                   [1, 2, 3, 4, 5].map(i => (
                                     <div key={i} className="p-2">
-                                      <Star size={previewMode === 'mobile' ? 30 : 40} className="text-gray-200 fill-gray-100" />
+                                      <Star size={previewMode === 'mobile' ? 30 : 40} className="text-gray-300 fill-gray-200" />
                                     </div>
                                   ))
                                 )}
                               </div>
-                              <button 
+                              <button
                                 onClick={() => handleElementClick('buttonText', step.id)}
                                 style={{ backgroundColor: primaryColor, fontFamily: bodyFont }}
                                 className={`text-white w-full py-4 rounded-xl text-xs font-bold shadow-xl transition-all border-2 ${selectedElement === 'buttonText' && activeStepId === step.id ? 'border-dashed border-white ring-4 ring-black/10' : 'border-transparent'}`}
@@ -492,28 +497,28 @@ export default function FormEditorPage() {
 
                           {step.type === 'textarea' && (
                             <div className="w-full max-w-md flex flex-col items-center gap-y-6 text-center">
-                              <h2 
+                              <h2
                                 onClick={() => handleElementClick('title', step.id)}
-                                style={{ borderColor: selectedElement === 'title' && activeStepId === step.id ? primaryColor : 'transparent', fontFamily: headingFont }}
-                                className={`text-3xl font-black tracking-tighter cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                                style={{ borderColor: selectedElement === 'title' && activeStepId === step.id ? '#000000' : 'transparent', fontFamily: headingFont, color: '#000000' }}
+                                className={`text-2xl md:text-3xl font-black tracking-tighter cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
                               >
                                 {step.title}
                               </h2>
-                              <p 
+                              <p
                                 onClick={() => handleElementClick('description', step.id)}
-                                style={{ borderColor: selectedElement === 'description' && activeStepId === step.id ? primaryColor : 'transparent' }}
-                                className={`text-gray-500 cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'description' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                                style={{ borderColor: selectedElement === 'description' && activeStepId === step.id ? '#000000' : 'transparent' }}
+                                className={`text-gray-600 cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'description' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
                               >
                                 {step.description}
                               </p>
                               <textarea
                                 disabled
                                 onClick={() => handleElementClick('placeholder', step.id)}
-                                className={`w-full h-48 p-6 rounded-2xl border-2 bg-gray-50 outline-none transition-all placeholder:text-gray-300 italic cursor-pointer ${selectedElement === 'placeholder' && activeStepId === step.id ? 'border-dashed border-gray-100' : 'border-gray-100 hover:border-black/5'}`}
-                                style={{ borderColor: selectedElement === 'placeholder' && activeStepId === step.id ? primaryColor : undefined }}
+                                className={`w-full h-48 p-6 rounded-2xl border-2 bg-gray-50 outline-none transition-all placeholder:text-gray-400 italic cursor-pointer ${selectedElement === 'placeholder' && activeStepId === step.id ? 'border-dashed border-gray-100' : 'border-gray-100 hover:border-black/5'}`}
+                                style={{ borderColor: selectedElement === 'placeholder' && activeStepId === step.id ? '#000000' : undefined }}
                                 placeholder={((step.config as Record<string, string | boolean>)?.placeholder as string) || "Tapez votre témoignage ici..."}
                               />
-                              <button 
+                              <button
                                 onClick={() => handleElementClick('buttonText', step.id)}
                                 style={{ backgroundColor: primaryColor, fontFamily: bodyFont }}
                                 className={`text-white w-full py-4 rounded-xl text-xs font-bold shadow-xl transition-all border-2 ${selectedElement === 'buttonText' && activeStepId === step.id ? 'border-dashed border-white ring-4 ring-black/10' : 'border-transparent'}`}
@@ -525,38 +530,38 @@ export default function FormEditorPage() {
 
                           {step.type === 'attribution' && (
                             <div className="w-full max-w-md flex flex-col items-center gap-y-6 text-center">
-                              <h2 
+                              <h2
                                 onClick={() => handleElementClick('title', step.id)}
-                                style={{ borderColor: selectedElement === 'title' && activeStepId === step.id ? primaryColor : 'transparent', fontFamily: headingFont }}
-                                className={`text-3xl font-black tracking-tighter cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                                style={{ borderColor: selectedElement === 'title' && activeStepId === step.id ? '#000000' : 'transparent', fontFamily: headingFont, color: '#000000' }}
+                                className={`text-2xl md:text-3xl font-black tracking-tighter cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
                               >
                                 {step.title}
                               </h2>
-                              <p 
+                              <p
                                 onClick={() => handleElementClick('description', step.id)}
-                                style={{ borderColor: selectedElement === 'description' && activeStepId === step.id ? primaryColor : 'transparent' }}
-                                className={`text-gray-500 cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'description' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                                style={{ borderColor: selectedElement === 'description' && activeStepId === step.id ? '#000000' : 'transparent' }}
+                                className={`text-gray-600 cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'description' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
                               >
                                 {step.description}
                               </p>
                               <div className="w-full space-y-4">
                                 <div className="flex flex-col gap-4">
-                                  <div className="w-full h-32 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-300 border-2 border-dashed border-gray-100 mb-2">
+                                  <div className="w-full h-32 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-500 border-2 border-dashed border-gray-100 mb-2">
                                     <Plus size={24} />
                                     <span className="ml-2 text-[10px] font-bold uppercase tracking-wider">Ajouter une photo</span>
                                   </div>
-                                  <div className="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 flex items-center text-gray-400 text-xs text-left italic">
+                                  <div className="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 flex items-center text-gray-600 text-xs text-left italic">
                                     {(step.config as Record<string, string | boolean>)?.collectName !== false ? 'Votre nom' : 'Anonyme'}
                                   </div>
                                 </div>
                                 {(step.config as Record<string, string | boolean>)?.collectEmail !== false && (
-                                  <div className="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 text-gray-400 text-xs text-left italic">votre@email.com</div>
+                                  <div className="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 text-gray-600 text-xs text-left italic">votre@email.com</div>
                                 )}
                                 {(step.config as Record<string, string | boolean>)?.collectCompany && (
-                                  <div className="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 text-gray-400 text-xs text-left italic">Votre entreprise / site web</div>
+                                  <div className="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 text-gray-600 text-xs text-left italic">Votre entreprise / site web</div>
                                 )}
                               </div>
-                              <button 
+                              <button
                                 onClick={() => handleElementClick('buttonText', step.id)}
                                 style={{ backgroundColor: primaryColor, fontFamily: bodyFont }}
                                 className={`text-white w-full py-4 rounded-xl text-xs font-bold shadow-xl transition-all border-2 ${selectedElement === 'buttonText' && activeStepId === step.id ? 'border-dashed border-white ring-4 ring-black/10' : 'border-transparent'}`}
@@ -568,23 +573,23 @@ export default function FormEditorPage() {
 
                           {step.type === 'success' && (
                             <div className="flex flex-col items-center gap-y-6 text-center w-full">
-                              <div 
+                              <div
                                 className="w-32 h-32 rounded-full flex items-center justify-center mx-auto transition-transform hover:scale-110 duration-500 shadow-lg"
                                 style={{ backgroundColor: `${primaryColor}1a`, color: primaryColor }}
                               >
                                 <CheckCircle size={40} />
                               </div>
-                              <h2 
+                              <h2
                                 onClick={() => handleElementClick('title', step.id)}
-                                style={{ borderColor: selectedElement === 'title' && activeStepId === step.id ? primaryColor : 'transparent', fontFamily: headingFont }}
-                                className={`text-3xl font-black tracking-tighter cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                                style={{ borderColor: selectedElement === 'title' && activeStepId === step.id ? '#000000' : 'transparent', fontFamily: headingFont, color: '#000000' }}
+                                className={`text-2xl md:text-3xl font-black tracking-tighter cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
                               >
                                 {step.title}
                               </h2>
-                              <p 
+                              <p
                                 onClick={() => handleElementClick('description', step.id)}
-                                style={{ borderColor: selectedElement === 'description' && activeStepId === step.id ? primaryColor : 'transparent' }}
-                                className={`text-gray-500 cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'description' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                                style={{ borderColor: selectedElement === 'description' && activeStepId === step.id ? '#000000' : 'transparent' }}
+                                className={`text-gray-600 cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'description' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
                               >
                                 {step.description}
                               </p>
@@ -606,7 +611,7 @@ export default function FormEditorPage() {
 
               {/* Add Step Button */}
               <div className="h-[400px] flex items-center justify-center snap-center w-full">
-                <button 
+                <button
                   className="flex flex-col items-center gap-4 group"
                   onClick={() => {
                     const newId = `step_${Date.now()}`
@@ -632,8 +637,8 @@ export default function FormEditorPage() {
           </section>
 
           {/* Right Sidebar: Settings */}
-          <aside className="bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-3xl flex flex-col overflow-hidden sticky top-8 h-[calc(100vh-140px)]">
-            <div className="flex border-b border-white/5 p-1 bg-white/5">
+          <aside className="order-first lg:order-last w-full lg:w-auto bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-2xl lg:rounded-3xl flex flex-col overflow-hidden lg:sticky top-8 h-[45vh] lg:h-[calc(100vh-140px)] z-40 shadow-2xl">
+            <div className="flex border-b border-white/5 p-1 bg-white/5 shrink-0">
               <button
                 onClick={() => setActiveTab('pages')}
                 className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'pages' ? 'bg-[#0D9E75] text-white shadow-lg shadow-[#0D9E75]/20' : 'text-white/40 hover:text-white/60'}`}
@@ -692,18 +697,18 @@ export default function FormEditorPage() {
 
                       <div className="pt-6 border-t border-white/5 space-y-6">
                         <span className="text-[10px] font-black uppercase tracking-widest text-[#0D9E75] block mb-4">Paramètres spécifiques</span>
-                        
+
                         {activeStep.type === 'rating' && (
                           <div className="pt-6 border-t border-white/5 mt-6">
                             <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block">Style de notation</label>
                             <div className="flex gap-2 bg-[var(--v3-bg)] p-1 rounded-xl border border-[var(--v3-border)]">
-                              <button 
+                              <button
                                 onClick={() => updateStep(activeStep.id, { config: { ...activeStep.config, ratingType: 'stars' } })}
                                 className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${((activeStep.config as Record<string, string | boolean>)?.ratingType || 'stars') === 'stars' ? 'bg-[var(--v3-teal)] text-white shadow-lg' : 'text-[var(--v3-muted2)] hover:text-white hover:bg-white/5'}`}
                               >
                                 Étoiles
                               </button>
-                              <button 
+                              <button
                                 onClick={() => updateStep(activeStep.id, { config: { ...activeStep.config, ratingType: 'emojis' } })}
                                 className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${((activeStep.config as Record<string, string | boolean>)?.ratingType) === 'emojis' ? 'bg-[var(--v3-teal)] text-white shadow-lg' : 'text-[var(--v3-muted2)] hover:text-white hover:bg-white/5'}`}
                               >
@@ -712,7 +717,7 @@ export default function FormEditorPage() {
                             </div>
                           </div>
                         )}
-                        
+
                         {(activeStep.type === 'welcome' || activeStep.type === 'success' || activeStep.type === 'informative' || activeStep.type === 'rating' || activeStep.type === 'textarea' || activeStep.type === 'attribution') && (
                           <div className="pt-6 border-t border-white/5 mt-6">
                             <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block">Texte du bouton</label>
@@ -803,12 +808,12 @@ export default function FormEditorPage() {
                     <div className="flex items-center gap-3">
                       <ColorPicker
                         value={form.config.branding.primaryColor || '#0D9E75'}
-                        onChange={(color) => setForm({ 
-                          ...form, 
-                          config: { 
-                            ...form.config, 
-                            branding: { ...form.config.branding, primaryColor: color } 
-                          } 
+                        onChange={(color) => setForm({
+                          ...form,
+                          config: {
+                            ...form.config,
+                            branding: { ...form.config.branding, primaryColor: color }
+                          }
                         })}
                         brandColors={form.config.branding.brandColors}
                         onAddBrandColor={(color) => {
@@ -818,9 +823,9 @@ export default function FormEditorPage() {
                               ...form,
                               config: {
                                 ...form.config,
-                                branding: { 
-                                  ...form.config.branding, 
-                                  brandColors: [...currentBrandColors, color] 
+                                branding: {
+                                  ...form.config.branding,
+                                  brandColors: [...currentBrandColors, color]
                                 }
                               }
                             });
@@ -839,7 +844,7 @@ export default function FormEditorPage() {
                           <div className="w-full h-32 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden p-6">
                             <img src={form.config.branding.logoUrl} alt="Logo" className="max-w-full max-h-full object-contain" />
                           </div>
-                          <button 
+                          <button
                             onClick={removeLogo}
                             className="absolute top-2 right-2 w-8 h-8 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500 hover:text-white"
                           >
@@ -855,11 +860,11 @@ export default function FormEditorPage() {
                             <span className="text-xs font-bold block">Charger le logo</span>
                             <span className="text-[10px] text-white/20">PNG, JPG jusqu'à 2Mo</span>
                           </div>
-                          <input 
-                            type="file" 
-                            className="hidden" 
+                          <input
+                            type="file"
+                            className="hidden"
                             accept="image/*"
-                            onChange={handleLogoUpload} 
+                            onChange={handleLogoUpload}
                           />
                         </label>
                       )}
@@ -913,6 +918,14 @@ export default function FormEditorPage() {
           </aside>
         </div>
       </main>
+
+      {/* Toast Notification */}
+      {showSaveSuccess && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-[#0D9E75] text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-bottom-8 duration-300 z-[9999]">
+          <CheckCircle size={20} className="text-white" />
+          <span className="font-bold text-sm">Modifications enregistrées !</span>
+        </div>
+      )}
     </div>
   )
 }

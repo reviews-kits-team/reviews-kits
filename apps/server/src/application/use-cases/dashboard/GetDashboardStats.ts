@@ -4,7 +4,9 @@ export interface DashboardStats {
   totalReviews: number;
   averageRating: number;
   uniqueRespondents: number;
-  completionRate: number; // Placeholder for now
+  completionRate: number;
+  reviewsGrowth?: number;
+  completionGrowth?: number;
 }
 
 export class GetDashboardStats {
@@ -17,7 +19,9 @@ export class GetDashboardStats {
       totalReviews: stats.totalReviews,
       averageRating: Number(stats.averageRating.toFixed(1)),
       uniqueRespondents: stats.uniqueRespondents,
-      completionRate: 0, // Still 0 until we have a way to track views
+      completionRate: stats.completionRate || 0,
+      reviewsGrowth: stats.reviewsGrowth,
+      completionGrowth: stats.completionGrowth,
     };
   }
 }

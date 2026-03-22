@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, boolean, jsonb, integer, index, unique } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, boolean, jsonb, integer, index, unique, date } from 'drizzle-orm/pg-core';
 
 // ═══════════════════════════════════════
 // USERS & AUTH (Better-auth)
@@ -94,6 +94,19 @@ export const forms = pgTable('forms', {
 // ═══════════════════════════════════════
 // TESTIMONIALS & MEDIA
 // ═══════════════════════════════════════
+
+export const formVisits = pgTable('form_visits', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  formId: uuid('form_id').notNull().references(() => forms.id, { onDelete: 'cascade' }),
+  date: date('date').notNull(),
+  visits: integer('visits').notNull().default(0),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+}, (t) => ({
+  formDateUnq: unique('unq_form_visits_date').on(t.formId, t.date),
+  formIdx: index('idx_form_visits_form').on(t.formId),
+  dateIdx: index('idx_form_visits_date').on(t.date),
+}));
 
 export const media = pgTable('media', {
   id: uuid('id').primaryKey().defaultRandom(),
