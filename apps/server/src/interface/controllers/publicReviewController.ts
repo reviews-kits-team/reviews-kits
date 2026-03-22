@@ -118,7 +118,13 @@ export const publicReviewController = {
     }
 
     try {
-      const form = await container.formRepository.findBySlug(slug);
+      let form = await container.formRepository.findBySlug(slug);
+      
+      // Fallback to publicId if slug doesn't match
+      if (!form) {
+        form = await container.formRepository.findByPublicId(slug);
+      }
+
       if (!form) {
         return c.json({ error: 'Form not found' }, 404);
       }

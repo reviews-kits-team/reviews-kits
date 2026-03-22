@@ -170,10 +170,13 @@ const getFormBySlugRoute = createRoute({
   },
 });
 
-// Apply Public API Key check to reviews path
-publicRouter.use('/reviews', pkCheck);
-
 // Register routes
-publicRouter.openapi(getReviewsRoute, (c) => publicReviewController.getReviews(c));
+publicRouter.openapi(getReviewsRoute, async (c) => {
+  // Manual check for PK on the GET reviews route since we moved away from global middleware
+  const response = await pkCheck(c, async () => {
+    return publicReviewController.getReviews(c);
+  });
+  return response;
+});
 publicRouter.openapi(submitReviewRoute, (c) => publicReviewController.submitReview(c));
 publicRouter.openapi(getFormBySlugRoute, (c) => publicReviewController.getFormBySlug(c));
