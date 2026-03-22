@@ -109,6 +109,32 @@ export const formController = {
     return c.json({ success: true });
   },
 
+  updateForm: async (c: Context) => {
+    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const formId = c.req.param('id');
+    const body = await c.req.json();
+    const { name, description, config, isActive } = body;
+
+    if (!userId || !formId) {
+      return c.json({ error: 'Unauthorized or missing ID' }, 401);
+    }
+
+    const form = await container.formRepository.findById(formId);
+    if (!form || form.userId !== userId) {
+      return c.json({ error: 'Form not found' }, 404);
+    }
+
+    if (name) form.updateName(name);
+    if (description !== undefined) (form as any).description = description; // Using as any if property is private but needed
+    if (config) form.updateConfig(config);
+    if (isActive !== undefined) (form as any).isActive = isActive;
+
+    await container.formRepository.update(form);
+    
+    const props = form.getProps();
+    return c.json({ ...props, slug: props.slug.getValue() });
+  },
+
   toggleFormStatus: async (c: Context) => {
     const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
     const formId = c.req.param('id');

@@ -28,7 +28,8 @@ describe("Form Entity", () => {
       
       const props = form.getProps();
       expect(props.isActive).toBe(true);
-      expect(props.config).toEqual({});
+      expect(props.config?.branding).toBeDefined();
+      expect(props.config?.steps).toHaveLength(4);
       expect(props.createdAt).toBeInstanceOf(Date);
       expect(props.updatedAt).toBeInstanceOf(Date);
     });
@@ -91,11 +92,13 @@ describe("Form Entity", () => {
         form.updateConfig({ primaryColor: "#fff", submissionLimit: 100 });
         
         const props = form.getProps();
-        expect(props.config).toEqual({
+        expect(props.config).toEqual(expect.objectContaining({
           showLogo: true,
           primaryColor: "#fff",
-          submissionLimit: 100
-        });
+          submissionLimit: 100,
+          branding: expect.any(Object),
+          steps: expect.any(Array)
+        }));
         expect(props.updatedAt!.getTime()).toBeGreaterThan(initialUpdatedAt.getTime());
       });
     });

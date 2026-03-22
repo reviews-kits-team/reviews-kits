@@ -120,9 +120,42 @@ const submitReviewRoute = createRoute({
   },
 });
 
+const getFormBySlugRoute = createRoute({
+  method: 'get',
+  path: '/forms/{slug}',
+  summary: 'Get form details by slug',
+  description: 'Retrieve public form configuration for rendering the collection form.',
+  tags: ['Public'],
+  request: {
+    params: z.object({
+      slug: z.string().openapi({ example: 'mon-formulaire' }),
+    }),
+  },
+  responses: {
+    200: {
+      description: 'Form details',
+      content: {
+        'application/json': {
+          schema: z.object({
+            id: z.string(),
+            publicId: z.string(),
+            name: z.string(),
+            description: z.string().optional(),
+            config: z.any(),
+          }),
+        },
+      },
+    },
+    404: {
+      description: 'Form not found',
+    },
+  },
+});
+
 // Apply Public API Key check to reviews path
 publicRouter.use('/reviews', pkCheck);
 
 // Register routes
 publicRouter.openapi(getReviewsRoute, (c) => publicReviewController.getReviews(c));
 publicRouter.openapi(submitReviewRoute, (c) => publicReviewController.submitReview(c));
+publicRouter.openapi(getFormBySlugRoute, (c) => publicReviewController.getFormBySlug(c));

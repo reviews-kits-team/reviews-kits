@@ -9,7 +9,7 @@ export const publicReviewController = {
   /**
    * Fetch approved reviews for a user based on public API key context
    */
-  getReviews: async (c: Context) => {
+  getReviews: async (c: any) => {
     // Defensive check to avoid TypeError: c.get is not a function
     if (!c || typeof c.get !== 'function') {
       console.error('[API Error] Context c is invalid in getReviews:', typeof c, Object.keys(c || {}));
@@ -105,6 +105,39 @@ export const publicReviewController = {
     } catch (error: any) {
       console.error('Failed to submit public review:', error);
       return c.json({ error: error.message || 'Internal server error' }, 500);
+    }
+  },
+
+  /**
+   * Get public form configuration by slug
+   */
+  getFormBySlug: async (c: any) => {
+    const slug = (c.req as any).param('slug');
+    if (!slug) {
+      return c.json({ error: 'Missing slug' }, 400);
+    }
+
+    try {
+      const form = await container.formRepository.findBySlug(slug);
+      if (!form) {
+        return c.json({ error: 'Form not found' }, 404);
+      }
+
+      if (!form.getIsActive()) {
+        return c.json({ error: 'This form is currently inactive' }, 403);
+      }
+
+      const props = form.getProps();
+      return c.json({
+        id: props.id,
+        publicId: props.publicId,
+        name: props.name,
+        description: props.description,
+        config: props.config,
+      });
+    } catch (error) {
+      console.error('Failed to get form by slug:', error);
+      return c.json({ error: 'Internal server error' }, 500);
     }
   }
 };

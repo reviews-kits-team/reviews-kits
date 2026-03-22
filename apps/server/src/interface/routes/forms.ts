@@ -7,6 +7,17 @@ export const formsRouter = new OpenAPIHono();
 // Apply Authentication protection (Session based for Admin UI)
 formsRouter.use('*', isAuthenticated);
 
+const getFormRoute = createRoute({
+  method: 'get',
+  path: '/{id}',
+  summary: 'Get form details',
+  tags: ['Forms'],
+  responses: {
+    200: { description: 'Form details' },
+    404: { description: 'Form not found' }
+  }
+});
+
 const listFormsRoute = createRoute({
   method: 'get',
   path: '/',
@@ -137,8 +148,39 @@ const batchDeleteFormsRoute = createRoute({
   },
 });
 
+const updateFormRoute = createRoute({
+  method: 'patch',
+  path: '/{id}',
+  summary: 'Update form configuration',
+  tags: ['Forms'],
+  request: {
+    params: z.object({
+      id: z.string()
+    }),
+    body: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            name: z.string().optional(),
+            description: z.string().optional(),
+            config: z.any().optional(),
+            isActive: z.boolean().optional()
+          })
+        }
+      }
+    }
+  },
+  responses: {
+    200: { description: 'Form updated' },
+    401: { description: 'Unauthorized' },
+    404: { description: 'Form not found' }
+  }
+});
+
 formsRouter.openapi(listFormsRoute, formController.listForms);
+formsRouter.openapi(getFormRoute, formController.getFormDetails);
 formsRouter.openapi(createFormRoute, formController.createForm);
+formsRouter.openapi(updateFormRoute, formController.updateForm as any);
 formsRouter.openapi(batchToggleFormStatusRoute, formController.batchToggleStatus);
 formsRouter.openapi(batchDeleteFormsRoute, formController.batchDeleteForms);
 formsRouter.openapi(getFormStatsRoute, formController.getFormStats);
