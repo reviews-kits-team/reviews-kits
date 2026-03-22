@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { 
   ChevronLeft as ChevronLeftIcon,
   Share2, 
@@ -13,6 +14,7 @@ import {
   Trash2,
   ChevronRight,
   Copy,
+  Plus,
   ArrowUp,
   ArrowDown,
   GripVertical
@@ -59,7 +61,6 @@ interface Testimonial {
 interface DetailViewProps {
   form: DashboardForm
   onBack: () => void
-  onShare: (id: string | null) => void
 }
 
 const SortIcon = ({ field, sortConfig }: { field: string; sortConfig: { field: string | null; order: 'asc' | 'desc' } }) => {
@@ -140,8 +141,8 @@ const SortableTestimonialRow = ({
         </div>
       </td>
       <td className="px-6 py-4 max-w-sm">
-        <p className="text-[13px] text-[var(--v3-muted2)] leading-relaxed line-clamp-2 italic group-hover:text-[var(--v3-text)] transition-colors">
-          "{testimonial.content}"
+        <p className="text-[13px] text-[var(--v3-muted2)] leading-relaxed italic group-hover:text-[var(--v3-text)] transition-colors">
+          "{testimonial.content.length > 70 ? testimonial.content.substring(0, 70) + '...' : testimonial.content}"
         </p>
       </td>
       <td className="px-6 py-4 text-center">
@@ -185,7 +186,8 @@ const SortableTestimonialRow = ({
   )
 }
 
-export const DetailView = ({ form, onBack, onShare }: DetailViewProps) => {
+export const DetailView = ({ form, onBack }: DetailViewProps) => {
+  const navigate = useNavigate()
   const [stats, setStats] = useState<FormStats | null>(null)
   const [testimonials, setTestimonials] = useState<Testimonial[]>([])
   const [loading, setLoading] = useState(true)
@@ -193,6 +195,8 @@ export const DetailView = ({ form, onBack, onShare }: DetailViewProps) => {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [sortConfig, setSortConfig] = useState<{ field: string | null; order: 'asc' | 'desc' }>({ field: null, order: 'desc' })
   const [copyingId, setCopyingId] = useState(false)
+  const [showSharePopover, setShowSharePopover] = useState(false)
+  const [copiedLink, setCopiedLink] = useState(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -345,6 +349,13 @@ export const DetailView = ({ form, onBack, onShare }: DetailViewProps) => {
     setTimeout(() => setCopyingId(false), 2000)
   }
 
+  const handleCopyLink = () => {
+    const url = `${window.location.origin}/f/${form.publicId}`
+    navigator.clipboard.writeText(url)
+    setCopiedLink(true)
+    setTimeout(() => setCopiedLink(false), 2000)
+  }
+
   const totReviews = stats?.totalReviews || 0
   const avgRating = stats?.averageRating || 0
   
@@ -425,20 +436,55 @@ export const DetailView = ({ form, onBack, onShare }: DetailViewProps) => {
               </div>
 
               <button 
+                onClick={() => navigate(`/forms/${form.id}/edit`)}
                 className="flex items-center gap-2 bg-white/5 border border-white/10 text-[var(--v3-text)] px-4 py-2 rounded-xl text-xs font-bold hover:bg-white/10 hover:border-white/20 transition-all group"
               >
                 <Pencil size={13} className="text-[var(--v3-muted2)] group-hover:text-[var(--v3-teal)] transition-colors" />
                 Modifier
               </button>
 
-              <button 
-                onClick={() => onShare(form.id)}
-                className="flex items-center gap-2 bg-[var(--v3-teal)] text-white px-4 py-2 rounded-xl text-xs font-bold hover:-translate-y-0.5 hover:shadow-[0_8px_24px_var(--v3-teal-glow)] transition-all overflow-hidden relative group"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-                <Share2 size={13} />
-                Partager
-              </button>
+              <div className="relative">
+                <button 
+                  onClick={() => setShowSharePopover(!showSharePopover)}
+                  className="flex items-center gap-2 bg-[var(--v3-teal)] text-white px-4 py-2 rounded-xl text-xs font-bold hover:-translate-y-0.5 hover:shadow-[0_8px_24px_var(--v3-teal-glow)] transition-all overflow-hidden relative group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                  <Share2 size={13} />
+                  Partager
+                </button>
+
+                {showSharePopover && (
+                  <div className="absolute top-full right-0 mt-2 w-72 bg-[#0A0A0A] border border-white/10 rounded-2xl shadow-2xl p-4 z-[400] animate-in fade-in zoom-in-95 duration-200">
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Lien Public</span>
+                        <button onClick={() => setShowSharePopover(false)} className="text-white/20 hover:text-white">
+                          <Plus size={14} className="rotate-45" />
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-2 bg-white/5 border border-white/5 rounded-xl px-3 py-2 overflow-hidden">
+                        <span className="text-[10px] text-white/40 truncate flex-1">
+                          {`${window.location.origin}/f/${form.publicId}`}
+                        </span>
+                        <button 
+                          onClick={handleCopyLink}
+                          className={`p-1.5 rounded-lg transition-all ${copiedLink ? 'bg-[var(--v3-teal)] text-white' : 'hover:bg-white/10 text-white/40'}`}
+                        >
+                          {copiedLink ? <Check size={12} /> : <Copy size={12} />}
+                        </button>
+                      </div>
+                      <a 
+                        href={`/f/${form.publicId}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-[10px] font-bold text-[var(--v3-teal)] hover:underline flex items-center gap-1 mt-1"
+                      >
+                        Ouvrir le lien <ChevronRight size={10} />
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               <div className="h-4 w-px bg-white/10 mx-1" />
 

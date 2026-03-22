@@ -1,4 +1,4 @@
-import type { Context, Next } from 'hono';
+import type { Context } from 'hono';
 import { container } from '@/infrastructure/container';
 import { ApiKeyGenerator } from '@/shared/utils/ApiKeyGenerator';
 
@@ -6,7 +6,7 @@ import { ApiKeyGenerator } from '@/shared/utils/ApiKeyGenerator';
  * Middleware to check for a valid Public API Key (pk_...)
  * Can be provided via 'x-api-key' header or 'token' query parameter.
  */
-export const pkCheck = async (c: Context, next: Next) => {
+export const pkCheck = async (c: Context, next: () => Promise<any>) => {
   const apiKey = c.req.header('x-api-key') || c.req.query('token');
 
   if (!apiKey || !ApiKeyGenerator.isPublicKey(apiKey)) {
@@ -27,7 +27,7 @@ export const pkCheck = async (c: Context, next: Next) => {
     keyRecord.updateLastUsed();
     container.apiKeyRepository.update(keyRecord).catch(console.error);
 
-    await next();
+    return await next();
   } catch (error) {
     console.error('Public API Key check failed:', error);
     return c.json({ error: 'Internal server error' }, 500);
