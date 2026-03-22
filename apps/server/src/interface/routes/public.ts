@@ -8,8 +8,7 @@ export const publicRouter = new OpenAPIHono();
 // Enable CORS for all origins on the public API
 publicRouter.use('*', cors());
 
-// Authentication check for public keys
-publicRouter.use('/reviews', pkCheck);
+// Authentication is handled specifically per route
 
 const getReviewsRoute = createRoute({
   method: 'get',
@@ -85,5 +84,45 @@ const getReviewsRoute = createRoute({
   },
 });
 
-// Endpoint to fetch approved reviews
-publicRouter.openapi(getReviewsRoute, publicReviewController.getReviews as any);
+const submitReviewRoute = createRoute({
+  method: 'post',
+  path: '/reviews',
+  summary: 'Submit a new review',
+  description: 'Submit a new testimonial/review for a specific form.',
+  tags: ['Public'],
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            formId: z.string().openapi({ example: 'rk_frm_live_...' }),
+            content: z.string().openapi({ example: 'Great product!' }),
+            authorName: z.string().openapi({ example: 'John Doe' }),
+            rating: z.number().min(1).max(5).optional().openapi({ example: 5 }),
+            authorEmail: z.string().email().optional().openapi({ example: 'john@example.com' }),
+            authorTitle: z.string().optional().openapi({ example: 'CEO' }),
+            authorUrl: z.string().optional().openapi({ example: 'https://example.com' }),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: 'Review submitted successfully',
+    },
+    400: {
+      description: 'Invalid input data',
+    },
+    404: {
+      description: 'Form not found',
+    },
+  },
+});
+
+// Apply Public API Key check to reviews path
+publicRouter.use('/reviews', pkCheck);
+
+// Register routes
+publicRouter.openapi(getReviewsRoute, (c) => publicReviewController.getReviews(c));
+publicRouter.openapi(submitReviewRoute, (c) => publicReviewController.submitReview(c));

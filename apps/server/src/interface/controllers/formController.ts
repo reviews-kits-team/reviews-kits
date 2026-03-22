@@ -14,17 +14,19 @@ export const formController = {
     }
 
     const forms = await container.formRepository.findByUser(userId);
-    return c.json(forms.map(f => {
+    const formsWithStats = await Promise.all(forms.map(async f => {
       const props = f.getProps();
+      const stats = await container.testimonialRepository.getStatsByFormId(props.id);
       return { 
         ...props, 
         slug: props.slug.getValue(),
         publicId: props.publicId,
-        responses: 0,
-        rating: null,
-        completion: 0
+        responses: stats.totalReviews,
+        rating: stats.averageRating,
+        completion: 100 // Placeholder for now
       };
     }));
+    return c.json(formsWithStats);
   },
 
   createForm: async (c: Context) => {
@@ -79,12 +81,14 @@ export const formController = {
     }
 
     const props = form.getProps();
+    const stats = await container.testimonialRepository.getStatsByFormId(props.id);
+    
     return c.json({ 
       ...props, 
       slug: props.slug.getValue(),
-      responses: 0,
-      rating: null,
-      completion: 0
+      responses: stats.totalReviews,
+      rating: stats.averageRating,
+      completion: 100
     });
   },
 
@@ -200,5 +204,59 @@ export const formController = {
       console.error("Failed to batch delete forms:", err);
       return c.json({ error: 'Erreur lors de la suppression groupée' }, 500);
     }
+  },
+
+  getFormStats: async (c: Context) => {
+    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const formId = c.req.param('id');
+
+    if (!userId || !formId) {
+      return c.json({ error: 'Unauthorized or missing ID' }, 401);
+    }
+
+    // Verify ownership
+    const form = await container.formRepository.findById(formId);
+    if (!form || form.userId !== userId) {
+      return c.json({ error: 'Form not found' }, 404);
+    }
+
+    const stats = await container.testimonialRepository.getStatsByFormId(formId);
+    return c.json(stats);
+  },
+
+  getFormTestimonials: async (c: Context) => {
+    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const formId = c.req.param('id');
+    const page = parseInt(c.req.query('page') || '1', 10);
+    const limit = 10;
+    const offset = (page - 1) * limit;
+
+    if (!userId || !formId) {
+      return c.json({ error: 'Unauthorized or missing ID' }, 401);
+    }
+
+    // Verify ownership
+    const form = await container.formRepository.findById(formId);
+    if (!form || form.userId !== userId) {
+      return c.json({ error: 'Form not found' }, 404);
+    }
+
+    const sort = c.req.query('sort') || 'createdAt';
+    const order = (c.req.query('order') || 'desc') as 'asc' | 'desc';
+
+    const testimonials = await container.testimonialRepository.findByFormId(formId, { 
+      limit, 
+      offset, 
+      sort, 
+      order 
+    });
+    return c.json(testimonials.map(t => {
+      const props = t.getProps();
+      return {
+        ...props,
+        rating: props.rating?.getValue(),
+        authorEmail: props.authorEmail?.getValue()
+      };
+    }));
   },
 };

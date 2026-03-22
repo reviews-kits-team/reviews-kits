@@ -96,6 +96,26 @@ const batchToggleFormStatusRoute = createRoute({
   },
 });
 
+const getFormStatsRoute = createRoute({
+  method: 'get',
+  path: '/{id}/stats',
+  summary: 'Get form statistics',
+  tags: ['Forms'],
+  responses: {
+    200: { description: 'Form statistics' },
+  },
+});
+
+const getFormTestimonialsRoute = createRoute({
+  method: 'get',
+  path: '/{id}/testimonials',
+  summary: 'Get form testimonials',
+  tags: ['Forms'],
+  responses: {
+    200: { description: 'List of testimonials for the form' },
+  },
+});
+
 const batchDeleteFormsRoute = createRoute({
   method: 'delete',
   path: '/batch',
@@ -121,6 +141,8 @@ formsRouter.openapi(listFormsRoute, formController.listForms);
 formsRouter.openapi(createFormRoute, formController.createForm);
 formsRouter.openapi(batchToggleFormStatusRoute, formController.batchToggleStatus);
 formsRouter.openapi(batchDeleteFormsRoute, formController.batchDeleteForms);
+formsRouter.openapi(getFormStatsRoute, formController.getFormStats);
+formsRouter.openapi(getFormTestimonialsRoute, formController.getFormTestimonials);
 formsRouter.openapi(deleteFormRoute, formController.deleteForm);
 formsRouter.openapi(toggleFormStatusRoute, formController.toggleFormStatus);
 formsRouter.openapi(duplicateFormRoute, formController.duplicateForm);

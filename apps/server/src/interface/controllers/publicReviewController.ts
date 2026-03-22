@@ -1,11 +1,21 @@
 import type { Context } from 'hono';
 import { container } from '@/infrastructure/container';
+import { Testimonial } from '@/domain/entities/Testimonial';
+import { Rating } from '@/domain/value-objects/Rating';
+import { Email } from '@/domain/value-objects/Email';
+import { randomUUID } from 'node:crypto';
 
 export const publicReviewController = {
   /**
    * Fetch approved reviews for a user based on public API key context
    */
   getReviews: async (c: Context) => {
+    // Defensive check to avoid TypeError: c.get is not a function
+    if (!c || typeof c.get !== 'function') {
+      console.error('[API Error] Context c is invalid in getReviews:', typeof c, Object.keys(c || {}));
+      return (c as any)?.json ? (c as any).json({ error: 'Internal context error' }, 500) : new Response('Internal context error', { status: 500 });
+    }
+
     const userId = c.get('userId');
     if (!userId) {
       return c.json({ error: 'Unauthorized' }, 401);
@@ -50,6 +60,51 @@ export const publicReviewController = {
     } catch (error) {
       console.error('Failed to fetch public reviews:', error);
       return c.json({ error: 'Internal server error' }, 500);
+    }
+  },
+
+  /**
+   * Submit a new review (publicly accessible)
+   */
+  submitReview: async (c: Context) => {
+    const body = await c.req.json();
+    const { formId, content, authorName, authorEmail, rating, authorTitle, authorUrl } = body;
+
+    if (!formId || !content || !authorName) {
+      return c.json({ error: 'Missing required fields: formId, content, authorName' }, 400);
+    }
+
+    try {
+      // Resolve internal form and user
+      const form = await container.formRepository.findByPublicId(formId);
+      if (!form) {
+        return c.json({ error: 'Invalid form ID' }, 404);
+      }
+
+      const testimonial = new Testimonial({
+        id: randomUUID(),
+        userId: form.userId,
+        formId: form.id,
+        content,
+        authorName,
+        rating: rating ? Rating.create(Number(rating)) : undefined,
+        authorEmail: authorEmail ? Email.create(authorEmail) : undefined,
+        authorTitle,
+        authorUrl,
+        status: 'pending',
+        source: 'form'
+      });
+
+      await container.testimonialRepository.save(testimonial);
+
+      return c.json({ 
+        success: true, 
+        message: 'Review submitted successfully',
+        id: testimonial.id
+      }, 201);
+    } catch (error: any) {
+      console.error('Failed to submit public review:', error);
+      return c.json({ error: error.message || 'Internal server error' }, 500);
     }
   }
 };

@@ -13,20 +13,51 @@ export const Stars = ({ rating, size = 13 }: { rating: number | null, size?: num
 }
 
 export const Badge = ({ status }: { status: string }) => {
-  const isActive = status === 'active'
+  const config: Record<string, { label: string; active: boolean; color: string }> = {
+    active: { label: 'Actif', active: true, color: 'var(--v3-teal)' },
+    draft: { label: 'Brouillon', active: false, color: 'white' },
+    approved: { label: 'Approuvé', active: true, color: 'var(--v3-teal)' },
+    pending: { label: 'En attente', active: true, color: '#f59e0b' },
+    rejected: { label: 'Rejeté', active: false, color: '#e84040' },
+  }
+
+  const { label, active, color } = config[status.toLowerCase()] || config.draft
+  
   return (
     <div className={`inline-flex items-center gap-2 px-3 py-[1px] rounded-full text-[8px] font-black uppercase tracking-[0.15em] border backdrop-blur-md transition-all ${
-      isActive 
-        ? 'bg-[var(--v3-teal)]/10 text-[var(--v3-teal)] border-[var(--v3-teal)]/20 shadow-[0_0_15px_rgba(45,212,191,0.05)]' 
+      active 
+        ? `bg-[${color}]/10 text-[${color}] border-[${color}]/20 shadow-[0_0_15px_rgba(45,212,191,0.05)]` 
         : 'bg-white/5 text-[var(--v3-muted2)] border-white/10'
-    }`}>
+    }`} style={{ color: active ? color : undefined, borderColor: active ? `${color}33` : undefined, backgroundColor: active ? `${color}1a` : undefined }}>
       <div className="relative flex items-center justify-center">
-        <div className={`w-1 h-1 rounded-full ${isActive ? 'bg-[var(--v3-teal)]' : 'bg-white/20'}`} />
-        {isActive && (
-          <div className="absolute w-1 h-1 rounded-full bg-[var(--v3-teal)] animate-ping opacity-60" />
+        <div className={`w-1 h-1 rounded-full ${active ? '' : 'bg-white/20'}`} style={{ backgroundColor: active ? color : undefined }} />
+        {active && (
+          <div className="absolute w-1 h-1 rounded-full animate-ping opacity-60" style={{ backgroundColor: color }} />
         )}
       </div>
-      {isActive ? 'Actif' : 'Brouillon'}
+      {label}
+    </div>
+  )
+}
+
+export const Checkbox = ({ checked, onChange }: { checked: boolean; onChange: (val: boolean) => void }) => {
+  return (
+    <div 
+      onClick={(e) => {
+        e.stopPropagation();
+        onChange(!checked);
+      }}
+      className={`w-4 h-4 rounded border transition-all cursor-pointer flex items-center justify-center ${
+        checked 
+          ? 'bg-[var(--v3-teal)] border-[var(--v3-teal)] shadow-[0_0_10px_rgba(45,212,191,0.2)]' 
+          : 'bg-white/5 border-white/20 hover:border-white/40'
+      }`}
+    >
+      {checked && (
+        <svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      )}
     </div>
   )
 }
