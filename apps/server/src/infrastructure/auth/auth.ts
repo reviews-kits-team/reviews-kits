@@ -67,5 +67,7 @@ export const auth = betterAuth({
     "http://172.20.0.1:5180",
     "http://localhost:3000", // Swagger / Local API
     "http://localhost",       // Tests
+    "http://localhost:5174",
+    "http://172.20.0.1:5174",
   ],
 });
