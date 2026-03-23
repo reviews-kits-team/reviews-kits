@@ -37,6 +37,17 @@ export class DrizzleFormRepository implements FormRepository {
     return rows.map(row => this.mapToDomain(row));
   }
 
+  async findByIdsAndUser(ids: string[], userId: string): Promise<Form[]> {
+    if (!ids || ids.length === 0) return [];
+    
+    const { inArray } = await import('drizzle-orm');
+    const rows = await this.db.select()
+      .from(forms)
+      .where(and(inArray(forms.id, ids), eq(forms.userId, userId)));
+      
+    return rows.map(row => this.mapToDomain(row));
+  }
+
   async save(form: Form): Promise<void> {
     const props = form.getProps();
     await this.db.insert(forms).values({

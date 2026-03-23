@@ -201,9 +201,11 @@ export const formController = {
     }
 
     try {
-      // Security check: ensure all forms belong to the user
-      // For simplicity in this demo, we assume the IDs are valid, 
-      // but in production we'd verify ownership for each ID.
+      const owned = await container.formRepository.findByIdsAndUser(ids, userId);
+      if (owned.length !== ids.length) {
+        return c.json({ error: 'Forbidden: one or more forms do not belong to you' }, 403);
+      }
+
       await container.formRepository.batchUpdateStatus(ids, isActive);
       return c.json({ success: true, isActive });
     } catch (err: any) {
@@ -224,6 +226,11 @@ export const formController = {
     }
 
     try {
+      const owned = await container.formRepository.findByIdsAndUser(ids, userId);
+      if (owned.length !== ids.length) {
+        return c.json({ error: 'Forbidden: one or more forms do not belong to you' }, 403);
+      }
+
       await container.formRepository.batchDelete(ids);
       return c.json({ success: true });
     } catch (err: any) {
