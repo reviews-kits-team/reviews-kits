@@ -36,7 +36,7 @@ jobs:
         image: postgres:15
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: your_secure_password
+          POSTGRES_PASSWORD: ${{ secrets.CI_POSTGRES_PASSWORD }}
           POSTGRES_DB: reviewskits
         ports:
           - 5433:5432
@@ -47,10 +47,10 @@ jobs:
           --health-retries 5
 
     env:
-      DATABASE_URL: postgresql://postgres:your_secure_password@localhost:5433/reviewskits
-      BETTER_AUTH_SECRET: your_super_secret_auth_key
-      ADMIN_EMAIL: admin@reviewskits.com
-      ADMIN_PASSWORD: admin_secure_password
+      DATABASE_URL: postgresql://postgres:${{ secrets.CI_POSTGRES_PASSWORD }}@localhost:5433/reviewskits
+      BETTER_AUTH_SECRET: ${{ secrets.CI_BETTER_AUTH_SECRET }}
+      ADMIN_EMAIL: ${{ secrets.CI_ADMIN_EMAIL }}
+      ADMIN_PASSWORD: ${{ secrets.CI_ADMIN_PASSWORD }}
 
     steps:
       - name: Checkout
