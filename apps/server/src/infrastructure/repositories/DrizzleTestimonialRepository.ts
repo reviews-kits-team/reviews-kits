@@ -31,6 +31,17 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
     return rows.map(row => this.mapToDomain(row));
   }
 
+  async findByIdsAndUser(ids: string[], userId: string): Promise<Testimonial[]> {
+    if (!ids || ids.length === 0) return [];
+    
+    const { inArray } = await import('drizzle-orm');
+    const rows = await this.db.select()
+      .from(testimonials)
+      .where(and(inArray(testimonials.id, ids), eq(testimonials.userId, userId)));
+      
+    return rows.map(row => this.mapToDomain(row));
+  }
+
   async save(testimonial: Testimonial): Promise<void> {
     const props = testimonial.getProps();
     await this.db.insert(testimonials).values({

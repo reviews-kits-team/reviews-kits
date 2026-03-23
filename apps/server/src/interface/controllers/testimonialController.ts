@@ -52,12 +52,15 @@ export const testimonialController = {
     const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
     const { ids, status } = await c.req.json();
 
-    if (!userId || !Array.isArray(ids) || !status) {
+    if (!userId || !Array.isArray(ids) || ids.length === 0 || !status) {
       return c.json({ error: 'Unauthorized or invalid data' }, 401);
     }
 
-    // In a real app, we'd verify ownership of each ID. 
-    // For this implementation, we assume the IDs provided belong to the user's forms.
+    const owned = await container.testimonialRepository.findByIdsAndUser(ids, userId);
+    if (owned.length !== ids.length) {
+      return c.json({ error: 'Forbidden: one or more testimonials do not belong to you' }, 403);
+    }
+
     await container.testimonialRepository.batchUpdateStatus(ids, status);
     return c.json({ success: true });
   },
@@ -66,8 +69,13 @@ export const testimonialController = {
     const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
     const { ids } = await c.req.json();
 
-    if (!userId || !Array.isArray(ids)) {
+    if (!userId || !Array.isArray(ids) || ids.length === 0) {
       return c.json({ error: 'Unauthorized or invalid data' }, 401);
+    }
+
+    const owned = await container.testimonialRepository.findByIdsAndUser(ids, userId);
+    if (owned.length !== ids.length) {
+      return c.json({ error: 'Forbidden: one or more testimonials do not belong to you' }, 403);
     }
 
     await container.testimonialRepository.batchDelete(ids);
