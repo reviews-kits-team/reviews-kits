@@ -58,7 +58,8 @@ export const verifications = pgTable('verifications', {
 export const apiKeys = pgTable('api_keys', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  key: text('key').unique().notNull(),
+  keyHash: text('key_hash').unique().notNull(),
+  keyPrefix: text('key_prefix').notNull(),
   type: text('type').notNull(), // public | secret
   name: text('name'),
   lastUsed: timestamp('last_used'),
@@ -66,7 +67,7 @@ export const apiKeys = pgTable('api_keys', {
   isActive: boolean('is_active').default(true),
   createdAt: timestamp('created_at').defaultNow(),
 }, (t) => ({
-  keyIdx: index('idx_api_keys_key').on(t.key),
+  hashIdx: index('idx_api_keys_hash').on(t.keyHash),
   userIdIdx: index('idx_api_keys_user').on(t.userId),
 }));
 

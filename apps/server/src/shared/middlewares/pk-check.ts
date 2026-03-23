@@ -1,6 +1,7 @@
 import type { Context } from 'hono';
 import { container } from '@/infrastructure/container';
 import { ApiKeyGenerator } from '@/shared/utils/ApiKeyGenerator';
+import { createHash } from 'node:crypto';
 
 /**
  * Middleware to check for a valid Public API Key (pk_...)
@@ -14,7 +15,8 @@ export const pkCheck = async (c: Context, next: () => Promise<any>) => {
   }
 
   try {
-    const keyRecord = await container.apiKeyRepository.findByKey(apiKey);
+    const keyHash = createHash('sha256').update(apiKey).digest('hex');
+    const keyRecord = await container.apiKeyRepository.findByHash(keyHash);
     
     if (!keyRecord || keyRecord.getProps().type !== 'public' || !keyRecord.getProps().isActive) {
       return c.json({ error: 'Invalid or inactive public API key' }, 401);
