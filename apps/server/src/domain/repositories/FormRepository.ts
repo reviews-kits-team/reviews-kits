@@ -5,6 +5,7 @@ export interface FormRepository {
   findBySlug(slug: string): Promise<Form | null>;
   findByPublicId(publicId: string): Promise<Form | null>;
   findByUser(userId: string): Promise<Form[]>;
+  findByIdsAndUser(ids: string[], userId: string): Promise<Form[]>;
   save(form: Form): Promise<void>;
   update(form: Form): Promise<void>;
   delete(id: string): Promise<void>;
