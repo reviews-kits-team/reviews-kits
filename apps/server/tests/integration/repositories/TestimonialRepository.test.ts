@@ -106,4 +106,55 @@ describe("DrizzleTestimonialRepository Integration", () => {
     const found = await repository.findById(testimonial.id);
     expect(found).toBeNull();
   });
+
+  it("should find testimonials by multiple IDs and user ID", async () => {
+    const t1 = new Testimonial({
+      id: crypto.randomUUID(),
+      userId: userId,
+      content: "T1",
+      authorName: "A1",
+      status: "approved",
+      source: "api"
+    });
+    const t2 = new Testimonial({
+      id: crypto.randomUUID(),
+      userId: userId,
+      content: "T2",
+      authorName: "A2",
+      status: "approved",
+      source: "api"
+    });
+    
+    const otherUserId = crypto.randomUUID();
+    await testDb.insert(schema.users).values({
+      id: otherUserId,
+      email: "other@example.com",
+      name: "Other User",
+      emailVerified: true,
+      isSystemAdmin: false
+    });
+    
+    const t3 = new Testimonial({
+      id: crypto.randomUUID(),
+      userId: otherUserId,
+      content: "T3",
+      authorName: "A3",
+      status: "approved",
+      source: "api"
+    });
+
+    await repository.save(t1);
+    await repository.save(t2);
+    await repository.save(t3);
+
+    const found = await repository.findByIdsAndUser([t1.id, t2.id, t3.id], userId);
+    expect(found).toHaveLength(2);
+    const foundIds = found.map(f => f.id);
+    expect(foundIds).toContain(t1.id);
+    expect(foundIds).toContain(t2.id);
+    expect(foundIds).not.toContain(t3.id);
+    
+    const missing = await repository.findByIdsAndUser([t1.id], otherUserId);
+    expect(missing).toHaveLength(0);
+  });
 });
