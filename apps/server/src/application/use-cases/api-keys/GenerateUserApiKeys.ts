@@ -13,12 +13,17 @@ export class GenerateUserApiKeys {
     let publicKey = existingKeys.find((k: ApiKey) => k.type === 'public' && k.getProps().isActive);
     let secretKey = existingKeys.find((k: ApiKey) => k.type === 'secret' && k.getProps().isActive);
 
+    let publicKeyRaw: string | undefined;
+    let secretKeyRaw: string | undefined;
+
     if (!publicKey) {
-      const keyStr = ApiKeyGenerator.generate('public');
+      const generated = ApiKeyGenerator.generate('public');
+      publicKeyRaw = generated.rawKey;
       publicKey = new ApiKey({
         id: randomUUID(),
         userId,
-        key: keyStr,
+        keyHash: generated.keyHash,
+        keyPrefix: generated.keyPrefix,
         type: 'public',
         isActive: true,
       });
@@ -26,11 +31,13 @@ export class GenerateUserApiKeys {
     }
 
     if (!secretKey) {
-      const keyStr = ApiKeyGenerator.generate('secret');
+      const generated = ApiKeyGenerator.generate('secret');
+      secretKeyRaw = generated.rawKey;
       secretKey = new ApiKey({
         id: randomUUID(),
         userId,
-        key: keyStr,
+        keyHash: generated.keyHash,
+        keyPrefix: generated.keyPrefix,
         type: 'secret',
         isActive: true,
       });
@@ -38,8 +45,8 @@ export class GenerateUserApiKeys {
     }
 
     return {
-      publicKey: publicKey.key,
-      secretKey: secretKey.key,
+      publicKey: publicKeyRaw || `${publicKey.getProps().keyPrefix}***`,
+      secretKey: secretKeyRaw || `${secretKey.getProps().keyPrefix}***`,
     };
   }
 }

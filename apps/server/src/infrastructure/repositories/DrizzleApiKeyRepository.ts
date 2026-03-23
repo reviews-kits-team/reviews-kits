@@ -14,8 +14,8 @@ export class DrizzleApiKeyRepository implements ApiKeyRepository {
     return this.mapToDomain(row);
   }
 
-  async findByKey(key: string): Promise<ApiKey | null> {
-    const [row] = await this.db.select().from(apiKeys).where(and(eq(apiKeys.key, key), eq(apiKeys.isActive, true)));
+  async findByHash(keyHash: string): Promise<ApiKey | null> {
+    const [row] = await this.db.select().from(apiKeys).where(and(eq(apiKeys.keyHash, keyHash), eq(apiKeys.isActive, true)));
     if (!row) return null;
     return this.mapToDomain(row);
   }
@@ -30,7 +30,8 @@ export class DrizzleApiKeyRepository implements ApiKeyRepository {
     await this.db.insert(apiKeys).values({
       id: props.id,
       userId: props.userId,
-      key: props.key,
+      keyHash: props.keyHash,
+      keyPrefix: props.keyPrefix,
       type: props.type,
       name: props.name,
       lastUsed: props.lastUsed,
@@ -60,7 +61,8 @@ export class DrizzleApiKeyRepository implements ApiKeyRepository {
     return new ApiKey({
       id: row.id,
       userId: row.userId,
-      key: row.key,
+      keyHash: row.keyHash,
+      keyPrefix: row.keyPrefix,
       type: row.type as 'public' | 'secret',
       name: row.name || undefined,
       lastUsed: row.lastUsed || undefined,

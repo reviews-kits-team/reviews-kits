@@ -1,7 +1,8 @@
 export interface ApiKeyProps {
   id: string;
   userId: string;
-  key: string;
+  keyHash: string;
+  keyPrefix: string;
   type: 'public' | 'secret';
   name?: string;
   lastUsed?: Date;
@@ -13,7 +14,8 @@ export interface ApiKeyProps {
 export class ApiKey {
   public readonly id: string;
   public readonly userId: string;
-  public readonly key: string;
+  public readonly keyHash: string;
+  public readonly keyPrefix: string;
   public readonly type: 'public' | 'secret';
   private name?: string;
   private lastUsed?: Date;
@@ -24,7 +26,8 @@ export class ApiKey {
   constructor(props: ApiKeyProps) {
     this.id = props.id;
     this.userId = props.userId;
-    this.key = props.key;
+    this.keyHash = props.keyHash;
+    this.keyPrefix = props.keyPrefix;
     this.type = props.type;
     this.name = props.name;
     this.lastUsed = props.lastUsed;
@@ -37,7 +40,8 @@ export class ApiKey {
     return {
       id: this.id,
       userId: this.userId,
-      key: this.key,
+      keyHash: this.keyHash,
+      keyPrefix: this.keyPrefix,
       type: this.type,
       name: this.name,
       lastUsed: this.lastUsed,

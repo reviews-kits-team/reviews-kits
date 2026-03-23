@@ -15,6 +15,13 @@
       "when": 1774200058151,
       "tag": "0001_brave_cerise",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774298164022,
+      "tag": "0002_complete_dragon_man",
+      "breakpoints": true
     }
   ]
 }
