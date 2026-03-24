@@ -1,8 +1,8 @@
 import type { Context, Next } from 'hono';
-
 import { getConnInfo } from 'hono/bun';
-
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+import { sql, eq } from 'drizzle-orm';
+import { db } from '@/infrastructure/database/db';
+import { rateLimits } from '@/infrastructure/database/schema';
 
 export const rateLimiter = (options: { limit: number; windowMs: number }) => {
   return async (c: Context, next: Next) => {
@@ -19,19 +19,38 @@ export const rateLimiter = (options: { limit: number; windowMs: number }) => {
            'unknown';
     }
     
-    const now = Date.now();
-    let record = rateLimitMap.get(ip);
-    
-    // Clean up expired window
-    if (!record || now > record.resetTime) {
-      record = { count: 0, resetTime: now + options.windowMs };
-    }
-    
-    record.count++;
-    rateLimitMap.set(ip, record);
+    const now = new Date();
+    const key = `rl:${ip}`;
+    const windowStart = new Date(now.getTime() + options.windowMs);
 
-    if (record.count > options.limit) {
-      return c.json({ error: 'Too many requests, please try again later.' }, 429);
+    try {
+      // Distributed rate limiting logic
+      const count = await db.transaction(async (tx) => {
+        const [existing] = await tx.select().from(rateLimits).where(eq(rateLimits.key, key)).limit(1);
+        
+        if (!existing || now > existing.resetAt) {
+          const [inserted] = await tx.insert(rateLimits)
+            .values({ key, count: 1, resetAt: windowStart })
+            .onConflictDoUpdate({
+              target: rateLimits.key,
+              set: { count: 1, resetAt: windowStart }
+            })
+            .returning({ count: rateLimits.count });
+          return inserted?.count ?? 1;
+        } else {
+          const [updated] = await tx.update(rateLimits)
+            .set({ count: sql`${rateLimits.count} + 1` })
+            .where(eq(rateLimits.key, key))
+            .returning({ count: rateLimits.count });
+          return updated?.count ?? existing.count + 1;
+        }
+      });
+
+      if (count > options.limit) {
+        return c.json({ error: 'Too many requests, please try again later.' }, 429);
+      }
+    } catch (error) {
+      console.error('Rate limiter database error:', error);
     }
     
     await next();
