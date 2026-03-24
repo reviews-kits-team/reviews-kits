@@ -1,4 +1,4 @@
-import { expect, it, describe, spyOn, beforeEach, afterEach, afterAll } from "bun:test";
+import { expect, it, describe, spyOn, beforeEach, afterEach, afterAll, beforeAll } from "bun:test";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { meRouter } from "../../../src/interface/routes/me";
 import { auth } from "../../../src/infrastructure/auth/auth";
@@ -8,14 +8,6 @@ describe("Me API Flow", () => {
   app.route("/api/v1/me", meRouter);
 
   const getSessionSpy = spyOn(auth.api, "getSession") as any;
-
-  beforeEach(() => {
-    getSessionSpy.mockReset();
-  });
-
-  afterEach(() => {
-    getSessionSpy.mockReset();
-  });
 
   afterAll(() => {
     getSessionSpy.mockRestore();

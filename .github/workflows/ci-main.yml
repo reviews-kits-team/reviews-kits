@@ -28,9 +28,13 @@ jobs:
         run: bun run build
 
   quality:
-    name: Quality & Test
+    name: Quality & Test (${{ matrix.test-type }})
     needs: build
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        test-type: [unit, integration-repositories, integration-controllers]
     services:
       postgres:
         image: postgres:15
@@ -65,20 +69,30 @@ jobs:
         run: bun install
 
       - name: Push Schema
+        if: matrix.test-type != 'unit'
         run: cd apps/server && bun x drizzle-kit push
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
 
       - name: Run Lint
+        if: matrix.test-type == 'unit'
         run: bun run lint
 
-      - name: Run Tests
-        shell: bash
+      - name: Run Unit Tests
+        if: matrix.test-type == 'unit'
         run: |
           cd apps/server
-          find tests -name "*.test.ts" | while read -r f; do
-            echo "::group::Running test $f"
-            bun test "$f" --env-file=../../.env || exit 1
-            echo "::endgroup::"
-          done
+          bun test tests/unit --env-file=../../.env
+
+      - name: Run Integration Repository Tests
+        if: matrix.test-type == 'integration-repositories'
+        run: |
+          cd apps/server
+          bun test tests/integration/repositories --env-file=../../.env
+
+      - name: Run Integration Controller Tests
+        if: matrix.test-type == 'integration-controllers'
+        run: |
+          cd apps/server
+          bun test tests/integration/controllers --env-file=../../.env
 
