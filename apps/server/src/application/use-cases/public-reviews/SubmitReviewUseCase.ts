@@ -4,6 +4,7 @@ import type { IFormRepository } from '../../../domain/repositories/IFormReposito
 import { Testimonial } from '../../../domain/entities/Testimonial';
 import { Rating } from '../../../domain/value-objects/Rating';
 import { Email } from '../../../domain/value-objects/Email';
+import type { WebhookService } from '../../services/WebhookService';
 
 export interface SubmitReviewRequest {
   formId: string;
@@ -18,7 +19,8 @@ export interface SubmitReviewRequest {
 export class SubmitReviewUseCase {
   constructor(
     private readonly testimonialRepository: ITestimonialRepository,
-    private readonly formRepository: IFormRepository
+    private readonly formRepository: IFormRepository,
+    private readonly webhookService: WebhookService
   ) {}
 
   async execute(request: SubmitReviewRequest): Promise<string> {
@@ -44,6 +46,19 @@ export class SubmitReviewUseCase {
     });
 
     await this.testimonialRepository.save(testimonial);
+
+    // Trigger webhook asynchronously
+    const tProps = testimonial.getProps();
+    this.webhookService.trigger('testimonial.created', form.getUserId(), {
+      id: testimonial.getId(),
+      formId: form.getId(),
+      content: tProps.content,
+      authorName: tProps.authorName,
+      authorEmail: tProps.authorEmail?.getValue(),
+      rating: tProps.rating?.getValue(),
+      createdAt: tProps.createdAt
+    }).catch(err => console.error('Webhook trigger failed:', err));
+
     return testimonial.getId();
   }
 }

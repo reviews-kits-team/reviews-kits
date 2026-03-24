@@ -86,3 +86,7 @@ const reorderTestimonialsRoute = createRoute({
 testimonialsRouter.openapi(updateStatusRoute, testimonialController.updateStatus as any);
 testimonialsRouter.openapi(batchUpdateStatusRoute, testimonialController.batchUpdateStatus as any);
 testimonialsRouter.openapi(reorderTestimonialsRoute, testimonialController.reorderTestimonials as any);
+
+// Internal routes for admin (CSV Export/Import)
+testimonialsRouter.get('/export', testimonialController.exportTestimonials as any);
+testimonialsRouter.post('/import', testimonialController.importTestimonials as any);

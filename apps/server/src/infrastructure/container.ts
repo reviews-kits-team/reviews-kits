@@ -3,6 +3,9 @@ import { DrizzleFormRepository } from './repositories/DrizzleFormRepository';
 import { DrizzleTestimonialRepository } from './repositories/DrizzleTestimonialRepository';
 import { DrizzleApiKeyRepository } from './repositories/DrizzleApiKeyRepository';
 import { DrizzleUserRepository } from './repositories/DrizzleUserRepository';
+import { DrizzleWebhookRepository } from './repositories/DrizzleWebhookRepository';
+
+import { WebhookService } from '../application/services/WebhookService';
 
 import { GenerateUserApiKeys } from '../application/use-cases/api-keys/GenerateUserApiKeys';
 import { VerifyApiKey } from '../application/use-cases/api-keys/VerifyApiKey';
@@ -15,6 +18,8 @@ import { UpdateUserUseCase } from '../application/use-cases/user/UpdateUserUseCa
 import { UpdateTestimonialStatusUseCase } from '../application/use-cases/testimonials/UpdateTestimonialStatusUseCase';
 import { BatchUpdateTestimonialStatusUseCase } from '../application/use-cases/testimonials/BatchUpdateTestimonialStatusUseCase';
 import { ReorderTestimonialsUseCase } from '../application/use-cases/testimonials/ReorderTestimonialsUseCase';
+import { ExportTestimonialsUseCase } from '../application/use-cases/testimonials/ExportTestimonialsUseCase';
+import { ImportTestimonialsUseCase } from '../application/use-cases/testimonials/ImportTestimonialsUseCase';
 
 // Forms Use Cases
 import { ListFormsUseCase } from '../application/use-cases/forms/ListFormsUseCase';
@@ -39,6 +44,10 @@ const formRepository = new DrizzleFormRepository(db as any);
 const testimonialRepository = new DrizzleTestimonialRepository(db as any);
 const apiKeyRepository = new DrizzleApiKeyRepository(db as any);
 const userRepository = new DrizzleUserRepository(db as any);
+const webhookRepository = new DrizzleWebhookRepository(db as any);
+
+// Services
+const webhookService = new WebhookService(webhookRepository);
 
 // Use Case Instances
 const generateUserApiKeys = new GenerateUserApiKeys(apiKeyRepository);
@@ -50,6 +59,8 @@ const updateUserUseCase = new UpdateUserUseCase(userRepository);
 const updateTestimonialStatusUseCase = new UpdateTestimonialStatusUseCase(testimonialRepository);
 const batchUpdateTestimonialStatusUseCase = new BatchUpdateTestimonialStatusUseCase(testimonialRepository);
 const reorderTestimonialsUseCase = new ReorderTestimonialsUseCase(testimonialRepository);
+const exportTestimonialsUseCase = new ExportTestimonialsUseCase(testimonialRepository, formRepository);
+const importTestimonialsUseCase = new ImportTestimonialsUseCase(testimonialRepository, formRepository);
 
 const listFormsUseCase = new ListFormsUseCase(formRepository, testimonialRepository);
 const createFormUseCase = new CreateFormUseCase(formRepository);
@@ -64,7 +75,7 @@ const getFormStatsUseCase = new GetFormStatsUseCase(formRepository, testimonialR
 const getFormTestimonialsUseCase = new GetFormTestimonialsUseCase(formRepository, testimonialRepository);
 
 const getPublicReviewsUseCase = new GetPublicReviewsUseCase(testimonialRepository, formRepository);
-const submitReviewUseCase = new SubmitReviewUseCase(testimonialRepository, formRepository);
+const submitReviewUseCase = new SubmitReviewUseCase(testimonialRepository, formRepository, webhookService);
 const getPublicFormUseCase = new GetPublicFormUseCase(formRepository);
 
 export const container = {
@@ -72,6 +83,10 @@ export const container = {
   testimonialRepository,
   apiKeyRepository,
   userRepository,
+  webhookRepository,
+  
+  // Services
+  webhookService,
   
   // Use Cases
   generateUserApiKeys,
@@ -83,6 +98,8 @@ export const container = {
   updateTestimonialStatusUseCase,
   batchUpdateTestimonialStatusUseCase,
   reorderTestimonialsUseCase,
+  exportTestimonialsUseCase,
+  importTestimonialsUseCase,
   
   listFormsUseCase,
   createFormUseCase,

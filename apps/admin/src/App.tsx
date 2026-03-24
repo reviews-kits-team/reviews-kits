@@ -7,6 +7,7 @@ import ProfilePage from './pages/ProfilePage'
 import SettingsPage from './pages/SettingsPage'
 import FormEditorPage from './pages/FormEditorPage'
 import PublicFormPage from './pages/PublicFormPage'
+import IntegrationsPage from './pages/IntegrationsPage'
 import './App.css'
 
 // Apply saved theme before first render to avoid flash
@@ -32,6 +33,7 @@ function App() {
       <Route element={<AuthGuard />}>
         <Route path="/" element={<DashboardPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/integrations" element={<IntegrationsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/forms/:id/edit" element={<FormEditorPage />} />
       </Route>

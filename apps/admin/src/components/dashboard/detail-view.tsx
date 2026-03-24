@@ -16,7 +16,9 @@ import {
   Plus,
   ArrowUp,
   ArrowDown,
-  GripVertical
+  GripVertical,
+  Download,
+  Upload
 } from 'lucide-react'
 import {
   DndContext,
@@ -38,6 +40,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { StatCard } from './stat-card'
 import { Stars, Badge, Checkbox } from './ui'
 import { ReviewModal } from './review-modal'
+import { MigrationModal } from './migration-modal'
 import type { DashboardForm } from './types'
 
 interface FormStats {
@@ -198,6 +201,7 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
   const [copiedLink, setCopiedLink] = useState(false)
   const [selectedReview, setSelectedReview] = useState<Testimonial | null>(null)
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
+  const [isMigrationModalOpen, setIsMigrationModalOpen] = useState(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -324,6 +328,10 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
     navigator.clipboard.writeText(url)
     setCopiedLink(true)
     setTimeout(() => setCopiedLink(false), 2000)
+  }
+
+  const handleExport = () => {
+    window.open(`/api/v1/testimonials/export?formId=${form.id}`, '_blank');
   }
 
   const totReviews = stats?.totalReviews || 0
@@ -549,7 +557,22 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
           <span className="text-[14px] font-black uppercase tracking-widest text-[var(--v3-text)] opacity-80">
             // Review Management
           </span>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={handleExport}
+              className="flex items-center gap-1.5 bg-white/5 border border-white/10 text-[var(--v3-muted2)] px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-white/10 hover:text-[var(--v3-teal)] transition-all"
+            >
+              <Download size={12} />
+              Export CSV
+            </button>
+            <button 
+              onClick={() => setIsMigrationModalOpen(true)}
+              className="flex items-center gap-1.5 bg-white/5 border border-white/10 text-[var(--v3-muted2)] px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-white/10 hover:text-[var(--v3-teal)] transition-all"
+            >
+              <Upload size={12} />
+              Import
+            </button>
+            <div className="w-px h-4 bg-white/10 mx-1" />
             <span className="text-[11px] font-bold text-[var(--v3-muted2)]">{totReviews} total</span>
           </div>
         </div>
@@ -685,6 +708,13 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
         formatDate={formatDate}
         getRandomGradient={getRandomGradient}
         getInitials={getInitials}
+      />
+
+      <MigrationModal 
+        isOpen={isMigrationModalOpen}
+        onClose={() => setIsMigrationModalOpen(false)}
+        formId={form.id}
+        onImported={() => fetchData()}
       />
     </main>
   )
