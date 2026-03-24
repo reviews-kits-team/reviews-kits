@@ -253,6 +253,33 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
     };
   }
 
+  async getBasicStatsByFormIds(formIds: string[]): Promise<Map<string, { totalReviews: number; averageRating: number }>> {
+    const statsMap = new Map<string, { totalReviews: number; averageRating: number }>();
+    if (!formIds || formIds.length === 0) return statsMap;
+
+    const { inArray } = await import('drizzle-orm');
+    
+    const rows = await this.db.select({
+      formId: testimonials.formId,
+      totalReviews: count(testimonials.id),
+      averageRating: avg(testimonials.rating),
+    })
+    .from(testimonials)
+    .where(inArray(testimonials.formId, formIds))
+    .groupBy(testimonials.formId);
+
+    for (const row of rows) {
+      if (row.formId) {
+        statsMap.set(row.formId, {
+          totalReviews: Number(row.totalReviews) || 0,
+          averageRating: Number(row.averageRating) || 0,
+        });
+      }
+    }
+
+    return statsMap;
+  }
+
   async getStatsByFormId(formId: string): Promise<{
     totalReviews: number;
     averageRating: number;

@@ -20,6 +20,7 @@ export interface TestimonialRepository {
     completionRate?: number;
     completionGrowth?: number;
   }>;
+  getBasicStatsByFormIds(formIds: string[]): Promise<Map<string, { totalReviews: number; averageRating: number }>>;
   getStatsByFormId(formId: string): Promise<{
     totalReviews: number;
     averageRating: number;
