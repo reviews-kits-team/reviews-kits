@@ -16,8 +16,8 @@ describe("Form Entity", () => {
     it("should create a form with all properties", () => {
       const form = new Form(validProps);
       
-      expect(form.id).toBe(validProps.id);
-      expect(form.userId).toBe(validProps.userId);
+      expect(form.getId()).toBe(validProps.id);
+      expect(form.getUserId()).toBe(validProps.userId);
       expect(form.getName()).toBe(validProps.name);
       expect(form.getSlug()).toBe(validProps.slug.getValue());
       expect(form.createdAt).toBeInstanceOf(Date);

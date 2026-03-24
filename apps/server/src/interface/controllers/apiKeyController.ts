@@ -1,10 +1,10 @@
 import type { Context } from 'hono';
 import { container } from '@/infrastructure/container';
+import { getUserIdFromContext } from '@/shared/utils/auth';
 
 export const apiKeyController = {
   getApiKeys: async (c: Context) => {
-    const session = c.get('session');
-    const userId = session?.user?.id;
+    const userId = getUserIdFromContext(c);
 
     if (!userId) {
       return c.json({ error: 'Unauthorized' }, 401);
@@ -19,8 +19,7 @@ export const apiKeyController = {
   },
 
   rotateKeys: async (c: Context) => {
-    const session = c.get('session');
-    const userId = session?.user?.id;
+    const userId = getUserIdFromContext(c);
 
     if (!userId) {
       return c.json({ error: 'Unauthorized' }, 401);

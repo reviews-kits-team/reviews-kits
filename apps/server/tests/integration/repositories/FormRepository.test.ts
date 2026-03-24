@@ -63,7 +63,7 @@ describe("DrizzleFormRepository Integration", () => {
     form.updateConfig({ steps: [{}, {}] as any });
     await repository.update(form);
 
-    const found = await repository.findById(form.id);
+    const found = await repository.findById(form.getId());
     expect(found?.getProps().config?.steps).toHaveLength(2);
   });
 
@@ -71,9 +71,9 @@ describe("DrizzleFormRepository Integration", () => {
     const form = new Form({ id: crypto.randomUUID(), userId: userId, name: "D", slug: Slug.create("d"), publicId: "rk_frm_live_d", config: {} });
 
     await repository.save(form);
-    await repository.delete(form.id);
+    await repository.delete(form.getId());
 
-    const found = await repository.findById(form.id);
+    const found = await repository.findById(form.getId());
     expect(found).toBeNull();
   });
 
@@ -114,14 +114,14 @@ describe("DrizzleFormRepository Integration", () => {
     await repository.save(f2);
     await repository.save(f3);
 
-    const found = await repository.findByIdsAndUser([f1.id, f2.id, f3.id], userId);
+    const found = await repository.findByIdsAndUser([f1.getId(), f2.getId(), f3.getId()], userId);
     expect(found).toHaveLength(2);
-    const foundIds = found.map(f => f.id);
-    expect(foundIds).toContain(f1.id);
-    expect(foundIds).toContain(f2.id);
-    expect(foundIds).not.toContain(f3.id);
+    const foundIds = found.map(f => f.getId());
+    expect(foundIds).toContain(f1.getId());
+    expect(foundIds).toContain(f2.getId());
+    expect(foundIds).not.toContain(f3.getId());
     
-    const missing = await repository.findByIdsAndUser([f1.id], otherUserId);
+    const missing = await repository.findByIdsAndUser([f1.getId()], otherUserId);
     expect(missing).toHaveLength(0);
   });
 });

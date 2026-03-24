@@ -39,8 +39,8 @@ export interface FormProps {
 }
 
 export class Form {
-  public readonly id: string;
-  public readonly userId: string;
+  private readonly id: string;
+  private readonly userId: string;
   private name: string;
   private slug: Slug;
   public readonly publicId: string;
@@ -67,7 +67,7 @@ export class Form {
     this.description = props.description;
     this.thankYouMessage = props.thankYouMessage;
     this.config = props.config ?? {};
-    
+
     // Ensure default steps and branding exist if not provided
     if (!this.config.steps || this.config.steps.length === 0) {
       this.config.steps = this.getDefaultSteps();
@@ -130,6 +130,14 @@ export class Form {
 
   public getSteps(): FormStep[] {
     return this.config.steps || [];
+  }
+
+  public getUserId(): string {
+    return this.userId;
+  }
+
+  public getId(): string {
+    return this.id;
   }
 
   public getBranding(): FormBranding | undefined {

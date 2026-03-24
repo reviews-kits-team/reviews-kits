@@ -16,8 +16,8 @@ describe("Testimonial Entity", () => {
     it("should create a testimonial with all minimal properties", () => {
       const testimonial = new Testimonial(validProps);
       
-      expect(testimonial.id).toBe(validProps.id);
-      expect(testimonial.userId).toBe(validProps.userId);
+      expect(testimonial.getId()).toBe(validProps.id);
+      expect(testimonial.getUserId()).toBe(validProps.userId);
       expect(testimonial.getProps().content).toBe(validProps.content);
       expect(testimonial.getProps().authorName).toBe(validProps.authorName);
       expect(testimonial.createdAt).toBeInstanceOf(Date);

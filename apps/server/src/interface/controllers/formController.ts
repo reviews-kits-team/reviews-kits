@@ -92,7 +92,7 @@ export const formController = {
 
     const form = await container.formRepository.findById(formId);
     
-    if (!form || !form.userId || form.userId !== userId) {
+    if (!form || form.getUserId() !== userId) {
       return c.json({ error: 'Form not found' }, 404);
     }
 
@@ -126,7 +126,7 @@ export const formController = {
     }
 
     const form = await container.formRepository.findById(formId);
-    if (!form || form.userId !== userId) {
+    if (!form || form.getUserId() !== userId) {
       return c.json({ error: 'Form not found' }, 404);
     }
 
@@ -145,7 +145,7 @@ export const formController = {
     }
 
     const form = await container.formRepository.findById(formId);
-    if (!form || form.userId !== userId) {
+    if (!form || form.getUserId() !== userId) {
       return c.json({ error: 'Form not found' }, 404);
     }
 
@@ -169,7 +169,7 @@ export const formController = {
     }
 
     const form = await container.formRepository.findById(formId);
-    if (!form || form.userId !== userId) {
+    if (!form || form.getUserId() !== userId) {
       return c.json({ error: 'Form not found' }, 404);
     }
 
@@ -189,7 +189,7 @@ export const formController = {
     }
 
     const originalForm = await container.formRepository.findById(formId);
-    if (!originalForm || originalForm.userId !== userId) {
+    if (!originalForm || originalForm.getUserId() !== userId) {
       return c.json({ error: 'Form not found' }, 404);
     }
 
@@ -274,7 +274,7 @@ export const formController = {
 
     // Verify ownership
     const form = await container.formRepository.findById(formId);
-    if (!form || form.userId !== userId) {
+    if (!form || form.getUserId() !== userId) {
       return c.json({ error: 'Form not found' }, 404);
     }
 
@@ -295,7 +295,7 @@ export const formController = {
 
     // Verify ownership
     const form = await container.formRepository.findById(formId);
-    if (!form || form.userId !== userId) {
+    if (!form || form.getUserId() !== userId) {
       return c.json({ error: 'Form not found' }, 404);
     }
 

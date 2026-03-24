@@ -32,14 +32,14 @@ export const publicReviewController = {
     try {
       // Resolve internal ID from public ID
       const form = await container.formRepository.findByPublicId(publicId);
-      if (!form || form.userId !== userId) {
+      if (!form || form.getUserId() !== userId) {
         return c.json({ error: 'Form not found or invalid public ID' }, 404);
       }
 
       const testimonials = await container.testimonialRepository.findApprovedByUser(userId as string, {
         limit: Math.min(limit, 50), // Cap at 50 for performance
         minRating: minRating > 0 ? minRating : undefined,
-        formId: form.id
+        formId: form.getId()
       });
 
       return c.json({
@@ -93,8 +93,8 @@ export const publicReviewController = {
 
       const testimonial = new Testimonial({
         id: randomUUID(),
-        userId: form.userId,
-        formId: form.id,
+        userId: form.getUserId(),
+        formId: form.getId(),
         content,
         authorName,
         rating: rating ? Rating.create(Number(rating)) : undefined,
@@ -110,7 +110,7 @@ export const publicReviewController = {
       return c.json({ 
         success: true, 
         message: 'Review submitted successfully',
-        id: testimonial.id
+        id: testimonial.getId()
       }, 201);
     } catch (error: any) {
       console.error('Failed to submit public review:', error);
@@ -143,7 +143,7 @@ export const publicReviewController = {
         return c.json({ error: 'This form is currently inactive' }, 403);
       }
 
-      await container.formRepository.incrementVisits(form.id).catch(console.error);
+      await container.formRepository.incrementVisits(form.getId()).catch(console.error);
 
       const props = form.getProps();
       return c.json({

@@ -12,8 +12,8 @@ export const isSystemAdmin = async (c: Context, next: Next) => {
     return c.json({ error: "Unauthorized: No session" }, 403);
   }
 
-  // Robust check for isSystemAdmin property
-  const isSysAdmin = (session.user as any).isSystemAdmin === true || (session.user as any).isSystemAdmin === 1 || (session.user as any).isSystemAdmin === "true";
+  // Standard boolean check for isSystemAdmin property
+  const isSysAdmin = !!session.user.isSystemAdmin;
 
   if (!isSysAdmin) {
     return c.json({ error: "Unauthorized: System Admin only" }, 403);
