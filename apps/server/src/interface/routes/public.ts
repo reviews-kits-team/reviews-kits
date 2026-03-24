@@ -73,7 +73,7 @@ const getReviewsRoute = createRoute({
               authorTitle: z.string().optional(),
               authorUrl: z.string().optional(),
               createdAt: z.date().or(z.string()),
-              type: z.string(),
+              source: z.string(),
             })),
           }),
         },
