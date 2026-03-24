@@ -230,12 +230,13 @@ export default function FormEditorPage() {
   const activeStep = form.config.steps.find(s => s.id === activeStepId)
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white">
+    <div className="h-screen bg-[#0A0A0A] text-white flex flex-col overflow-hidden">
       <TopBar />
 
-      <main className="max-w-[1140px] mx-auto px-6 py-8 pb-20 relative z-10">
+      <main className="flex-1 flex flex-col min-h-0 relative z-10 overflow-hidden">
+        <div className="max-w-[1400px] w-full mx-auto px-4 md:px-6 py-4 md:py-6 flex-1 flex flex-col min-h-0 overflow-hidden">
         {/* Editor Title & Actions */}
-        <div className="mb-8 flex items-center justify-between gap-6 py-2">
+        <div className="mb-6 flex items-center justify-between gap-6 shrink-0">
           <div className="flex items-center gap-4 flex-1">
             <button
               onClick={() => navigate(-1)}
@@ -323,10 +324,10 @@ export default function FormEditorPage() {
           </div>
         </div>
 
-        <div className="flex flex-col lg:grid lg:grid-cols-[1fr_340px] gap-6 lg:gap-8 items-start">
+        <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[1fr_340px] gap-6 lg:gap-8 min-h-0 overflow-hidden">
           <section
             ref={canvasRef}
-            className="order-last lg:order-first w-full bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-2xl lg:rounded-3xl shadow-2xl h-[60vh] lg:h-[calc(100vh-140px)] overflow-y-auto p-4 md:p-8 lg:p-12 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] bg-fixed custom-scrollbar snap-y snap-mandatory"
+            className="order-first lg:order-first w-full bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-2xl lg:rounded-3xl shadow-2xl h-full overflow-y-auto p-4 md:p-8 lg:p-12 background-fixed custom-scrollbar snap-y snap-mandatory"
             style={{
               scrollBehavior: 'smooth',
               scrollbarWidth: 'none',
@@ -369,14 +370,14 @@ export default function FormEditorPage() {
                   key={step.id}
                   ref={el => { stepRefs.current[step.id] = el }}
                   data-step-id={step.id}
-                  className="flex flex-col items-center w-full min-h-[500px] md:min-h-[1100px] snap-center justify-center py-10 md:py-20 relative"
+                  className="flex flex-col items-center w-full min-h-[500px] md:min-h-[calc(100vh-160px)] snap-center justify-center py-10 md:py-12 relative"
                 >
                   {/* Step Card Container */}
                   <div
                     onClick={() => scrollToStep(step.id)}
                     className={`
                       transition-all duration-500 shadow-2xl relative bg-white overflow-hidden rounded-2xl md:rounded-3xl cursor-pointer
-                      ${previewMode === 'mobile' ? 'w-full max-w-[375px] h-[75vh] md:h-[812px]' : 'w-full max-w-[800px] h-[75vh] md:h-[920px]'}
+                      ${previewMode === 'mobile' ? 'w-full max-w-[375px] h-fit max-h-[calc(100vh-200px)]' : 'w-full max-w-[800px] h-fit max-h-[85%]'}
                       ${activeStepId === step.id ? 'ring-4 ring-[#0D9E75] ring-offset-4 ring-offset-[#0A0A0A]' : 'opacity-40 hover:opacity-100 hover:ring-2 hover:ring-white/20 scale-95 lg:scale-95'}
                       ${!step.isEnabled ? 'grayscale-[1]' : ''}
                     `}
@@ -429,7 +430,7 @@ export default function FormEditorPage() {
                                   fontFamily: headingFont,
                                   color: '#000000'
                                 }}
-                                className={`text-black text-2xl md:text-4xl font-black tracking-tighter cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                                className={`text-black text-2xl md:text-3xl font-black tracking-tighter cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
                               >
                                 {step.title}
                               </h2>
@@ -459,7 +460,7 @@ export default function FormEditorPage() {
                                   fontFamily: headingFont,
                                   color: '#000000'
                                 }}
-                                className={`text-black text-2xl md:text-4xl font-black tracking-tighter text-balance cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                                className={`text-black text-2xl md:text-3xl font-black tracking-tighter text-balance cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
                               >
                                 {step.title}
                               </h2>
@@ -602,7 +603,7 @@ export default function FormEditorPage() {
 
                   {/* Flow Arrow - Adjusted for snap spacing */}
                   {index < form.config.steps.length - 1 && (
-                    <div className="h-20 flex items-center justify-center text-white/20 animate-bounce mt-10">
+                    <div className="h-20 flex items-center justify-center text-white/20 animate-bounce mt-6">
                       <ChevronDown size={32} strokeWidth={3} />
                     </div>
                   )}
@@ -637,8 +638,8 @@ export default function FormEditorPage() {
           </section>
 
           {/* Right Sidebar: Settings */}
-          <aside className="order-first lg:order-last w-full lg:w-auto bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-2xl lg:rounded-3xl flex flex-col overflow-hidden lg:sticky top-8 h-[45vh] lg:h-[calc(100vh-140px)] z-40 shadow-2xl">
-            <div className="flex border-b border-white/5 p-1 bg-white/5 shrink-0">
+          <aside className="order-last lg:order-last w-full lg:w-auto bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-2xl lg:rounded-3xl flex flex-col overflow-hidden h-[40vh] lg:h-full z-40 shadow-2xl relative">
+            <div className="flex border-b border-white/5 p-1 bg-white/5 shrink-0 sticky top-0 z-50">
               <button
                 onClick={() => setActiveTab('pages')}
                 className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'pages' ? 'bg-[#0D9E75] text-white shadow-lg shadow-[#0D9E75]/20' : 'text-white/40 hover:text-white/60'}`}
@@ -917,7 +918,8 @@ export default function FormEditorPage() {
             </div>
           </aside>
         </div>
-      </main>
+      </div>
+    </main>
 
       {/* Toast Notification */}
       {showSaveSuccess && (
