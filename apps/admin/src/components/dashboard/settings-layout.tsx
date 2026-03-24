@@ -11,8 +11,8 @@ interface SettingsLayoutProps {
 
 const navItems = [
   { label: 'Profil', path: '/profile', icon: User },
-  { label: 'Paramètres', path: '/settings', icon: Settings },
-  { label: 'Sécurité', path: '/security', icon: ShieldCheck },
+  { label: 'Settings', path: '/settings', icon: Settings },
+  { label: 'Security', path: '/security', icon: ShieldCheck },
 ]
 
 export const SettingsLayout = ({ children, title, subtitle }: SettingsLayoutProps) => {

@@ -76,9 +76,9 @@ export const formController = {
     } catch (err: any) {
       console.error("Failed to create form:", err);
       if (err.message?.includes('unique constraint') && err.message?.includes('slug')) {
-        return c.json({ error: 'Ce slug est déjà utilisé par un autre formulaire.' }, 409);
+        return c.json({ error: 'This slug is already in use by another form.' }, 409);
       }
-      return c.json({ error: err.message || 'Erreur lors de la création du formulaire' }, 500);
+      return c.json({ error: err.message || 'Error occurred while creating the form' }, 500);
     }
   },
 
@@ -235,7 +235,7 @@ export const formController = {
       return c.json({ success: true, isActive });
     } catch (err: any) {
       console.error("Failed to batch toggle form status:", err);
-      return c.json({ error: 'Erreur lors de la mise à jour groupée' }, 500);
+      return c.json({ error: 'Error during batch update' }, 500);
     }
   },
 
@@ -260,7 +260,7 @@ export const formController = {
       return c.json({ success: true });
     } catch (err: any) {
       console.error("Failed to batch delete forms:", err);
-      return c.json({ error: 'Erreur lors de la suppression groupée' }, 500);
+      return c.json({ error: 'Error during batch deletion' }, 500);
     }
   },
 

@@ -161,7 +161,7 @@ export default function DashboardPage() {
     }
   };
 
-  const userName = session?.user?.name?.split(' ')[0] || 'Utilisateur'
+  const userName = session?.user?.name?.split(' ')[0] || 'User'
 
   return (
     <div className="min-h-screen">
@@ -179,9 +179,9 @@ export default function DashboardPage() {
               // dashboard
             </span>
             <h1 className="text-[clamp(26px,3vw,36px)] font-extrabold tracking-tighter text-[var(--v3-text)] leading-[1.1] mb-2">
-              Bonjour, {userName} 👋
+              Hello, {userName} 👋
             </h1>
-            <p className="text-[15px] text-[var(--v3-muted2)]">Vue d'ensemble de ta plateforme de reviews.</p>
+            <p className="text-[15px] text-[var(--v3-muted2)]">Overview of your reviews platform.</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-14">
@@ -194,20 +194,20 @@ export default function DashboardPage() {
             />
             <StatCard 
               icon={<CheckCircle2 size={18} />} 
-              label="Taux de complétion" 
+              label="Completion rate" 
               value={`${stats.completionRate}%`} 
               delta={stats.completionGrowth !== undefined ? (stats.completionGrowth > 0 ? `↑ +${stats.completionGrowth}%` : stats.completionGrowth < 0 ? `↓ ${stats.completionGrowth}%` : "0%") : "—"} 
               colorClass="bg-emerald-500/10 border-emerald-500/20 text-emerald-500" 
             />
             <StatCard 
               icon={<Star size={18} />} 
-              label="Note moyenne" 
+              label="Average rating" 
               value={stats.averageRating.toFixed(1)} 
               colorClass="bg-amber-500/10 border-amber-500/20 text-amber-500" 
             />
             <StatCard 
               icon={<Users size={18} />} 
-              label="Répondants uniques" 
+              label="Unique respondents" 
               value={stats.uniqueRespondents.toString()} 
               delta="—" 
               colorClass="bg-sky-500/10 border-sky-500/20 text-sky-500" 
@@ -216,9 +216,9 @@ export default function DashboardPage() {
 
           <div className="flex justify-between items-center mb-6 gap-4 flex-wrap">
             <div className="flex items-center gap-2.5">
-              <span className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--v3-teal)]">// mes formulaires</span>
+              <span className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--v3-teal)]">// my forms</span>
               <span className="text-[11px] font-semibold bg-[var(--v3-bg3)] border border-[var(--v3-border2)] text-[var(--v3-muted2)] px-2.5 py-0.5 rounded-full">
-                {forms.length} formulaires
+                {forms.length} forms
               </span>
             </div>
             <button 
@@ -227,13 +227,13 @@ export default function DashboardPage() {
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
               <Plus size={14} strokeWidth={2.5} />
-              Ajouter un formulaire
+              Add form
             </button>
           </div>
 
           <div className="mb-20">
             {loading ? (
-              <div className="py-20 text-center text-[var(--v3-muted)] italic">Chargement...</div>
+              <div className="py-20 text-center text-[var(--v3-muted)] italic">Loading...</div>
             ) : forms.length > 0 ? (
               <FormTable 
                 forms={forms} 
@@ -249,12 +249,12 @@ export default function DashboardPage() {
               />
             ) : (
               <div className="py-20 bg-[var(--v3-bg2)] border border-dashed border-white/5 rounded-2xl text-center">
-                <p className="text-[var(--v3-muted)] mb-4">Tu n'as pas encore de formulaire.</p>
+                <p className="text-[var(--v3-muted)] mb-4">You don't have any forms yet.</p>
                 <button 
                   onClick={() => setIsModalOpen(true)}
                   className="text-[var(--v3-teal)] font-bold hover:underline"
                 >
-                  Créer ton premier formulaire
+                  Create your first form
                 </button>
               </div>
             )}

@@ -4,8 +4,8 @@ import { Lock, Shield, Fingerprint } from 'lucide-react'
 export default function SecurityPage() {
   return (
     <SettingsLayout 
-      title="Sécurité" 
-      subtitle="Protège ton compte avec des paramètres de sécurité avancés."
+      title="Security" 
+      subtitle="Protect your account with advanced security settings."
     >
       <div className="space-y-8">
         {/* Password Reset Section */}
@@ -47,7 +47,7 @@ export default function SecurityPage() {
            </div>
 
            <button className="w-full py-3.5 bg-white/5 border border-white/10 text-white rounded-xl font-bold text-sm hover:border-rose-500/30 transition-all shadow-xl">
-             Mettre à jour le mot de passe
+             Update password
            </button>
         </section>
 
@@ -63,12 +63,12 @@ export default function SecurityPage() {
                     <Fingerprint size={20} />
                  </div>
                  <div>
-                    <h3 className="font-bold text-[var(--v3-text)]">Double Authentification (2FA)</h3>
-                    <p className="text-xs text-[var(--v3-muted2)] mt-0.5">Ajoute une couche de sécurité supplémentaire.</p>
+                    <h3 className="font-bold text-[var(--v3-text)]">Two-Factor Authentication (2FA)</h3>
+                    <p className="text-xs text-[var(--v3-muted2)] mt-0.5">Add an extra layer of security.</p>
                  </div>
               </div>
               <button className="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full text-xs font-bold transition-all text-[var(--v3-muted2)]">
-                 Désactivé
+                 Disabled
               </button>
            </div>
         </section>
@@ -79,7 +79,7 @@ export default function SecurityPage() {
               <div className="w-9 h-9 rounded-xl bg-sky-500/10 flex items-center justify-center text-sky-500">
                  <Shield size={18} />
               </div>
-              <h3 className="font-bold text-[var(--v3-text)]">Sessions actives</h3>
+              <h3 className="font-bold text-[var(--v3-text)]">Active sessions</h3>
            </div>
            
            <div className="bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-xl p-4 flex items-center justify-between">

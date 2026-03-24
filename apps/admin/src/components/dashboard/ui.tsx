@@ -14,11 +14,11 @@ export const Stars = ({ rating, size = 13 }: { rating: number | null, size?: num
 
 export const Badge = ({ status }: { status: string }) => {
   const config: Record<string, { label: string; active: boolean; color: string }> = {
-    active: { label: 'Actif', active: true, color: 'var(--v3-teal)' },
-    draft: { label: 'Brouillon', active: false, color: 'white' },
-    approved: { label: 'Approuvé', active: true, color: 'var(--v3-teal)' },
-    pending: { label: 'En attente', active: true, color: '#f59e0b' },
-    rejected: { label: 'Rejeté', active: false, color: '#e84040' },
+    active: { label: 'Active', active: true, color: 'var(--v3-teal)' },
+    draft: { label: 'Draft', active: false, color: 'white' },
+    approved: { label: 'Approved', active: true, color: 'var(--v3-teal)' },
+    pending: { label: 'Pending', active: true, color: '#f59e0b' },
+    rejected: { label: 'Rejected', active: false, color: '#e84040' },
   }
 
   const { label, active, color } = config[status.toLowerCase()] || config.draft

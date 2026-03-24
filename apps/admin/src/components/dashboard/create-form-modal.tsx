@@ -113,7 +113,7 @@ export function CreateFormModal({ isOpen, onClose, onCreated }: CreateFormModalP
             <textarea 
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="À quoi sert ce formulaire..."
+              placeholder="What is this form for..."
               className="w-full bg-[var(--v3-bg)] border border-[var(--v3-border)] rounded-lg px-4 py-3 text-sm text-[var(--v3-text)] focus:border-[var(--v3-teal)]/50 focus:outline-none transition-all min-h-[100px] resize-none"
             />
           </div>
@@ -132,7 +132,7 @@ export function CreateFormModal({ isOpen, onClose, onCreated }: CreateFormModalP
                className="flex-[2] bg-[var(--v3-teal)] text-white px-5 py-3 rounded-lg text-sm font-semibold hover:-translate-y-0.5 hover:shadow-[0_8px_24px_var(--v3-teal-glow)] transition-all flex items-center justify-center gap-2"
              >
                {loading && <Loader2 size={16} className="animate-spin" />}
-               Créer le formulaire
+               Create Form
              </button>
           </div>
         </form>

@@ -142,29 +142,29 @@ export class Form {
       {
         id: randomUUID(),
         type: 'rating',
-        title: 'Quelle note nous donneriez-vous ?',
-        description: 'Sur une échelle de 1 à 5, comment évalueriez-vous notre service ?',
+        title: 'How would you rate us?',
+        description: 'On a scale of 1 to 5, how would you rate our service?',
         isEnabled: true
       },
       {
         id: randomUUID(),
         type: 'textarea',
-        title: 'Dites-nous en plus !',
-        description: 'Votre avis nous aide à nous améliorer.',
+        title: 'Tell us more!',
+        description: 'Your feedback helps us improve.',
         isEnabled: true
       },
       {
         id: randomUUID(),
         type: 'attribution',
-        title: 'À propos de vous',
-        description: 'Ces informations seront affichées avec votre témoignage.',
+        title: 'About you',
+        description: 'This information will be displayed with your testimonial.',
         isEnabled: true
       },
       {
         id: randomUUID(),
         type: 'success',
-        title: 'Merci !',
-        description: 'Votre témoignage a été envoyé avec succès.',
+        title: 'Thank you!',
+        description: 'Your testimonial has been submitted successfully.',
         isEnabled: true
       }
     ];

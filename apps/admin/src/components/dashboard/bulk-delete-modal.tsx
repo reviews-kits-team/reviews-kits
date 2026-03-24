@@ -11,7 +11,7 @@ interface BulkDeleteModalProps {
 
 export const BulkDeleteModal = ({ isOpen, onClose, onConfirm, count, loading }: BulkDeleteModalProps) => {
   const [confirmationText, setConfirmationText] = useState('');
-  const REQUIRED_TEXT = 'supprimer la sélection';
+  const REQUIRED_TEXT = 'delete selection';
 
   if (!isOpen) return null;
 
@@ -46,11 +46,11 @@ export const BulkDeleteModal = ({ isOpen, onClose, onConfirm, count, loading }: 
           </div>
 
           <h2 className="text-xl font-black tracking-tight text-[var(--v3-text)] mb-3">
-            Supprimer la sélection ?
+            Delete selection?
           </h2>
           <p className="text-[var(--v3-muted2)] text-sm leading-relaxed mb-6">
-            Tu es sur le point de supprimer <span className="text-rose-400 font-bold">{count} formulaires</span>.
-            Cette action est irréversible. Pour confirmer, tape <span className="text-[var(--v3-text)] font-mono font-bold select-none cursor-default bg-white/5 px-1.5 py-0.5 rounded">"{REQUIRED_TEXT}"</span> ci-dessous :
+            You are about to delete <span className="text-rose-400 font-bold">{count} forms</span>.
+            This action is irreversible. To confirm, type <span className="text-[var(--v3-text)] font-mono font-bold select-none cursor-default bg-white/5 px-1.5 py-0.5 rounded">"{REQUIRED_TEXT}"</span> below :
           </p>
 
           <div className="mb-8">
@@ -58,7 +58,7 @@ export const BulkDeleteModal = ({ isOpen, onClose, onConfirm, count, loading }: 
               type="text"
               value={confirmationText}
               onChange={(e) => setConfirmationText(e.target.value)}
-              placeholder="Tape la phrase de confirmation..."
+              placeholder="Type the confirmation phrase..."
               className="w-full bg-[var(--v3-bg)] border border-[var(--v3-border)] rounded-xl px-4 py-3 text-sm text-[var(--v3-text)] placeholder:text-[var(--v3-muted2)] focus:outline-none focus:border-rose-500/50 transition-all"
               autoFocus
             />
@@ -69,14 +69,14 @@ export const BulkDeleteModal = ({ isOpen, onClose, onConfirm, count, loading }: 
               onClick={onClose}
               className="flex-1 px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-[var(--v3-muted2)] hover:text-[var(--v3-text)] bg-white/5 hover:bg-white/10 transition-all border border-white/5"
             >
-              Annuler
+              Cancel
             </button>
             <button
               onClick={handleConfirm}
               disabled={loading || confirmationText !== REQUIRED_TEXT}
               className="flex-1 px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-rose-400 border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 hover:border-rose-500/40 transition-all disabled:opacity-30 disabled:grayscale"
             >
-              {loading ? 'Suppression...' : 'Supprimer définitivement'}
+              {loading ? 'Deleting...' : 'Delete permanently'}
             </button>
           </div>
         </div>

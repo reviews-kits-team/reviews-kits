@@ -124,7 +124,7 @@ const SortableRow = ({ form, isSelected, onSelect, onOpen, onDelete, onDuplicate
       <td className="py-3.5 px-4 text-center">
         <div className="flex flex-col items-center">
           <span className="text-sm font-bold text-[var(--v3-text)]">{form.responses ?? 0}</span>
-          <span className="text-[9px] uppercase tracking-wider font-bold text-[var(--v3-muted2)] opacity-60">Réponses</span>
+          <span className="text-[9px] uppercase tracking-wider font-bold text-[var(--v3-muted2)] opacity-60">Responses</span>
         </div>
       </td>
       <td className="py-3.5 px-4 text-center hidden sm:table-cell">
@@ -150,7 +150,7 @@ const SortableRow = ({ form, isSelected, onSelect, onOpen, onDelete, onDuplicate
         <div className="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             className="p-2 text-[var(--v3-muted2)] hover:text-[var(--v3-text)] hover:bg-white/5 rounded-lg transition-all group/btn"
-            title="Témoignages"
+            title="Testimonials"
             onClick={() => onOpen(form.id)}
           >
             <MessageSquare size={14} className="group-hover/btn:scale-110 transition-transform" />
@@ -158,7 +158,7 @@ const SortableRow = ({ form, isSelected, onSelect, onOpen, onDelete, onDuplicate
 
           <button
             className="p-2 text-[var(--v3-muted2)] hover:text-[var(--v3-teal)] hover:bg-[var(--v3-teal)]/10 rounded-lg transition-all group/btn"
-            title="Éditer"
+            title="Edit"
             onClick={(e) => {
               e.stopPropagation();
               onEdit(form.id);
@@ -283,7 +283,7 @@ export const FormTable = ({
       {selectedIds.size > 0 && (
         <div className="absolute top-0 left-0 right-0 z-20 h-14 bg-[var(--v3-teal)] flex items-center justify-between px-6 animate-in slide-in-from-top duration-300">
           <div className="flex items-center gap-4">
-            <span className="text-sm font-bold text-white">{selectedIds.size} sélectionné(s)</span>
+            <span className="text-sm font-bold text-white">{selectedIds.size} selected</span>
             <div className="h-4 w-px bg-white/20" />
             
             <button 
@@ -343,7 +343,7 @@ export const FormTable = ({
                   <th className="py-4 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] hidden md:table-cell">Status</th>
                   <th className="py-4 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] text-center">Stats</th>
                   <th className="py-4 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] text-center hidden sm:table-cell">Rating</th>
-                  <th className="py-4 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] text-center">Complétion</th>
+                  <th className="py-4 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] text-center">Completion</th>
                   <th className="py-4 px-4 text-right pr-6 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)]">Actions</th>
                 </tr>
               </thead>
@@ -372,7 +372,7 @@ export const FormTable = ({
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-6 py-4 border-t border-white/5 bg-white/[0.01]">
           <div className="text-xs text-[var(--v3-muted2)]">
-            Affichage de <span className="text-[var(--v3-text)] font-bold">{startIndex + 1}</span> à <span className="text-[var(--v3-text)] font-bold">{Math.min(startIndex + ITEMS_PER_PAGE, forms.length)}</span> sur <span className="text-[var(--v3-text)] font-bold">{forms.length}</span> formulaires
+            Showing <span className="text-[var(--v3-text)] font-bold">{startIndex + 1}</span> to <span className="text-[var(--v3-text)] font-bold">{Math.min(startIndex + ITEMS_PER_PAGE, forms.length)}</span> of <span className="text-[var(--v3-text)] font-bold">{forms.length}</span> forms
           </div>
           <div className="flex items-center gap-1.5">
             <button

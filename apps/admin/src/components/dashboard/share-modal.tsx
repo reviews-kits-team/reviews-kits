@@ -72,7 +72,7 @@ export const ShareModal = ({ isOpen, onClose, formName, formSlug, publicId }: Sh
                   className={`px-4 rounded-xl flex items-center gap-2 font-bold text-xs uppercase transition-all ${copiedLink ? 'bg-emerald-500 text-white' : 'bg-[var(--v3-teal)] text-white hover:shadow-[0_8px_20px_rgba(45,212,191,0.2)]'}`}
                 >
                   {copiedLink ? <Check size={16} /> : <Copy size={16} />}
-                  {copiedLink ? 'Copié' : 'Copier'}
+                  {copiedLink ? 'Copied' : 'Copy'}
                 </button>
               </div>
             </div>
@@ -94,17 +94,17 @@ export const ShareModal = ({ isOpen, onClose, formName, formSlug, publicId }: Sh
                   className={`px-4 rounded-xl flex items-center gap-2 font-bold text-xs uppercase transition-all ${copiedId ? 'bg-emerald-500 text-white' : 'bg-purple-600/80 text-white hover:bg-purple-600 hover:shadow-[0_8px_20px_rgba(147,51,234,0.2)]'}`}
                 >
                   {copiedId ? <Check size={16} /> : <Copy size={16} />}
-                  {copiedId ? 'Copié' : 'Copier'}
+                  {copiedId ? 'Copied' : 'Copy'}
                 </button>
               </div>
               <p className="mt-2 text-[10px] text-[var(--v3-muted2)] italic">
-                Utilise cet ID pour tes requêtes API publiques.
+                Use this ID for your public API requests.
               </p>
             </div>
 
             {/* Social Sharing */}
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--v3-muted2)] block mb-4">Partager sur les réseaux</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--v3-muted2)] block mb-4">Share on networks</span>
               <div className="grid grid-cols-3 gap-2">
                 <button 
                   onClick={() => shareSocial('twitter')}
