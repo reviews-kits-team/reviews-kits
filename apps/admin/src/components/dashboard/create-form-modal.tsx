@@ -46,7 +46,7 @@ export function CreateFormModal({ isOpen, onClose, onCreated }: CreateFormModalP
       setDescription('')
       onClose()
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Une erreur est survenue'
+      const message = err instanceof Error ? err.message : 'An error occurred'
       setError(message)
     } finally {
       setLoading(false)
@@ -66,7 +66,7 @@ export function CreateFormModal({ isOpen, onClose, onCreated }: CreateFormModalP
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
       <div className="bg-[var(--v3-bg2)] border border-[var(--v3-border)] w-full max-w-[500px] rounded-2xl shadow-[0_32px_80px_rgba(0,0,0,0.6)] overflow-hidden scale-in">
         <div className="flex justify-between items-center px-6 py-5 border-b border-[var(--v3-border)]">
-          <h2 className="text-xl font-bold tracking-tight text-[var(--v3-text)]">Nouveau Formulaire</h2>
+          <h2 className="text-xl font-bold tracking-tight text-[var(--v3-text)]">New Form</h2>
           <button onClick={onClose} className="text-[var(--v3-muted)] hover:text-white transition-colors">
             <X size={20} />
           </button>
@@ -80,13 +80,13 @@ export function CreateFormModal({ isOpen, onClose, onCreated }: CreateFormModalP
           )}
 
           <div className="space-y-2">
-            <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--v3-teal)]">Nom du formulaire</label>
+            <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--v3-teal)]">Form name</label>
             <input 
               required
               type="text" 
               value={name}
               onChange={handleNameChange}
-              placeholder="ex: Feedback Produit SaaS"
+              placeholder="ex: SaaS Product Feedback"
               className="w-full bg-[var(--v3-bg)] border border-[var(--v3-border)] rounded-lg px-4 py-3 text-sm text-[var(--v3-text)] focus:border-[var(--v3-teal)]/50 focus:outline-none transition-all"
             />
           </div>
@@ -109,7 +109,7 @@ export function CreateFormModal({ isOpen, onClose, onCreated }: CreateFormModalP
           </div>
 
           <div className="space-y-2">
-            <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--v3-teal)]">Description (optionnelle)</label>
+            <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--v3-teal)]">Description (optional)</label>
             <textarea 
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -124,7 +124,7 @@ export function CreateFormModal({ isOpen, onClose, onCreated }: CreateFormModalP
                onClick={onClose}
                className="flex-1 bg-[var(--v3-bg3)] border border-[var(--v3-border)] text-white px-5 py-3 rounded-lg text-sm font-semibold hover:bg-white/5 transition-all"
              >
-               Annuler
+               Cancel
              </button>
              <button 
                type="submit"

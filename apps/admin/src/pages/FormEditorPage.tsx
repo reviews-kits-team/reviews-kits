@@ -472,14 +472,14 @@ export default function FormEditorPage() {
                               </p>
                               <div className="flex gap-8 justify-center">
                                 {(step.config as Record<string, string | boolean>)?.ratingType === 'emojis' ? (
-                                  ['😠', '🙁', '😐', '🙂', '😍'].map((emoji, i) => (
-                                    <div key={i} className="text-4xl filter grayscale hover:grayscale-0 transition-all cursor-default">
+                                  ['😠', '🙁', '😐', '🙂', '😍'].map((emoji) => (
+                                    <div key={emoji} className="text-4xl filter grayscale hover:grayscale-0 transition-all cursor-default">
                                       {emoji}
                                     </div>
                                   ))
                                 ) : (
-                                  [1, 2, 3, 4, 5].map(i => (
-                                    <div key={i} className="p-2">
+                                  [1, 2, 3, 4, 5].map(v => (
+                                    <div key={v} className="p-2">
                                       <Star size={previewMode === 'mobile' ? 30 : 40} className="text-gray-300 fill-gray-200" />
                                     </div>
                                   ))
@@ -490,7 +490,7 @@ export default function FormEditorPage() {
                                 style={{ backgroundColor: primaryColor, fontFamily: bodyFont }}
                                 className={`text-white w-full py-4 rounded-xl text-xs font-bold shadow-xl transition-all border-2 ${selectedElement === 'buttonText' && activeStepId === step.id ? 'border-dashed border-white ring-4 ring-black/10' : 'border-transparent'}`}
                               >
-                                {(step.config as Record<string, string | boolean>)?.buttonText || 'Continuer'}
+                                {(step.config as Record<string, string | boolean>)?.buttonText || 'Continue'}
                               </button>
                             </div>
                           )}

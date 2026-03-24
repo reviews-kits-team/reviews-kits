@@ -104,7 +104,7 @@ export const ProfileMenu = ({ isOpen, onClose }: ProfileMenuProps) => {
                 <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[var(--v3-muted2)] group-hover:text-[var(--v3-teal)] transition-colors">
                   <User size={16} />
                 </div>
-                Mon Profil
+                My Profile
               </div>
               <ChevronRight size={14} className="text-[var(--v3-muted)]" />
             </Link>

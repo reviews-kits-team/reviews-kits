@@ -101,8 +101,43 @@ export default function PublicFormPage() {
 
   const headingFont = branding?.headingFont || 'Inter'
   const bodyFont = branding?.bodyFont || 'Inter'
+  const [fontsReady, setFontsReady] = useState(false)
 
   const getFontUrl = (font: string) => `https://fonts.googleapis.com/css2?family=${font.replace(/ /g, '+')}:wght@400;700;900&display=swap`
+
+  // Load fonts and apply only once ready to prevent FOUT
+  useEffect(() => {
+    let cancelled = false
+    const fonts = [headingFont, bodyFont]
+    const links: HTMLLinkElement[] = []
+
+    fonts.forEach(font => {
+      const id = `font-${font.replace(/ /g, '-')}`
+      if (!document.getElementById(id)) {
+        const link = document.createElement('link')
+        link.id = id
+        link.rel = 'stylesheet'
+        link.href = getFontUrl(font)
+        document.head.appendChild(link)
+        links.push(link)
+      }
+    })
+
+    Promise.all(fonts.map(f => document.fonts.load(`700 1em "${f}"`))).then(() => {
+      if (!cancelled) setFontsReady(true)
+    })
+
+    return () => {
+      cancelled = true
+      links.forEach(link => {
+        if (link.parentNode) document.head.removeChild(link)
+      })
+      setFontsReady(false)
+    }
+  }, [headingFont, bodyFont])
+
+  const appliedHeadingFont = fontsReady ? headingFont : 'system-ui, sans-serif'
+  const appliedBodyFont = fontsReady ? bodyFont : 'system-ui, sans-serif'
 
   const handleNext = async () => {
     if (currentStep?.type === 'attribution') {
@@ -164,14 +199,7 @@ export default function PublicFormPage() {
   )
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] flex flex-col items-center justify-center p-6" style={{ fontFamily: bodyFont }}>
-      <style>
-        {`
-          @import url('${getFontUrl(headingFont)}');
-          @import url('${getFontUrl(bodyFont)}');
-        `}
-      </style>
-
+    <div className="min-h-screen bg-[#F9FAFB] flex flex-col items-center justify-center p-6" style={{ fontFamily: appliedBodyFont }}>
       <div className="w-full max-w-xl bg-white rounded-[3rem] overflow-hidden border border-gray-100 flex flex-col min-h-[650px] relative transition-all duration-500">
         {/* Progress Bar */}
         <div className="h-1.5 w-full bg-gray-50 flex">
@@ -195,7 +223,7 @@ export default function PublicFormPage() {
           {/* Welcome Step */}
           {currentStep?.type === 'welcome' && (
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 w-full flex flex-col items-center">
-              <h1 className="text-4xl font-black tracking-tighter text-black mb-6" style={{ fontFamily: headingFont, color: '#000000' }}>
+              <h1 className="text-4xl font-black tracking-tighter text-black mb-6" style={{ fontFamily: appliedHeadingFont, color: '#000000' }}>
                 {currentStep.title}
               </h1>
               <p className="text-gray-600 mb-10 text-xl leading-relaxed max-w-md">
@@ -214,7 +242,7 @@ export default function PublicFormPage() {
           {/* Informative Step */}
           {currentStep?.type === 'informative' && (
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 w-full flex flex-col items-center">
-              <h1 className="text-4xl font-black tracking-tighter text-black mb-6" style={{ fontFamily: headingFont, color: '#000000' }}>
+              <h1 className="text-4xl font-black tracking-tighter text-black mb-6" style={{ fontFamily: appliedHeadingFont, color: '#000000' }}>
                 {currentStep.title}
               </h1>
               <p className="text-gray-600 mb-10 text-xl leading-relaxed max-w-md">
@@ -233,7 +261,7 @@ export default function PublicFormPage() {
           {/* Rating Step */}
           {currentStep?.type === 'rating' && (
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 w-full flex flex-col items-center">
-              <h1 className="text-4xl font-black tracking-tighter text-black mb-6" style={{ fontFamily: headingFont, color: '#000000' }}>
+              <h1 className="text-4xl font-black tracking-tighter text-black mb-6" style={{ fontFamily: appliedHeadingFont, color: '#000000' }}>
                 {currentStep.title}
               </h1>
               <p className="text-gray-600 mb-10 text-xl leading-relaxed">{currentStep.description}</p>
@@ -278,7 +306,7 @@ export default function PublicFormPage() {
           {/* Textarea Step */}
           {currentStep?.type === 'textarea' && (
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 w-full flex flex-col items-center">
-              <h1 className="text-4xl font-black tracking-tighter text-black mb-6" style={{ fontFamily: headingFont, color: '#000000' }}>
+              <h1 className="text-4xl font-black tracking-tighter text-black mb-6" style={{ fontFamily: appliedHeadingFont, color: '#000000' }}>
                 {currentStep.title}
               </h1>
               <p className="text-gray-600 mb-8 text-xl leading-relaxed">{currentStep.description}</p>
@@ -313,7 +341,7 @@ export default function PublicFormPage() {
           {/* Attribution Step */}
           {currentStep?.type === 'attribution' && (
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 w-full flex flex-col items-center">
-              <h1 className="text-4xl font-black tracking-tighter text-black mb-6" style={{ fontFamily: headingFont, color: '#000000' }}>
+              <h1 className="text-4xl font-black tracking-tighter text-black mb-6" style={{ fontFamily: appliedHeadingFont, color: '#000000' }}>
                 {currentStep.title}
               </h1>
               <p className="text-gray-600 mb-10 text-xl leading-relaxed">{currentStep.description}</p>
@@ -394,7 +422,7 @@ export default function PublicFormPage() {
               >
                 <CheckCircle size={64} />
               </div>
-              <h1 className="text-4xl font-black tracking-tighter text-black mb-6" style={{ fontFamily: headingFont, color: '#000000' }}>
+              <h1 className="text-4xl font-black tracking-tighter text-black mb-6" style={{ fontFamily: appliedHeadingFont, color: '#000000' }}>
                 {currentStep.title}
               </h1>
               <p className="text-gray-600 text-xl leading-relaxed max-w-md">

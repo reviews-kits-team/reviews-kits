@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it, setSystemTime } from "bun:test";
 import { Form, type FormProps } from "../../../../src/domain/entities/Form";
 import { Slug } from "../../../../src/domain/value-objects/Slug";
 
@@ -42,13 +42,15 @@ describe("Form Entity", () => {
 
   describe("Behavior", () => {
     describe("Status Toggle", () => {
-      it("should toggle isActive status and refresh updatedAt", async () => {
+      it("should toggle isActive status and refresh updatedAt", () => {
+        const now = new Date("2024-01-01T00:00:00Z");
+        setSystemTime(now);
         const form = new Form(validProps);
         const initialUpdatedAt = form.getProps().updatedAt!;
         
         expect(form.getIsActive()).toBe(true);
         
-        await new Promise(resolve => setTimeout(resolve, 10));
+        setSystemTime(new Date(now.getTime() + 1000));
         
         form.toggleActive();
         expect(form.getIsActive()).toBe(false);
@@ -60,11 +62,13 @@ describe("Form Entity", () => {
     });
 
     describe("Name Update", () => {
-      it("should update name and refresh updatedAt", async () => {
+      it("should update name and refresh updatedAt", () => {
+        const now = new Date("2024-01-01T00:00:00Z");
+        setSystemTime(now);
         const form = new Form(validProps);
         const initialUpdatedAt = form.getProps().updatedAt!;
         
-        await new Promise(resolve => setTimeout(resolve, 10));
+        setSystemTime(new Date(now.getTime() + 1000));
         
         form.updateName("Support Form");
         
@@ -79,7 +83,9 @@ describe("Form Entity", () => {
     });
 
     describe("Config Update", () => {
-      it("should update config and merge with existing ones", async () => {
+      it("should update config and merge with existing ones", () => {
+        const now = new Date("2024-01-01T00:00:00Z");
+        setSystemTime(now);
         const propsWithConfig: FormProps = {
           ...validProps,
           config: { showLogo: true, primaryColor: "#000" }
@@ -87,7 +93,7 @@ describe("Form Entity", () => {
         const form = new Form(propsWithConfig);
         const initialUpdatedAt = form.getProps().updatedAt!;
         
-        await new Promise(resolve => setTimeout(resolve, 10));
+        setSystemTime(new Date(now.getTime() + 1000));
         
         form.updateConfig({ primaryColor: "#fff", submissionLimit: 100 });
         

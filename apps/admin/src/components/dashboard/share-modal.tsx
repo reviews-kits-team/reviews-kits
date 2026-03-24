@@ -30,7 +30,7 @@ export const ShareModal = ({ isOpen, onClose, formName, formSlug, publicId }: Sh
   };
 
   const shareSocial = (platform: 'twitter' | 'linkedin' | 'facebook') => {
-    const text = `Consultez mon formulaire: ${formName}`;
+    const text = `Check out my form: ${formName}`;
     const urls = {
       twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`,
       linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`,
@@ -47,7 +47,7 @@ export const ShareModal = ({ isOpen, onClose, formName, formSlug, publicId }: Sh
         <div className="p-8">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-black tracking-tight text-[var(--v3-text)]">
-              Partager le formulaire
+              Share form
             </h2>
             <button onClick={onClose} className="p-2 text-[var(--v3-muted2)] hover:text-[var(--v3-text)] hover:bg-white/5 rounded-xl transition-all">
               <X size={20} />
@@ -59,7 +59,7 @@ export const ShareModal = ({ isOpen, onClose, formName, formSlug, publicId }: Sh
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <Globe size={14} className="text-[var(--v3-teal)]" />
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--v3-muted2)]">Lien direct</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--v3-muted2)]">Direct link</span>
               </div>
               <div className="flex gap-2">
                 <input 
@@ -81,7 +81,7 @@ export const ShareModal = ({ isOpen, onClose, formName, formSlug, publicId }: Sh
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <FileText size={14} className="text-purple-400" />
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--v3-muted2)]">ID du formulaire (API)</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--v3-muted2)]">Form ID (API)</span>
               </div>
               <div className="flex gap-2">
                 <input 

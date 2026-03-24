@@ -7,7 +7,7 @@ export default function ProfilePage() {
 
   return (
     <SettingsLayout 
-      title="Mon Profil" 
+      title="My Profile" 
       subtitle="Manage your personal information and visual identity."
     >
       <div className="space-y-8">
@@ -23,7 +23,7 @@ export default function ProfilePage() {
                 </button>
               </div>
               <div>
-                <h3 className="font-bold text-[var(--v3-text)] text-lg">Photo de profil</h3>
+                <h3 className="font-bold text-[var(--v3-text)] text-lg">Profile picture</h3>
                 <p className="text-xs text-[var(--v3-muted2)] mt-1">Click on the icon to modify your avatar.</p>
               </div>
            </div>
@@ -33,7 +33,7 @@ export default function ProfilePage() {
         <section className="space-y-6">
            <div className="grid grid-cols-1 gap-6">
               <div className="space-y-2">
-                <label className="text-[11px] font-black uppercase tracking-wider text-[var(--v3-teal)] ml-1">Nom Complet</label>
+                <label className="text-[11px] font-black uppercase tracking-wider text-[var(--v3-teal)] ml-1">Full Name</label>
                 <div className="relative group">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--v3-muted)] group-focus-within:text-[var(--v3-teal)] transition-colors">
                     <UserIcon size={16} />
@@ -42,13 +42,13 @@ export default function ProfilePage() {
                     type="text" 
                     defaultValue={session?.user?.name || ''}
                     className="w-full bg-[var(--v3-bg2)] border border-[var(--v3-border)] focus:border-[var(--v3-teal)]/50 rounded-xl py-3 pl-12 pr-4 text-sm text-[var(--v3-text)] outline-none transition-all focus:ring-4 focus:ring-[var(--v3-teal)]/5"
-                    placeholder="Ton nom..."
+                    placeholder="Your name..."
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-[11px] font-black uppercase tracking-wider text-[var(--v3-teal)] ml-1">Adresse Email</label>
+                <label className="text-[11px] font-black uppercase tracking-wider text-[var(--v3-teal)] ml-1">Email Address</label>
                 <div className="relative group">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--v3-muted)] group-focus-within:text-[var(--v3-teal)] transition-colors">
                     <Mail size={16} />
@@ -65,7 +65,7 @@ export default function ProfilePage() {
            </div>
 
            <button className="w-full py-3.5 bg-[var(--v3-teal)] text-white rounded-xl font-bold text-sm shadow-xl hover:-translate-y-0.5 transition-all">
-             Enregistrer les modifications
+             Save changes
            </button>
         </section>
       </div>
