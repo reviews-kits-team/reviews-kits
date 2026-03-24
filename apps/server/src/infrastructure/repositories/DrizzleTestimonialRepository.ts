@@ -157,13 +157,28 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
   }
 
   async updatePositions(positions: { id: string; position: number }[]): Promise<void> {
-    await this.db.transaction(async (tx) => {
-      for (const { id, position } of positions) {
-        await tx.update(testimonials)
-          .set({ position, updatedAt: new Date() })
-          .where(eq(testimonials.id, id));
-      }
-    });
+    if (positions.length === 0) return;
+
+    const ids = positions.map(p => p.id);
+    const sqlChunks: any[] = [];
+    sqlChunks.push(sql`(case`);
+    
+    for (const { id, position } of positions) {
+      sqlChunks.push(sql`when ${testimonials.id} = ${id} then ${position}::integer`);
+    }
+    
+    sqlChunks.push(sql`end)`);
+
+    const finalSql = sql.join(sqlChunks, sql.raw(' '));
+
+    const { inArray } = await import('drizzle-orm');
+    
+    await this.db.update(testimonials)
+      .set({ 
+        position: finalSql, 
+        updatedAt: new Date() 
+      })
+      .where(inArray(testimonials.id, ids));
   }
 
   async getStatsByUser(userId: string): Promise<{

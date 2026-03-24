@@ -1,11 +1,24 @@
 import type { Context, Next } from 'hono';
 
+import { getConnInfo } from 'hono/bun';
+
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 
 export const rateLimiter = (options: { limit: number; windowMs: number }) => {
   return async (c: Context, next: Next) => {
-    // Attempt to get the real IP, fallback to something generic if not available
-    const ip = c.req.header('x-forwarded-for') || c.req.header('x-real-ip') || 'unknown';
+    let ip = 'unknown';
+
+    try {
+      // Use getConnInfo for Bun to get the real remote address
+      const info = getConnInfo(c);
+      ip = info.remote.address || 'unknown';
+    } catch (e) {
+      // Fallback for environments where getConnInfo might fail (like some test setups)
+      ip = c.req.header('x-forwarded-for')?.split(',')[0]?.trim() || 
+           c.req.header('x-real-ip') || 
+           'unknown';
+    }
+    
     const now = Date.now();
     let record = rateLimitMap.get(ip);
     
