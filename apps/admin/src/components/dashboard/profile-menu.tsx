@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { 
-  User, 
-  Settings, 
-  LogOut, 
-  Key, 
-  Copy, 
-  RefreshCw, 
-  ShieldCheck,
+import {
+  User,
+  Settings,
+  LogOut,
+  Key,
+  Copy,
+  RefreshCw,
   ChevronRight,
   ExternalLink,
   Check
@@ -76,9 +75,9 @@ export const ProfileMenu = ({ isOpen, onClose }: ProfileMenuProps) => {
   return (
     <>
       <div className="fixed inset-0 z-[250]" onClick={(e) => { e.stopPropagation(); onClose(); }} />
-      <div className="absolute top-full right-0 mt-2 w-80 bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-2xl shadow-[0_32px_80px_rgba(0,0,0,0.6)] overflow-hidden z-[300] animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+      <div className="absolute top-full right-0 mt-2 w-80 bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15),0_32px_80px_rgba(0,0,0,0.25)] overflow-hidden z-[300] animate-in fade-in zoom-in-95 duration-200 origin-top-right">
         {/* Header */}
-        <div className="p-5 border-b border-[var(--v3-border)] bg-white/[0.02]">
+        <div className="p-5 border-b border-[var(--v3-border)] bg-[var(--v3-bg3)]/40">
            <div className="flex items-center gap-3 mb-1">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--v3-teal)] to-[#0a6e52] flex items-center justify-center text-sm font-bold text-white shadow-[0_0_20px_rgba(45,212,191,0.2)]">
                 {session?.user?.name?.[0] || 'U'}
@@ -98,10 +97,10 @@ export const ProfileMenu = ({ isOpen, onClose }: ProfileMenuProps) => {
             <Link 
               to="/profile" 
               onClick={onClose}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-[13px] font-medium text-[var(--v3-text)] hover:bg-white/[0.04] transition-all group"
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-[13px] font-medium text-[var(--v3-text)] hover:bg-[var(--v3-border)] transition-all group"
             >
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[var(--v3-muted2)] group-hover:text-[var(--v3-teal)] transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-[var(--v3-bg3)] border border-[var(--v3-border)] flex items-center justify-center text-[var(--v3-muted2)] group-hover:text-[var(--v3-teal)] transition-colors">
                   <User size={16} />
                 </div>
                 My Profile
@@ -109,13 +108,13 @@ export const ProfileMenu = ({ isOpen, onClose }: ProfileMenuProps) => {
               <ChevronRight size={14} className="text-[var(--v3-muted)]" />
             </Link>
 
-            <Link 
-              to="/settings" 
+            <Link
+              to="/settings"
               onClick={onClose}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-[13px] font-medium text-[var(--v3-text)] hover:bg-white/[0.04] transition-all group"
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-[13px] font-medium text-[var(--v3-text)] hover:bg-[var(--v3-border)] transition-all group"
             >
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[var(--v3-muted2)] group-hover:text-[var(--v3-teal)] transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-[var(--v3-bg3)] border border-[var(--v3-border)] flex items-center justify-center text-[var(--v3-muted2)] group-hover:text-[var(--v3-teal)] transition-colors">
                   <Settings size={16} />
                 </div>
                 Settings
@@ -123,28 +122,14 @@ export const ProfileMenu = ({ isOpen, onClose }: ProfileMenuProps) => {
               <ChevronRight size={14} className="text-[var(--v3-muted)]" />
             </Link>
 
-            <Link 
-              to="/security" 
-              onClick={onClose}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-[13px] font-medium text-[var(--v3-text)] hover:bg-white/[0.04] transition-all group"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[var(--v3-muted2)] group-hover:text-[var(--v3-teal)] transition-colors">
-                  <ShieldCheck size={16} />
-                </div>
-                Security
-              </div>
-              <ChevronRight size={14} className="text-[var(--v3-muted)]" />
-            </Link>
-
-            {/* API Keys Item */}
+{/* API Keys Item */}
             <div className="space-y-1">
-              <button 
+              <button
                 onClick={() => setShowApiKeys(!showApiKeys)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-[13px] font-medium transition-all group ${showApiKeys ? 'bg-white/[0.04] text-[var(--v3-teal)]' : 'text-[var(--v3-text)] hover:bg-white/[0.04]'}`}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-[13px] font-medium transition-all group ${showApiKeys ? 'bg-[var(--v3-border)] text-[var(--v3-teal)]' : 'text-[var(--v3-text)] hover:bg-[var(--v3-border)]'}`}
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center transition-colors ${showApiKeys ? 'text-[var(--v3-teal)]' : 'text-[var(--v3-muted2)] group-hover:text-[var(--v3-teal)]'}`}>
+                  <div className={`w-8 h-8 rounded-lg bg-[var(--v3-bg3)] border border-[var(--v3-border)] flex items-center justify-center transition-colors ${showApiKeys ? 'text-[var(--v3-teal)]' : 'text-[var(--v3-muted2)] group-hover:text-[var(--v3-teal)]'}`}>
                     <Key size={16} />
                   </div>
                   API Keys
@@ -164,9 +149,9 @@ export const ProfileMenu = ({ isOpen, onClose }: ProfileMenuProps) => {
                           {apiKeys?.publicKey || 'rk_pk_live_...'}
                         </div>
                     </div>
-                    <button 
+                    <button
                       onClick={(e) => { e.stopPropagation(); if (apiKeys) copyToClipboard(apiKeys.publicKey, 'public'); }}
-                      className={`p-1.5 rounded-md transition-all ${copiedKey === 'public' ? 'text-emerald-500 bg-emerald-500/10' : 'hover:bg-white/5 text-[var(--v3-muted2)] hover:text-[var(--v3-teal)]'}`}
+                      className={`p-1.5 rounded-md transition-all ${copiedKey === 'public' ? 'text-emerald-500 bg-emerald-500/10' : 'hover:bg-[var(--v3-border)] text-[var(--v3-muted2)] hover:text-[var(--v3-teal)]'}`}
                     >
                       {copiedKey === 'public' ? <Check size={12} /> : <Copy size={12} />}
                     </button>
@@ -180,15 +165,15 @@ export const ProfileMenu = ({ isOpen, onClose }: ProfileMenuProps) => {
                         </div>
                     </div>
                     <div className="flex items-center gap-1">
-                        <button 
+                        <button
                           onClick={(e) => { e.stopPropagation(); if (apiKeys) copyToClipboard(apiKeys.secretKey, 'secret'); }}
-                          className={`p-1.5 rounded-md transition-all ${copiedKey === 'secret' ? 'text-emerald-500 bg-emerald-500/10' : 'hover:bg-white/5 text-[var(--v3-muted2)] hover:text-rose-400'}`}
+                          className={`p-1.5 rounded-md transition-all ${copiedKey === 'secret' ? 'text-emerald-500 bg-emerald-500/10' : 'hover:bg-[var(--v3-border)] text-[var(--v3-muted2)] hover:text-rose-400'}`}
                         >
                           {copiedKey === 'secret' ? <Check size={12} /> : <Copy size={12} />}
                         </button>
-                        <button 
+                        <button
                           onClick={(e) => { e.stopPropagation(); handleRotateKeys(); }}
-                          className="p-1.5 hover:bg-white/5 rounded-md text-[var(--v3-muted2)] hover:text-[var(--v3-teal)] transition-all"
+                          className="p-1.5 hover:bg-[var(--v3-border)] rounded-md text-[var(--v3-muted2)] hover:text-[var(--v3-teal)] transition-all"
                         >
                           <RefreshCw size={12} />
                         </button>
@@ -215,7 +200,7 @@ export const ProfileMenu = ({ isOpen, onClose }: ProfileMenuProps) => {
         </div>
 
         {/* Footer info */}
-        <div className="p-4 bg-black/20 flex items-center justify-between">
+        <div className="p-4 bg-[var(--v3-bg3)]/60 flex items-center justify-between">
            <span className="text-[10px] font-bold text-[var(--v3-muted2)] opacity-50 uppercase tracking-widest">v1.2.0</span>
            <a href="#" className="text-[10px] font-bold text-[var(--v3-teal)] hover:underline flex items-center gap-1">
               Docs <ExternalLink size={10} />

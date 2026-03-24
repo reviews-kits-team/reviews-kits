@@ -292,7 +292,7 @@ export default function DashboardPage() {
                 onEditForm={handleEditForm}
               />
             ) : (
-              <div className="py-20 bg-[var(--v3-bg2)] border border-dashed border-white/5 rounded-2xl text-center">
+              <div className="py-20 bg-[var(--v3-bg2)] border border-dashed border-[var(--v3-border2)] rounded-2xl text-center">
                 <p className="text-[var(--v3-muted)] mb-4">You don't have any forms yet.</p>
                 <button
                   onClick={() => setIsModalOpen(true)}

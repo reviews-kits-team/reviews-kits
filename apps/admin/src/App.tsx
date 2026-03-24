@@ -9,19 +9,25 @@ import FormEditorPage from './pages/FormEditorPage'
 import PublicFormPage from './pages/PublicFormPage'
 import './App.css'
 
+// Apply saved theme before first render to avoid flash
+const savedTheme = localStorage.getItem('rk-theme')
+if (savedTheme === 'light') {
+  document.documentElement.classList.add('light')
+}
+
 function App() {
   const { data: session } = authClient.useSession()
 
   return (
     <Routes>
-      <Route 
-        path="/login" 
-        element={session ? <Navigate to="/" replace /> : <LoginPage />} 
+      <Route
+        path="/login"
+        element={session ? <Navigate to="/" replace /> : <LoginPage />}
       />
 
       {/* Public Form Route */}
       <Route path="/f/:slug" element={<PublicFormPage />} />
-      
+
       {/* Protected Routes */}
       <Route element={<AuthGuard />}>
         <Route path="/" element={<DashboardPage />} />

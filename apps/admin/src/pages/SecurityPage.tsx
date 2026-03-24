@@ -46,7 +46,7 @@ export default function SecurityPage() {
               </div>
            </div>
 
-           <button className="w-full py-3.5 bg-white/5 border border-white/10 text-white rounded-xl font-bold text-sm hover:border-rose-500/30 transition-all shadow-xl">
+           <button className="w-full py-3.5 bg-[var(--v3-bg3)] border border-[var(--v3-border)] text-[var(--v3-text)] rounded-xl font-bold text-sm hover:border-rose-500/30 transition-all shadow-sm">
              Update password
            </button>
         </section>
@@ -67,7 +67,7 @@ export default function SecurityPage() {
                     <p className="text-xs text-[var(--v3-muted2)] mt-0.5">Add an extra layer of security.</p>
                  </div>
               </div>
-              <button className="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full text-xs font-bold transition-all text-[var(--v3-muted2)]">
+              <button className="px-5 py-2.5 bg-[var(--v3-bg3)] hover:bg-[var(--v3-border)] border border-[var(--v3-border)] rounded-full text-xs font-bold transition-all text-[var(--v3-muted2)]">
                  Disabled
               </button>
            </div>
