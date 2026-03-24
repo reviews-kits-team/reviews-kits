@@ -53,7 +53,7 @@ export const publicReviewController = {
             authorTitle: props.authorTitle,
             authorUrl: props.authorUrl,
             createdAt: props.createdAt,
-            type: props.source
+            source: props.source
           };
         })
       });
