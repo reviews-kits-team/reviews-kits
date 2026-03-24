@@ -80,7 +80,6 @@ describe("API Keys Integration", () => {
     expect(allKeys.filter(k => k.getProps().isActive)).toHaveLength(2);
     
     // Old keys should be inactive
-    const oldKeys = allKeys.filter(k => !firstKeys.find(fk => fk.id === k.id));
     const originalKeys = allKeys.filter(k => firstKeys.find(fk => fk.id === k.id));
     expect(originalKeys.every(k => !k.getProps().isActive)).toBe(true);
   });

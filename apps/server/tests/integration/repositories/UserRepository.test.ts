@@ -1,7 +1,6 @@
 import { describe, expect, it, beforeEach } from "bun:test";
 import { testDb, clearDatabase } from "../IntegrationSetup";
 import { DrizzleUserRepository } from "../../../src/infrastructure/repositories/DrizzleUserRepository";
-import { User } from "../../../src/domain/entities/User";
 
 describe("DrizzleUserRepository Integration", () => {
   const repository = new DrizzleUserRepository(testDb as any);

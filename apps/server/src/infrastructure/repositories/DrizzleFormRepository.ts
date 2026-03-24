@@ -3,10 +3,10 @@ import type { BunSQLDatabase } from 'drizzle-orm/bun-sql';
 import * as schema from '../database/schema';
 import { forms, formVisits } from '../database/schema';
 import { Form } from '../../domain/entities/Form';
-import type { FormRepository } from '../../domain/repositories/FormRepository';
+import type { IFormRepository } from '../../domain/repositories/IFormRepository';
 import { Slug } from '../../domain/value-objects/Slug';
 
-export class DrizzleFormRepository implements FormRepository {
+export class DrizzleFormRepository implements IFormRepository {
   constructor(private readonly db: BunSQLDatabase<typeof schema>) {}
 
   async findById(id: string): Promise<Form | null> {

@@ -1,6 +1,6 @@
 import { Form } from '../entities/Form';
 
-export interface FormRepository {
+export interface IFormRepository {
   findById(id: string): Promise<Form | null>;
   findBySlug(slug: string): Promise<Form | null>;
   findByPublicId(publicId: string): Promise<Form | null>;

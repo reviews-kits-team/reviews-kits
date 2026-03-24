@@ -1,10 +1,10 @@
 import { ApiKey } from '../../../domain/entities/ApiKey';
-import type { ApiKeyRepository } from '../../../domain/repositories/ApiKeyRepository';
+import type { IApiKeyRepository } from '../../../domain/repositories/IApiKeyRepository';
 import { ApiKeyGenerator } from '../../../shared/utils/ApiKeyGenerator';
 import { randomUUID } from 'node:crypto';
 
 export class GenerateUserApiKeys {
-  constructor(private readonly apiKeyRepository: ApiKeyRepository) {}
+  constructor(private readonly apiKeyRepository: IApiKeyRepository) {}
 
   async execute(userId: string): Promise<{ publicKey: string; secretKey: string }> {
     // Check if user already has keys

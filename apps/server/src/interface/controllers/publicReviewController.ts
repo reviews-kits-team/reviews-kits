@@ -1,8 +1,5 @@
 import type { Context } from 'hono';
 import { container } from '@/infrastructure/container';
-import { Testimonial } from '@/domain/entities/Testimonial';
-import { Rating } from '@/domain/value-objects/Rating';
-import { Email } from '@/domain/value-objects/Email';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 
@@ -38,37 +35,19 @@ export const publicReviewController = {
     }
 
     try {
-      // Resolve internal ID from public ID
-      const form = await container.formRepository.findByPublicId(publicId);
-      if (!form || form.getUserId() !== userId) {
-        return c.json({ error: 'Form not found or invalid public ID' }, 404);
-      }
-
-      const testimonials = await container.testimonialRepository.findApprovedByUser(userId as string, {
-        limit: Math.min(limit, 50), // Cap at 50 for performance
-        minRating: minRating > 0 ? minRating : undefined,
-        formId: form.getId()
+      const testimonials = await container.getPublicReviewsUseCase.execute({
+        userId: userId as string,
+        publicId,
+        limit,
+        minRating: minRating > 0 ? minRating : undefined
       });
 
-      return c.json({
-        data: testimonials.map(t => {
-          const props = t.getProps();
-          return {
-            id: props.id,
-            content: props.content,
-            rating: props.rating?.getValue(),
-            authorName: props.authorName,
-            authorTitle: props.authorTitle,
-            authorUrl: props.authorUrl,
-            createdAt: props.createdAt,
-            source: props.source
-          };
-        })
-      });
+      return c.json({ data: testimonials });
     } catch (error) {
       console.error('Failed to fetch public reviews:', error);
       const isProduction = process.env.NODE_ENV === 'production';
-      return c.json({ error: isProduction ? 'Internal server error' : (error instanceof Error ? error.message : 'Internal server error') }, 500);
+      const status = (error instanceof Error && error.message.includes('not found')) ? 404 : 500;
+      return c.json({ error: isProduction ? 'Internal server error' : (error instanceof Error ? error.message : 'Internal server error') }, status);
     }
   },
 
@@ -96,38 +75,27 @@ export const publicReviewController = {
     }
 
     try {
-      // Resolve internal form and user
-      const form = await container.formRepository.findByPublicId(formId);
-      if (!form) {
-        return c.json({ error: 'Invalid form ID' }, 404);
-      }
-
-      const testimonial = new Testimonial({
-        id: randomUUID(),
-        userId: form.getUserId(),
-        formId: form.getId(),
+      const testimonialId = await container.submitReviewUseCase.execute({
+        formId,
         content,
         authorName,
-        rating: (rating !== undefined && rating !== null && rating !== '') ? Rating.create(Number(rating)) : undefined,
-        authorEmail: (authorEmail && authorEmail !== '') ? Email.create(authorEmail) : undefined,
+        authorEmail,
+        rating,
         authorTitle,
-        authorUrl: (authorUrl && authorUrl !== '') ? authorUrl : undefined,
-        status: 'pending',
-        source: 'form'
+        authorUrl
       });
-
-      await container.testimonialRepository.save(testimonial);
 
       return c.json({ 
         success: true, 
         message: 'Review submitted successfully',
-        id: testimonial.getId()
+        id: testimonialId
       }, 201);
     } catch (error: unknown) {
       console.error('Failed to submit public review:', error);
       const isProduction = process.env.NODE_ENV === 'production';
       const message = (isProduction || !(error instanceof Error)) ? 'Internal server error' : error.message;
-      return c.json({ error: message }, 500);
+      const status = (error instanceof Error && error.message.includes('Invalid form')) ? 404 : 500;
+      return c.json({ error: message }, status);
     }
   },
 
@@ -141,34 +109,12 @@ export const publicReviewController = {
     }
 
     try {
-      let form = await container.formRepository.findBySlug(slug);
-      
-      // Fallback to publicId if slug doesn't match
-      if (!form) {
-        form = await container.formRepository.findByPublicId(slug);
-      }
-
-      if (!form) {
-        return c.json({ error: 'Form not found' }, 404);
-      }
-
-      if (!form.getIsActive()) {
-        return c.json({ error: 'This form is currently inactive' }, 403);
-      }
-
-      await container.formRepository.incrementVisits(form.getId()).catch(console.error);
-
-      const props = form.getProps();
-      return c.json({
-        id: props.id,
-        publicId: props.publicId,
-        name: props.name,
-        description: props.description,
-        config: props.config,
-      });
-    } catch (error) {
+      const result = await container.getPublicFormUseCase.execute({ slug });
+      return c.json(result);
+    } catch (error: any) {
       console.error('Failed to get form by slug:', error);
-      return c.json({ error: 'Internal server error' }, 500);
+      const status = error.message === 'Form not found' ? 404 : (error.message.includes('inactive') ? 403 : 500);
+      return c.json({ error: error.message }, status);
     }
   }
 };

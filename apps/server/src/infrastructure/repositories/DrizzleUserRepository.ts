@@ -2,7 +2,7 @@ import { db as globalDb } from '../database/db';
 import * as schema from '../database/schema';
 import { eq } from 'drizzle-orm';
 import type { BunSQLDatabase } from 'drizzle-orm/bun-sql';
-import type { IUserRepository } from '../../domain/repositories/UserRepository';
+import type { IUserRepository } from '../../domain/repositories/IUserRepository';
 import { User } from '../../domain/entities/User';
 
 export class DrizzleUserRepository implements IUserRepository {
@@ -28,6 +28,18 @@ export class DrizzleUserRepository implements IUserRepository {
     const [row] = await this.db.select().from(schema.users).where(eq(schema.users.email, email)).limit(1);
     if (!row) return null;
     return this.mapToDomain(row);
+  }
+
+  async update(user: User): Promise<void> {
+    const props = user.getProps();
+    await this.db.update(schema.users)
+      .set({
+        email: props.email,
+        name: props.name,
+        image: props.avatarUrl,
+        updatedAt: props.updatedAt,
+      })
+      .where(eq(schema.users.id, user.id));
   }
 
   private mapToDomain(row: typeof schema.users.$inferSelect): User {

@@ -1,10 +1,6 @@
 import type { Context } from 'hono';
 import { getUserIdFromContext } from '@/shared/utils/auth';
 import { container } from '@/infrastructure/container';
-import { Form } from '@/domain/entities/Form';
-import { Slug } from '@/domain/value-objects/Slug';
-import { randomUUID } from 'node:crypto';
-import { ApiKeyGenerator } from '@/shared/utils/ApiKeyGenerator';
 
 export const formController = {
   listForms: async (c: Context) => {
@@ -14,35 +10,12 @@ export const formController = {
       return c.json({ error: 'Unauthorized' }, 401);
     }
 
-    const forms = await container.formRepository.findByUser(userId);
-    
-    const formIds = forms.map(f => f.getProps().id);
-    const [statsMap, visitsMap] = await Promise.all([
-      container.testimonialRepository.getBasicStatsByFormIds(formIds),
-      container.formRepository.getVisitsByFormIds(formIds)
-    ]);
-
-    const formsWithStats = forms.map(f => {
-      const props = f.getProps();
-      const stats = statsMap.get(props.id) || { totalReviews: 0, averageRating: 0 };
-      const visits = visitsMap.get(props.id) || 0;
-      
-      let completion = 0;
-      if (visits > 0) {
-        completion = Math.min(100, Math.round((stats.totalReviews / visits) * 100));
-      }
-
-      return { 
-        ...props, 
-        slug: props.slug.getValue(),
-        publicId: props.publicId,
-        responses: stats.totalReviews,
-        rating: stats.averageRating,
-        completion
-      };
-    });
-    
-    return c.json(formsWithStats);
+    try {
+      const forms = await container.listFormsUseCase.execute(userId);
+      return c.json(forms);
+    } catch (err: any) {
+      return c.json({ error: err.message }, 500);
+    }
   },
 
   createForm: async (c: Context) => {
@@ -55,27 +28,18 @@ export const formController = {
     const body = await c.req.json() as { name: string, slug: string, description?: string };
     const { name, slug, description } = body;
 
-    if (!name || !slug) {
-      return c.json({ error: 'Name and Slug are required' }, 400);
-    }
-
-    const form = new Form({
-      id: randomUUID(),
-      userId,
-      name,
-      slug: Slug.create(slug),
-      publicId: ApiKeyGenerator.generatePublicId('frm'),
-      description,
-      isActive: true,
-    });
-
     try {
-      await container.formRepository.save(form);
+      const form = await container.createFormUseCase.execute({
+        userId,
+        name,
+        slug,
+        description
+      });
       const props = form.getProps();
       return c.json({ ...props, slug: props.slug.getValue() }, 201);
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error("Failed to create form:", err);
-      const message = err instanceof Error ? err.message : '';
+      const message = err.message;
       if (message.includes('unique constraint') && message.includes('slug')) {
         return c.json({ error: 'This slug is already in use by another form.' }, 409);
       }
@@ -91,31 +55,13 @@ export const formController = {
       return c.json({ error: 'Unauthorized or missing ID' }, 401);
     }
 
-    const form = await container.formRepository.findById(formId);
-    
-    if (!form || form.getUserId() !== userId) {
-      return c.json({ error: 'Form not found' }, 404);
+    try {
+      const result = await container.getFormDetailsUseCase.execute({ id: formId, userId });
+      return c.json(result);
+    } catch (err: any) {
+      const status = err.message === 'Form not found' ? 404 : 500;
+      return c.json({ error: err.message }, status);
     }
-
-    const props = form.getProps();
-    const [stats, visitsMap] = await Promise.all([
-      container.testimonialRepository.getStatsByFormId(props.id),
-      container.formRepository.getVisitsByFormIds([props.id])
-    ]);
-    
-    const visits = visitsMap.get(props.id) || 0;
-    let completion = 0;
-    if (visits > 0) {
-      completion = Math.min(100, Math.round((stats.totalReviews / visits) * 100));
-    }
-
-    return c.json({ 
-      ...props, 
-      slug: props.slug.getValue(),
-      responses: stats.totalReviews,
-      rating: stats.averageRating,
-      completion
-    });
   },
 
   deleteForm: async (c: Context) => {
@@ -126,13 +72,13 @@ export const formController = {
       return c.json({ error: 'Unauthorized or missing ID' }, 401);
     }
 
-    const form = await container.formRepository.findById(formId);
-    if (!form || form.getUserId() !== userId) {
-      return c.json({ error: 'Form not found' }, 404);
+    try {
+      await container.deleteFormUseCase.execute({ id: formId, userId });
+      return c.json({ success: true });
+    } catch (err: any) {
+      const status = err.message === 'Form not found' ? 404 : 500;
+      return c.json({ error: err.message }, status);
     }
-
-    await container.formRepository.delete(formId);
-    return c.json({ success: true });
   },
 
   updateForm: async (c: Context) => {
@@ -145,20 +91,21 @@ export const formController = {
       return c.json({ error: 'Unauthorized or missing ID' }, 401);
     }
 
-    const form = await container.formRepository.findById(formId);
-    if (!form || form.getUserId() !== userId) {
-      return c.json({ error: 'Form not found' }, 404);
+    try {
+      const form = await container.updateFormUseCase.execute({
+        id: formId,
+        userId,
+        name,
+        description,
+        config,
+        isActive
+      });
+      const props = form.getProps();
+      return c.json({ ...props, slug: props.slug.getValue() });
+    } catch (err: any) {
+      const status = err.message === 'Form not found' ? 404 : 500;
+      return c.json({ error: err.message }, status);
     }
-
-    if (name) form.updateName(name);
-    if (description !== undefined) form.updateDescription(description);
-    if (config) form.updateConfig(config);
-    if (isActive !== undefined) form.updateIsActive(isActive);
-
-    await container.formRepository.update(form);
-    
-    const props = form.getProps();
-    return c.json({ ...props, slug: props.slug.getValue() });
   },
 
   toggleFormStatus: async (c: Context) => {
@@ -169,16 +116,14 @@ export const formController = {
       return c.json({ error: 'Unauthorized or missing ID' }, 401);
     }
 
-    const form = await container.formRepository.findById(formId);
-    if (!form || form.getUserId() !== userId) {
-      return c.json({ error: 'Form not found' }, 404);
+    try {
+      const form = await container.toggleFormStatusUseCase.execute({ id: formId, userId });
+      const props = form.getProps();
+      return c.json({ ...props, slug: props.slug.getValue() });
+    } catch (err: any) {
+      const status = err.message === 'Form not found' ? 404 : 500;
+      return c.json({ error: err.message }, status);
     }
-
-    form.toggleActive();
-    await container.formRepository.update(form);
-    
-    const props = form.getProps();
-    return c.json({ ...props, slug: props.slug.getValue() });
   },
 
   duplicateForm: async (c: Context) => {
@@ -189,30 +134,14 @@ export const formController = {
       return c.json({ error: 'Unauthorized or missing ID' }, 401);
     }
 
-    const originalForm = await container.formRepository.findById(formId);
-    if (!originalForm || originalForm.getUserId() !== userId) {
-      return c.json({ error: 'Form not found' }, 404);
+    try {
+      const form = await container.duplicateFormUseCase.execute({ id: formId, userId });
+      const props = form.getProps();
+      return c.json({ ...props, slug: props.slug.getValue() }, 201);
+    } catch (err: any) {
+      const status = err.message === 'Form not found' ? 404 : 500;
+      return c.json({ error: err.message }, status);
     }
-
-    const originalProps = originalForm.getProps();
-    const newSlugValue = `${originalProps.slug.getValue()}-copy-${Date.now().toString().slice(-4)}`;
-    
-    const newForm = new Form({
-      id: randomUUID(),
-      userId,
-      name: `${originalProps.name} (Copie)`,
-      slug: Slug.create(newSlugValue),
-      publicId: ApiKeyGenerator.generatePublicId('frm'),
-      description: originalProps.description,
-      thankYouMessage: originalProps.thankYouMessage,
-      config: originalProps.config,
-      accentColor: originalProps.accentColor,
-      isActive: originalProps.isActive,
-    });
-
-    await container.formRepository.save(newForm);
-    const props = newForm.getProps();
-    return c.json({ ...props, slug: props.slug.getValue() }, 201);
   },
 
   batchToggleStatus: async (c: Context) => {
@@ -227,16 +156,10 @@ export const formController = {
     }
 
     try {
-      const owned = await container.formRepository.findByIdsAndUser(ids, userId);
-      if (owned.length !== ids.length) {
-        return c.json({ error: 'Forbidden: one or more forms do not belong to you' }, 403);
-      }
-
-      await container.formRepository.batchUpdateStatus(ids, isActive);
+      await container.batchToggleFormStatusUseCase.execute({ ids, userId, isActive });
       return c.json({ success: true, isActive });
-    } catch (err: unknown) {
-      console.error("Failed to batch toggle form status:", err);
-      return c.json({ error: 'Error during batch update' }, 500);
+    } catch (err: any) {
+      return c.json({ error: err.message }, 403);
     }
   },
 
@@ -252,16 +175,10 @@ export const formController = {
     }
 
     try {
-      const owned = await container.formRepository.findByIdsAndUser(ids, userId);
-      if (owned.length !== ids.length) {
-        return c.json({ error: 'Forbidden: one or more forms do not belong to you' }, 403);
-      }
-
-      await container.formRepository.batchDelete(ids);
+      await container.batchDeleteFormsUseCase.execute({ ids, userId });
       return c.json({ success: true });
-    } catch (err: unknown) {
-      console.error("Failed to batch delete forms:", err);
-      return c.json({ error: 'Error during batch deletion' }, 500);
+    } catch (err: any) {
+      return c.json({ error: err.message }, 403);
     }
   },
 
@@ -273,14 +190,13 @@ export const formController = {
       return c.json({ error: 'Unauthorized or missing ID' }, 401);
     }
 
-    // Verify ownership
-    const form = await container.formRepository.findById(formId);
-    if (!form || form.getUserId() !== userId) {
-      return c.json({ error: 'Form not found' }, 404);
+    try {
+      const stats = await container.getFormStatsUseCase.execute({ id: formId, userId });
+      return c.json(stats);
+    } catch (err: any) {
+      const status = err.message === 'Form not found' ? 404 : 500;
+      return c.json({ error: err.message }, status);
     }
-
-    const stats = await container.testimonialRepository.getStatsByFormId(formId);
-    return c.json(stats);
   },
 
   getFormTestimonials: async (c: Context) => {
@@ -288,34 +204,27 @@ export const formController = {
     const formId = c.req.param('id');
     const page = parseInt(c.req.query('page') || '1', 10);
     const limit = 10;
-    const offset = (page - 1) * limit;
 
     if (!userId || !formId) {
       return c.json({ error: 'Unauthorized or missing ID' }, 401);
     }
 
-    // Verify ownership
-    const form = await container.formRepository.findById(formId);
-    if (!form || form.getUserId() !== userId) {
-      return c.json({ error: 'Form not found' }, 404);
-    }
-
     const sort = c.req.query('sort') || 'createdAt';
     const order = (c.req.query('order') || 'desc') as 'asc' | 'desc';
 
-    const testimonials = await container.testimonialRepository.findByFormId(formId, { 
-      limit, 
-      offset, 
-      sort, 
-      order 
-    });
-    return c.json(testimonials.map(t => {
-      const props = t.getProps();
-      return {
-        ...props,
-        rating: props.rating?.getValue(),
-        authorEmail: props.authorEmail?.getValue()
-      };
-    }));
+    try {
+      const testimonials = await container.getFormTestimonialsUseCase.execute({
+        id: formId,
+        userId,
+        page,
+        limit,
+        sort,
+        order
+      });
+      return c.json(testimonials);
+    } catch (err: any) {
+      const status = err.message === 'Form not found' ? 404 : 500;
+      return c.json({ error: err.message }, status);
+    }
   },
 };

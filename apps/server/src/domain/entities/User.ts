@@ -57,6 +57,12 @@ export class User {
     this.updatedAt = new Date();
   }
 
+  public updateEmail(email: string): void {
+    if (!email) throw new Error("User email cannot be empty");
+    this.email = email;
+    this.updatedAt = new Date();
+  }
+
   public getEmail(): string {
     return this.email;
   }
