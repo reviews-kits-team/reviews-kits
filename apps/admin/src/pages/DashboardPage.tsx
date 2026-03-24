@@ -5,7 +5,9 @@ import {
   MessageSquare, 
   CheckCircle2, 
   Star, 
-  Users
+  Users,
+  AlertCircle,
+  X
 } from 'lucide-react'
 
 // Layout/Dashboard Components
@@ -31,6 +33,7 @@ export default function DashboardPage() {
   const [bulkDeletingIds, setBulkDeletingIds] = useState<string[] | null>(null)
   const [sharingFormId, setSharingFormId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [stats, setStats] = useState<{
     totalReviews: number;
     completionRate: number;
@@ -75,6 +78,7 @@ export default function DashboardPage() {
   )
 
   const handleDeleteForm = (id: string) => {
+    setError(null);
     setDeletingFormId(id);
   };
 
@@ -82,40 +86,53 @@ export default function DashboardPage() {
     if (!deletingFormId) return;
     
     setIsDeleting(true);
+    setError(null);
     try {
       const res = await fetch(`/api/v1/forms/${deletingFormId}`, { method: 'DELETE' });
       if (res.ok) {
         setForms(forms.filter(f => f.id !== deletingFormId));
         setDeletingFormId(null);
+      } else {
+        const data = await res.json();
+        setError(data.error?.message || "Failed to delete form. Please try again.");
       }
     } catch (error) {
       console.error("Failed to delete form", error);
+      setError("A network error occurred. Please check your connection.");
     } finally {
       setIsDeleting(false);
     }
   };
 
   const handleToggleFormStatus = async (id: string) => {
+    setError(null);
     try {
       const res = await fetch(`/api/v1/forms/${id}/toggle`, { method: 'PATCH' });
       if (res.ok) {
         const updatedForm = await res.json();
         setForms(forms.map(f => f.id === id ? { ...f, isActive: updatedForm.isActive } : f));
+      } else {
+        setError("Failed to update form status.");
       }
     } catch (error) {
       console.error("Failed to toggle form status", error);
+      setError("Network error while updating form status.");
     }
   };
 
   const handleDuplicateForm = async (id: string) => {
+    setError(null);
     try {
       const res = await fetch(`/api/v1/forms/${id}/duplicate`, { method: 'POST' });
       if (res.ok) {
         const newForm = await res.json();
         setForms([newForm, ...forms]);
+      } else {
+        setError("Failed to duplicate form.");
       }
     } catch (error) {
       console.error("Failed to duplicate form", error);
+      setError("Network error while duplicating form.");
     }
   };
 
@@ -124,6 +141,7 @@ export default function DashboardPage() {
   };
 
   const handleBatchToggleStatus = async (ids: string[], isActive: boolean) => {
+    setError(null);
     try {
       const res = await fetch('/api/v1/forms/batch-toggle', {
         method: 'PATCH',
@@ -133,9 +151,12 @@ export default function DashboardPage() {
       
       if (res.ok) {
         setForms(forms.map(f => ids.includes(f.id) ? { ...f, isActive } : f));
+      } else {
+        setError("Failed to update multiple forms.");
       }
     } catch (error) {
       console.error("Failed to batch toggle forms status", error);
+      setError("Network error during batch update.");
     }
   };
 
@@ -143,6 +164,7 @@ export default function DashboardPage() {
     if (!bulkDeletingIds) return;
     
     setIsDeleting(true);
+    setError(null);
     try {
       const res = await fetch('/api/v1/forms/batch', {
         method: 'DELETE',
@@ -153,9 +175,13 @@ export default function DashboardPage() {
       if (res.ok) {
         setForms(forms.filter(f => !bulkDeletingIds.includes(f.id)));
         setBulkDeletingIds(null);
+      } else {
+        const data = await res.json();
+        setError(data.error?.message || "Failed to delete selected forms.");
       }
     } catch (error) {
       console.error("Failed to batch delete forms", error);
+      setError("Network error during bulk deletion.");
     } finally {
       setIsDeleting(false);
     }
@@ -183,6 +209,23 @@ export default function DashboardPage() {
             </h1>
             <p className="text-[15px] text-[var(--v3-muted2)]">Overview of your reviews platform.</p>
           </div>
+
+          {error && (
+            <div className="mb-8 p-4 bg-[var(--v3-red-dim)] border border-[var(--v3-red)]/20 rounded-2xl flex items-center justify-between group animate-in slide-in-from-top-2 duration-300">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[var(--v3-red)]/10 flex items-center justify-center text-[var(--v3-red)]">
+                  <AlertCircle size={16} />
+                </div>
+                <p className="text-sm font-medium text-[var(--v3-red)]">{error}</p>
+              </div>
+              <button 
+                onClick={() => setError(null)}
+                className="text-[var(--v3-red)]/50 hover:text-[var(--v3-red)] transition-colors p-1"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-14">
             <StatCard 
