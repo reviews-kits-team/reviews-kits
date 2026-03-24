@@ -90,22 +90,6 @@ describe("DrizzleTestimonialRepository Integration", () => {
     expect(found?.getProps().content).toBe("New content");
   });
 
-  it("should delete a testimonial", async () => {
-    const testimonial = new Testimonial({
-      id: crypto.randomUUID(),
-      userId: userId,
-      content: "Delete me",
-      authorName: "Ghost",
-      status: "pending",
-      source: "api"
-    });
-
-    await repository.save(testimonial);
-    await repository.delete(testimonial.getId());
-
-    const found = await repository.findById(testimonial.getId());
-    expect(found).toBeNull();
-  });
 
   it("should find testimonials by multiple IDs and user ID", async () => {
     const t1 = new Testimonial({

@@ -83,9 +83,6 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
       .where(eq(testimonials.id, props.id));
   }
 
-  async delete(id: string): Promise<void> {
-    await this.db.delete(testimonials).where(eq(testimonials.id, id));
-  }
 
   async findApprovedByUser(userId: string, options: { limit?: number; minRating?: number; formId: string }): Promise<Testimonial[]> {
     const { gte } = await import('drizzle-orm');
@@ -150,11 +147,6 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
       .where(inArray(testimonials.id, ids));
   }
 
-  async batchDelete(ids: string[]): Promise<void> {
-    const { inArray } = await import('drizzle-orm');
-    await this.db.delete(testimonials)
-      .where(inArray(testimonials.id, ids));
-  }
 
   async updatePositions(positions: { id: string; position: number }[]): Promise<void> {
     if (positions.length === 0) return;
@@ -330,23 +322,39 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
       count: Number(distributionRows.find(r => r.rating === (5 - i))?.count) || 0,
     }));
 
-    // Review volume (Last 12 weeks)
+    // Review volume (Daily - Last 14 days)
     const volumeRows = await this.db.select({
-      week: sql`date_trunc('week', ${testimonials.createdAt})`.as('week'),
+      day: sql`date_trunc('day', ${testimonials.createdAt})`.as('day'),
       count: count(testimonials.id),
     })
     .from(testimonials)
     .where(and(
       eq(testimonials.formId, formId),
-      sql`${testimonials.createdAt} >= NOW() - INTERVAL '12 weeks'`
+      sql`${testimonials.createdAt} >= NOW() - INTERVAL '14 days'`
     ))
-    .groupBy(sql`week`)
-    .orderBy(sql`week ASC`);
+    .groupBy(sql`day`)
+    .orderBy(sql`day ASC`);
 
-    const reviewVolume = volumeRows.map(row => ({
-      label: new Date(row.week as string).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }),
-      value: Number(row.count) || 0,
-    }));
+    // Zero-filling: Ensure we have the last 14 days exactly
+    const last14Days = Array.from({ length: 14 }, (_, i) => {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() - (13 - i));
+      return d;
+    });
+
+    const reviewVolume = last14Days.map(date => {
+      const row = volumeRows.find(r => {
+        const rowDate = new Date(r.day as string);
+        rowDate.setHours(0, 0, 0, 0);
+        return rowDate.getTime() === date.getTime();
+      });
+
+      return {
+        label: date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }),
+        value: Number(row?.count) || 0,
+      };
+    });
 
     // Dynamic Growth Metrics
     
