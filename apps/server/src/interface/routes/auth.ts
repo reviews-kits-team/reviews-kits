@@ -117,4 +117,4 @@ authRouter.openapi(getSessionRoute, (c) => auth.handler(c.req.raw) as any);
 authRouter.openapi(signOutRoute, (c) => auth.handler(rebuiltRequest(c)) as any);
 
 // ─── Catch-all for other Better-Auth requests ─────────────────────────────────
-authRouter.on(['POST', 'GET'], '/**', (c) => auth.handler(c.req.raw));
+authRouter.on(['POST', 'GET'], '/*', (c) => auth.handler(c.req.raw));

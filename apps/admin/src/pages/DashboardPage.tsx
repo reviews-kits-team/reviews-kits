@@ -34,6 +34,7 @@ export default function DashboardPage() {
   const [sharingFormId, setSharingFormId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showCreateSuccess, setShowCreateSuccess] = useState(false)
   const [stats, setStats] = useState<{
     totalReviews: number;
     completionRate: number;
@@ -308,7 +309,11 @@ export default function DashboardPage() {
       <CreateFormModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onCreated={(newForm) => setForms([newForm, ...forms])}
+        onCreated={(newForm) => {
+          setForms([newForm, ...forms])
+          setShowCreateSuccess(true)
+          setTimeout(() => setShowCreateSuccess(false), 3000)
+        }}
       />
 
       <DeleteConfirmModal
@@ -334,6 +339,14 @@ export default function DashboardPage() {
         formSlug={forms.find(f => f.id === sharingFormId)?.slug || ''}
         publicId={forms.find(f => f.id === sharingFormId)?.publicId || ''}
       />
+
+      {/* Toast Notification */}
+      {showCreateSuccess && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-[var(--v3-teal)] text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-bottom-8 duration-300 z-[9999]">
+          <CheckCircle2 size={20} className="text-white" />
+          <span className="font-bold text-sm">Form created successfully!</span>
+        </div>
+      )}
     </div>
   )
 }

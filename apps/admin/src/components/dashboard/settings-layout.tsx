@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { User, Settings, ShieldCheck, ChevronLeft } from 'lucide-react'
+import { User, Settings, ChevronLeft } from 'lucide-react'
 import { TopBar } from './top-bar'
 
 interface SettingsLayoutProps {
@@ -12,7 +12,6 @@ interface SettingsLayoutProps {
 const navItems = [
   { label: 'Profile', path: '/profile', icon: User },
   { label: 'Settings', path: '/settings', icon: Settings },
-  { label: 'Security', path: '/security', icon: ShieldCheck },
 ]
 
 export const SettingsLayout = ({ children, title, subtitle }: SettingsLayoutProps) => {
