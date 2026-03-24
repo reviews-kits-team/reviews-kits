@@ -4,6 +4,11 @@ import { bearer } from "better-auth/plugins";
 import { db } from "../database/db";
 import * as schema from "../database/schema";
 
+const secret = process.env.BETTER_AUTH_SECRET;
+if (!secret) {
+  throw new Error("BETTER_AUTH_SECRET environment variable is required for session encryption. Please set it in your .env file.");
+}
+
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
@@ -59,7 +64,7 @@ export const auth = betterAuth({
     },
   },
   // Secret for session encryption/signing
-  secret: process.env.BETTER_AUTH_SECRET,
+  secret,
   // Base URL for auth endpoints
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000/api/auth",
   trustedOrigins: [
