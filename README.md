@@ -75,7 +75,12 @@ Lightweight hooks and context for React applications. Optimized for Next.js App 
 - [Next.js Integration Guide](./packages/sdk-react/docs/nextjs-guide.md)
 
 ```bash
+# bun
 bun add @reviewskits/react
+# npm
+npm install @reviewskits/react
+# pnpm
+pnpm add @reviewskits/react
 ```
 
 ### [Vue / Nuxt 3](./packages/sdk-vue/README.md)
@@ -83,7 +88,12 @@ Lightweight composables and plugin for Vue 3 applications.
 - [Nuxt 3 Integration Guide](./packages/sdk-vue/docs/nuxt-guide.md)
 
 ```bash
+# bun
 bun add @reviewskits/vue
+# npm
+npm install @reviewskits/vue
+# pnpm
+pnpm add @reviewskits/vue
 ```
 
 ---

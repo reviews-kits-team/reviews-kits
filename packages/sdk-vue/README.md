@@ -6,6 +6,10 @@ The official Vue 3 SDK for **Reviewskits**.
 
 ```bash
 bun add @reviewskits/vue
+# or
+npm install @reviewskits/vue
+# or
+pnpm add @reviewskits/vue
 ```
 
 ## Setup
