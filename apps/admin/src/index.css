@@ -97,7 +97,7 @@
 
   --sidebar-ring: oklch(0.708 0 0);
 
-  /* V3 DASHBOARD COLORS - Synced with Brand Config */
+  /* V3 DASHBOARD COLORS - Dark Mode (default) */
   --v3-bg: #0A0A0F;
   --v3-bg2: #111118;
   --v3-bg3: #16161F;
@@ -117,6 +117,61 @@
   --avatar-teal-from: #0D9E75;
   --avatar-teal-to: #0a6e52;
   --code-bg-new: #0D0D14;
+}
+
+/* ─── LIGHT MODE ─────────────────────────────────────────────────────────── */
+.light {
+  /* V3 DASHBOARD COLORS - Light Mode */
+  --v3-bg: #F0F2F9;
+  --v3-bg2: #FFFFFF;
+  --v3-bg3: #E5E8F4;
+  --v3-teal: #0D9E75;
+  --v3-teal-dim: rgba(13, 158, 117, 0.10);
+  --v3-teal-glow: rgba(13, 158, 117, 0.20);
+  --v3-border: rgba(15, 23, 60, 0.09);
+  --v3-border2: rgba(15, 23, 60, 0.16);
+  --v3-text: #111827;
+  --v3-muted: #A0A5BC;
+  --v3-muted2: #6B7280;
+  --v3-red: #DC2626;
+  --v3-red-dim: rgba(220, 38, 38, 0.08);
+  --v3-yellow: #D97706;
+  --code-bg-new: #F4F6FC;
+}
+
+/* Light mode body */
+.light body {
+  background-color: var(--v3-bg);
+  color: var(--v3-text);
+}
+
+/* Reduce noise overlay in light mode */
+.light body::after {
+  opacity: 0.15;
+}
+
+/* ── Light mode: replace white-opacity patterns with dark-opacity equivalents */
+
+/* Buttons & containers using bg-white/5 → bg-black/5 */
+.light .bg-white\/5  { background-color: rgba(15, 23, 60, 0.05) !important; }
+.light .bg-white\/10 { background-color: rgba(15, 23, 60, 0.08) !important; }
+.light .hover\:bg-white\/10:hover { background-color: rgba(15, 23, 60, 0.08) !important; }
+
+/* Borders */
+.light .border-white\/5  { border-color: rgba(15, 23, 60, 0.08) !important; }
+.light .border-white\/10 { border-color: rgba(15, 23, 60, 0.12) !important; }
+
+/* White text in buttons that need to stay white (teal bg) */
+.light .bg-\[var\(--v3-teal\)\] .text-white { color: #ffffff !important; }
+
+/* Card shadows in light mode for depth */
+.light .bg-\[var\(--v3-bg2\)\] {
+  box-shadow: 0 1px 3px rgba(15, 23, 60, 0.06), 0 1px 2px rgba(15, 23, 60, 0.04);
+}
+
+/* TopBar in light mode */
+.light header {
+  box-shadow: 0 1px 0 rgba(15, 23, 60, 0.08);
 }
 
 body {
