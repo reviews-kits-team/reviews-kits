@@ -2,6 +2,7 @@ import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
 import { pkCheck } from '../../shared/middlewares/pk-check';
 import { publicReviewController } from '../controllers/publicReviewController';
+import { rateLimiter } from '../middlewares/rateLimiter';
 
 export const publicRouter = new OpenAPIHono();
 
@@ -120,6 +121,7 @@ const submitReviewRoute = createRoute({
             authorEmail: z.string().email().optional().openapi({ example: 'john@example.com' }),
             authorTitle: z.string().optional().openapi({ example: 'CEO' }),
             authorUrl: z.string().optional().openapi({ example: 'https://example.com' }),
+            _honey: z.string().optional().openapi({ description: 'Honeypot field for spam prevention' }),
           }),
         },
       },
@@ -134,6 +136,9 @@ const submitReviewRoute = createRoute({
     },
     404: {
       description: 'Form not found',
+    },
+    429: {
+      description: 'Too many requests',
     },
   },
 });
@@ -178,5 +183,13 @@ publicRouter.openapi(getReviewsRoute, async (c) => {
   });
   return response;
 });
+
+publicRouter.use('/reviews', async (c, next) => {
+  if (c.req.method === 'POST') {
+    return rateLimiter({ limit: 5, windowMs: 15 * 60 * 1000 })(c, next);
+  }
+  return next();
+});
+
 publicRouter.openapi(submitReviewRoute, (c) => publicReviewController.submitReview(c));
 publicRouter.openapi(getFormBySlugRoute, (c) => publicReviewController.getFormBySlug(c));

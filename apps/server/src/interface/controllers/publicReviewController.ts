@@ -68,7 +68,17 @@ export const publicReviewController = {
    */
   submitReview: async (c: Context) => {
     const body = await c.req.json();
-    const { formId, content, authorName, authorEmail, rating, authorTitle, authorUrl } = body;
+    const { formId, content, authorName, authorEmail, rating, authorTitle, authorUrl, _honey } = body;
+
+    // Honeypot check - Spambots usually fill hidden fields
+    if (_honey) {
+      // Silently discard to fool the bot
+      return c.json({ 
+        success: true, 
+        message: 'Review submitted successfully',
+        id: randomUUID()
+      }, 201);
+    }
 
     if (!formId || !content || !authorName) {
       return c.json({ error: 'Missing required fields: formId, content, authorName' }, 400);
