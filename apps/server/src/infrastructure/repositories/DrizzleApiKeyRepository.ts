@@ -1,12 +1,12 @@
 import { eq, and } from 'drizzle-orm';
-import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
+import type { BunSQLDatabase } from 'drizzle-orm/bun-sql';
 import * as schema from '../database/schema';
 import { apiKeys } from '../database/schema';
 import { ApiKey } from '../../domain/entities/ApiKey';
 import type { ApiKeyRepository } from '../../domain/repositories/ApiKeyRepository';
 
 export class DrizzleApiKeyRepository implements ApiKeyRepository {
-  constructor(private readonly db: PostgresJsDatabase<typeof schema>) {}
+  constructor(private readonly db: BunSQLDatabase<typeof schema>) {}
 
   async findById(id: string): Promise<ApiKey | null> {
     const [row] = await this.db.select().from(apiKeys).where(eq(apiKeys.id, id));

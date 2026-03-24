@@ -1,5 +1,5 @@
 import { eq, and, sql, count, avg, countDistinct } from 'drizzle-orm';
-import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
+import type { BunSQLDatabase } from 'drizzle-orm/bun-sql';
 import * as schema from '../database/schema';
 import { testimonials } from '../database/schema';
 import { Testimonial } from '../../domain/entities/Testimonial';
@@ -8,7 +8,7 @@ import { Rating } from '../../domain/value-objects/Rating';
 import { Email } from '../../domain/value-objects/Email';
 
 export class DrizzleTestimonialRepository implements TestimonialRepository {
-  constructor(private readonly db: PostgresJsDatabase<typeof schema>) {}
+  constructor(private readonly db: BunSQLDatabase<typeof schema>) {}
 
   async findById(id: string): Promise<Testimonial | null> {
     const [row] = await this.db.select().from(testimonials).where(eq(testimonials.id, id));
