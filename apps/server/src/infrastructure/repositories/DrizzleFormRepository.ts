@@ -1,5 +1,5 @@
 import { and, eq, sql } from 'drizzle-orm';
-import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
+import type { BunSQLDatabase } from 'drizzle-orm/bun-sql';
 import * as schema from '../database/schema';
 import { forms, formVisits } from '../database/schema';
 import { Form } from '../../domain/entities/Form';
@@ -7,7 +7,7 @@ import type { FormRepository } from '../../domain/repositories/FormRepository';
 import { Slug } from '../../domain/value-objects/Slug';
 
 export class DrizzleFormRepository implements FormRepository {
-  constructor(private readonly db: PostgresJsDatabase<typeof schema>) {}
+  constructor(private readonly db: BunSQLDatabase<typeof schema>) {}
 
   async findById(id: string): Promise<Form | null> {
     const [row] = await this.db.select().from(forms).where(eq(forms.id, id));
