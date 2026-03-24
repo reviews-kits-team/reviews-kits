@@ -62,7 +62,8 @@ export default function FormEditorPage() {
   const [selectedElement, setSelectedElement] = useState<string | null>(null)
   const [showSharePopover, setShowSharePopover] = useState(false)
   const [copied, setCopied] = useState(false)
-  
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false)
+
   const canvasRef = useRef<HTMLDivElement>(null)
   const stepRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
   const sidebarRefs = useRef<{ [key: string]: HTMLInputElement | HTMLTextAreaElement | null }>({})
@@ -71,7 +72,7 @@ export default function FormEditorPage() {
     setActiveStepId(stepId)
     setSelectedElement(elementKey)
     scrollToStep(stepId)
-    
+
     // Focus the sidebar input
     setTimeout(() => {
       const input = sidebarRefs.current[elementKey]
@@ -144,16 +145,16 @@ export default function FormEditorPage() {
     if (!form) return
     const newSteps = [...form.config.steps]
     const targetIndex = direction === 'up' ? index - 1 : index + 1
-    
+
     if (targetIndex < 0 || targetIndex >= newSteps.length) return
-    
+
     // Swap
     const temp = newSteps[index]
     newSteps[index] = newSteps[targetIndex]
     newSteps[targetIndex] = temp
-    
+
     setForm({ ...form, config: { ...form.config, steps: newSteps } })
-    
+
     // Scroll to the moved step
     setTimeout(() => scrollToStep(temp.id), 100)
   }
@@ -162,7 +163,7 @@ export default function FormEditorPage() {
     const newSteps = [...form.config.steps]
     const stepIdx = newSteps.findIndex(s => s.id === stepId)
     if (stepIdx === -1) return
-    
+
     newSteps[stepIdx] = { ...newSteps[stepIdx], ...updates }
     setForm({ ...form, config: { ...form.config, steps: newSteps } })
   }
@@ -210,19 +211,21 @@ export default function FormEditorPage() {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          name: form.name,
           config: form.config
         })
       })
       if (res.ok) {
-        alert("Modifications enregistrées !")
+        setShowSaveSuccess(true)
+        setTimeout(() => setShowSaveSuccess(false), 3000)
       }
     } catch (error) {
       console.error("Failed to save form", error)
     }
   }
 
-  if (loading) return <div className="flex items-center justify-center h-screen text-white">Chargement...</div>
-  if (!form) return <div className="flex items-center justify-center h-screen text-white">Formulaire non trouvé</div>
+  if (loading) return <div className="flex items-center justify-center h-screen text-white">Loading...</div>
+  if (!form) return <div className="flex items-center justify-center h-screen text-white">Form not found</div>
 
   const activeStep = form.config.steps.find(s => s.id === activeStepId)
 
@@ -243,19 +246,19 @@ export default function FormEditorPage() {
             <div className="h-6 w-px bg-white/10" />
             <div className="flex-1 max-w-md">
               <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--v3-teal)] block opacity-60">
-                Éditeur
+                Editor
               </span>
               <input
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 className="w-full bg-transparent border-none p-0 text-base font-bold tracking-tight text-[var(--v3-text)] focus:ring-0 outline-none placeholder:opacity-20"
-                placeholder="Nom du formulaire..."
+                placeholder="Form name..."
               />
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="flex items-center bg-white/5 rounded-lg p-1 border border-white/5">
+          <div className="flex items-center gap-2 md:gap-4">
+            <div className="hidden lg:flex items-center bg-white/5 rounded-lg p-1 border border-white/5">
               <button
                 onClick={() => setPreviewMode('mobile')}
                 className={`p-1.5 rounded-md transition-all ${previewMode === 'mobile' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white/60'}`}
@@ -275,14 +278,14 @@ export default function FormEditorPage() {
                 className="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all border border-white/10"
               >
                 <Link size={14} />
-                Partager
+                Share
               </button>
 
               {showSharePopover && (
                 <div className="absolute top-full right-0 mt-2 w-72 bg-[#0A0A0A] border border-white/10 rounded-2xl shadow-2xl p-4 z-[300] animate-in fade-in zoom-in-95 duration-200">
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Lien Public</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Public Link</span>
                       <button onClick={() => setShowSharePopover(false)} className="text-white/20 hover:text-white">
                         <Plus size={14} className="rotate-45" />
                       </button>
@@ -291,20 +294,20 @@ export default function FormEditorPage() {
                       <span className="text-[10px] text-white/40 truncate flex-1">
                         {`${window.location.origin}/f/${form.publicId}`}
                       </span>
-                      <button 
+                      <button
                         onClick={handleCopyLink}
                         className={`p-1.5 rounded-lg transition-all ${copied ? 'bg-[#0D9E75] text-white' : 'hover:bg-white/10 text-white/40'}`}
                       >
                         {copied ? <Check size={12} /> : <Copy size={12} />}
                       </button>
                     </div>
-                    <a 
-                      href={`/f/${form.publicId}`} 
-                      target="_blank" 
+                    <a
+                      href={`/f/${form.publicId}`}
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="text-[10px] font-bold text-[#0D9E75] hover:underline flex items-center gap-1 mt-1"
                     >
-                      Ouvrir le lien <ArrowRight size={10} />
+                      Open link <ArrowRight size={10} />
                     </a>
                   </div>
                 </div>
@@ -315,16 +318,16 @@ export default function FormEditorPage() {
               className="flex items-center gap-2 bg-[#0D9E75] hover:bg-[#0BA87E] text-white px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-lg shadow-[#0D9E75]/20"
             >
               <Save size={14} />
-              Enregistrer
+              Save
             </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8 items-start">
-          <section 
+        <div className="flex flex-col lg:grid lg:grid-cols-[1fr_340px] gap-6 lg:gap-8 items-start">
+          <section
             ref={canvasRef}
-            className="bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-3xl shadow-2xl h-[calc(100vh-140px)] overflow-y-auto p-12 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] bg-fixed custom-scrollbar snap-y snap-mandatory"
-            style={{ 
+            className="order-last lg:order-first w-full bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-2xl lg:rounded-3xl shadow-2xl h-[60vh] lg:h-[calc(100vh-140px)] overflow-y-auto p-4 md:p-8 lg:p-12 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] bg-fixed custom-scrollbar snap-y snap-mandatory"
+            style={{
               scrollBehavior: 'smooth',
               scrollbarWidth: 'none',
               msOverflowStyle: 'none'
@@ -341,19 +344,19 @@ export default function FormEditorPage() {
             {/* Fixed Minimalist Reorder Buttons (Top-Right of Canvas) */}
             <div className="sticky top-0 right-0 z-50 flex justify-end p-0 pointer-events-none">
               <div className="flex gap-1 bg-[#0A0A0A]/60 backdrop-blur-md p-1 rounded-bl-xl border-l border-b border-white/10 pointer-events-auto shadow-2xl overflow-hidden">
-                <button 
+                <button
                   disabled={form.config.steps.findIndex(s => s.id === activeStepId) <= 0}
                   onClick={() => moveStep(form.config.steps.findIndex(s => s.id === activeStepId), 'up')}
                   className="p-2 text-[#0D9E75] hover:bg-[#0D9E75]/10 rounded-lg transition-all disabled:opacity-20"
-                  title="Déplacer l'étape actuelle vers le haut"
+                  title="Move current step up"
                 >
                   <ChevronUp size={16} strokeWidth={3} />
                 </button>
-                <button 
+                <button
                   disabled={form.config.steps.findIndex(s => s.id === activeStepId) >= form.config.steps.length - 1}
                   onClick={() => moveStep(form.config.steps.findIndex(s => s.id === activeStepId), 'down')}
                   className="p-2 text-[#0D9E75] hover:bg-[#0D9E75]/10 rounded-lg transition-all disabled:opacity-20"
-                  title="Déplacer l'étape actuelle vers le bas"
+                  title="Move current step down"
                 >
                   <ChevronDown size={16} strokeWidth={3} />
                 </button>
@@ -362,26 +365,26 @@ export default function FormEditorPage() {
 
             <div className="flex flex-col items-center">
               {form.config.steps.map((step, index) => (
-                <div 
-                  key={step.id} 
+                <div
+                  key={step.id}
                   ref={el => { stepRefs.current[step.id] = el }}
                   data-step-id={step.id}
-                  className="flex flex-col items-center w-full min-h-[1100px] snap-center justify-center py-20 relative"
+                  className="flex flex-col items-center w-full min-h-[500px] md:min-h-[1100px] snap-center justify-center py-10 md:py-20 relative"
                 >
                   {/* Step Card Container */}
-                  <div 
+                  <div
                     onClick={() => scrollToStep(step.id)}
                     className={`
-                      transition-all duration-500 shadow-2xl relative bg-white overflow-hidden rounded-3xl cursor-pointer
-                      ${previewMode === 'mobile' ? 'w-[375px] h-[1067px]' : 'w-full max-w-[800px] h-[920px]'}
-                      ${activeStepId === step.id ? 'ring-4 ring-[#0D9E75] ring-offset-4 ring-offset-[#0A0A0A]' : 'opacity-40 hover:opacity-100 hover:ring-2 hover:ring-white/20 scale-95'}
+                      transition-all duration-500 shadow-2xl relative bg-white overflow-hidden rounded-2xl md:rounded-3xl cursor-pointer
+                      ${previewMode === 'mobile' ? 'w-full max-w-[375px] h-[75vh] md:h-[812px]' : 'w-full max-w-[800px] h-[75vh] md:h-[920px]'}
+                      ${activeStepId === step.id ? 'ring-4 ring-[#0D9E75] ring-offset-4 ring-offset-[#0A0A0A]' : 'opacity-40 hover:opacity-100 hover:ring-2 hover:ring-white/20 scale-95 lg:scale-95'}
                       ${!step.isEnabled ? 'grayscale-[1]' : ''}
                     `}
                   >
                     {/* Step Badge */}
                     <div className="absolute top-4 left-4 z-20">
                       <div className="bg-[#0A0A0A]/80 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white border border-white/10">
-                        Étape {index + 1}: {step.type}
+                        Step {index + 1}: {step.type}
                       </div>
                     </div>
 
@@ -396,8 +399,8 @@ export default function FormEditorPage() {
                       const getFontUrl = (font: string) => `https://fonts.googleapis.com/css2?family=${font.replace(/ /g, '+')}:wght@400;700;900&display=swap`;
 
                       return (
-                        <div 
-                          className="h-full w-full flex flex-col items-center justify-center p-8 text-[#1a1a1a] gap-y-6 relative"
+                        <div
+                          className="h-full w-full flex flex-col items-center justify-center p-4 md:p-8 text-[#1a1a1a] gap-y-4 md:gap-y-6 relative overflow-y-auto"
                           style={{ fontFamily: bodyFont }}
                         >
                           {/* Dynamic Font Loading */}
@@ -410,181 +413,183 @@ export default function FormEditorPage() {
 
                           {branding.logoUrl && (
                             <div className="mb-4 flex justify-center w-full">
-                              <img 
-                                src={branding.logoUrl} 
-                                alt="Logo" 
-                                className="max-h-16 w-auto object-contain" 
+                              <img
+                                src={branding.logoUrl}
+                                alt="Logo"
+                                className="max-h-16 w-auto object-contain"
                               />
                             </div>
                           )}
                           {(step.type === 'welcome' || step.type === 'informative') && (
                             <div className="flex flex-col items-center gap-y-6 text-center w-full">
-                              <h2 
+                              <h2
                                 onClick={() => handleElementClick('title', step.id)}
-                                style={{ 
-                                  borderColor: selectedElement === 'title' && activeStepId === step.id ? primaryColor : 'transparent',
-                                  fontFamily: headingFont
+                                style={{
+                                  borderColor: selectedElement === 'title' && activeStepId === step.id ? '#000000' : 'transparent',
+                                  fontFamily: headingFont,
+                                  color: '#000000'
                                 }}
-                                className={`text-4xl font-black tracking-tighter text-balance cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                                className={`text-black text-2xl md:text-4xl font-black tracking-tighter cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
                               >
                                 {step.title}
                               </h2>
-                              <p 
+                              <p
                                 onClick={() => handleElementClick('description', step.id)}
-                                style={{ borderColor: selectedElement === 'description' && activeStepId === step.id ? primaryColor : 'transparent' }}
-                                className={`text-gray-500 cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'description' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                                style={{ borderColor: selectedElement === 'description' && activeStepId === step.id ? '#000000' : 'transparent' }}
+                                className={`text-gray-600 cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'description' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
                               >
                                 {step.description}
                               </p>
-                              <button 
+                              <button
                                 onClick={() => handleElementClick('buttonText', step.id)}
                                 style={{ backgroundColor: primaryColor, fontFamily: bodyFont }}
                                 className={`text-white w-full py-4 rounded-xl text-xs font-bold shadow-xl transition-all border-2 ${selectedElement === 'buttonText' && activeStepId === step.id ? 'border-dashed border-white ring-4 ring-black/10' : 'border-transparent'}`}
                               >
-                                {(step.config as Record<string, string | boolean>)?.buttonText || 'Continuer'}
+                                {(step.config as Record<string, string | boolean>)?.buttonText || 'Continue'}
                               </button>
                             </div>
                           )}
 
                           {step.type === 'rating' && (
                             <div className="flex flex-col items-center gap-y-6 text-center w-full">
-                              <h2 
+                              <h2
                                 onClick={() => handleElementClick('title', step.id)}
-                                style={{ 
-                                  borderColor: selectedElement === 'title' && activeStepId === step.id ? primaryColor : 'transparent',
-                                  fontFamily: headingFont
+                                style={{
+                                  borderColor: selectedElement === 'title' && activeStepId === step.id ? '#000000' : 'transparent',
+                                  fontFamily: headingFont,
+                                  color: '#000000'
                                 }}
-                                className={`text-4xl font-black tracking-tighter text-balance cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                                className={`text-black text-2xl md:text-4xl font-black tracking-tighter text-balance cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
                               >
                                 {step.title}
                               </h2>
-                              <p 
+                              <p
                                 onClick={() => handleElementClick('description', step.id)}
-                                style={{ borderColor: selectedElement === 'description' && activeStepId === step.id ? primaryColor : 'transparent' }}
-                                className={`text-gray-500 cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'description' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                                style={{ borderColor: selectedElement === 'description' && activeStepId === step.id ? '#000000' : 'transparent' }}
+                                className={`text-gray-600 cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'description' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
                               >
                                 {step.description}
                               </p>
                               <div className="flex gap-8 justify-center">
                                 {(step.config as Record<string, string | boolean>)?.ratingType === 'emojis' ? (
-                                  ['😠', '🙁', '😐', '🙂', '😍'].map((emoji, i) => (
-                                    <div key={i} className="text-4xl filter grayscale hover:grayscale-0 transition-all cursor-default">
+                                  ['😠', '🙁', '😐', '🙂', '😍'].map((emoji) => (
+                                    <div key={emoji} className="text-4xl filter grayscale hover:grayscale-0 transition-all cursor-default">
                                       {emoji}
                                     </div>
                                   ))
                                 ) : (
-                                  [1, 2, 3, 4, 5].map(i => (
-                                    <div key={i} className="p-2">
-                                      <Star size={previewMode === 'mobile' ? 30 : 40} className="text-gray-200 fill-gray-100" />
+                                  [1, 2, 3, 4, 5].map(v => (
+                                    <div key={v} className="p-2">
+                                      <Star size={previewMode === 'mobile' ? 30 : 40} className="text-gray-300 fill-gray-200" />
                                     </div>
                                   ))
                                 )}
                               </div>
-                              <button 
+                              <button
                                 onClick={() => handleElementClick('buttonText', step.id)}
                                 style={{ backgroundColor: primaryColor, fontFamily: bodyFont }}
                                 className={`text-white w-full py-4 rounded-xl text-xs font-bold shadow-xl transition-all border-2 ${selectedElement === 'buttonText' && activeStepId === step.id ? 'border-dashed border-white ring-4 ring-black/10' : 'border-transparent'}`}
                               >
-                                {(step.config as Record<string, string | boolean>)?.buttonText || 'Continuer'}
+                                {(step.config as Record<string, string | boolean>)?.buttonText || 'Continue'}
                               </button>
                             </div>
                           )}
 
                           {step.type === 'textarea' && (
                             <div className="w-full max-w-md flex flex-col items-center gap-y-6 text-center">
-                              <h2 
+                              <h2
                                 onClick={() => handleElementClick('title', step.id)}
-                                style={{ borderColor: selectedElement === 'title' && activeStepId === step.id ? primaryColor : 'transparent', fontFamily: headingFont }}
-                                className={`text-3xl font-black tracking-tighter cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                                style={{ borderColor: selectedElement === 'title' && activeStepId === step.id ? '#000000' : 'transparent', fontFamily: headingFont, color: '#000000' }}
+                                className={`text-2xl md:text-3xl font-black tracking-tighter cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
                               >
                                 {step.title}
                               </h2>
-                              <p 
+                              <p
                                 onClick={() => handleElementClick('description', step.id)}
-                                style={{ borderColor: selectedElement === 'description' && activeStepId === step.id ? primaryColor : 'transparent' }}
-                                className={`text-gray-500 cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'description' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                                style={{ borderColor: selectedElement === 'description' && activeStepId === step.id ? '#000000' : 'transparent' }}
+                                className={`text-gray-600 cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'description' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
                               >
                                 {step.description}
                               </p>
                               <textarea
                                 disabled
                                 onClick={() => handleElementClick('placeholder', step.id)}
-                                className={`w-full h-48 p-6 rounded-2xl border-2 bg-gray-50 outline-none transition-all placeholder:text-gray-300 italic cursor-pointer ${selectedElement === 'placeholder' && activeStepId === step.id ? 'border-dashed border-gray-100' : 'border-gray-100 hover:border-black/5'}`}
-                                style={{ borderColor: selectedElement === 'placeholder' && activeStepId === step.id ? primaryColor : undefined }}
-                                placeholder={((step.config as Record<string, string | boolean>)?.placeholder as string) || "Tapez votre témoignage ici..."}
+                                className={`w-full h-48 p-6 rounded-2xl border-2 bg-gray-50 outline-none transition-all placeholder:text-gray-400 italic cursor-pointer ${selectedElement === 'placeholder' && activeStepId === step.id ? 'border-dashed border-gray-100' : 'border-gray-100 hover:border-black/5'}`}
+                                style={{ borderColor: selectedElement === 'placeholder' && activeStepId === step.id ? '#000000' : undefined }}
+                                placeholder={((step.config as Record<string, string | boolean>)?.placeholder as string) || "Type your testimonial here..."}
                               />
-                              <button 
+                              <button
                                 onClick={() => handleElementClick('buttonText', step.id)}
                                 style={{ backgroundColor: primaryColor, fontFamily: bodyFont }}
                                 className={`text-white w-full py-4 rounded-xl text-xs font-bold shadow-xl transition-all border-2 ${selectedElement === 'buttonText' && activeStepId === step.id ? 'border-dashed border-white ring-4 ring-black/10' : 'border-transparent'}`}
                               >
-                                {(step.config as Record<string, string | boolean>)?.buttonText || 'Suivant'}
+                                {(step.config as Record<string, string | boolean>)?.buttonText || 'Next'}
                               </button>
                             </div>
                           )}
 
                           {step.type === 'attribution' && (
                             <div className="w-full max-w-md flex flex-col items-center gap-y-6 text-center">
-                              <h2 
+                              <h2
                                 onClick={() => handleElementClick('title', step.id)}
-                                style={{ borderColor: selectedElement === 'title' && activeStepId === step.id ? primaryColor : 'transparent', fontFamily: headingFont }}
-                                className={`text-3xl font-black tracking-tighter cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                                style={{ borderColor: selectedElement === 'title' && activeStepId === step.id ? '#000000' : 'transparent', fontFamily: headingFont, color: '#000000' }}
+                                className={`text-2xl md:text-3xl font-black tracking-tighter cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
                               >
                                 {step.title}
                               </h2>
-                              <p 
+                              <p
                                 onClick={() => handleElementClick('description', step.id)}
-                                style={{ borderColor: selectedElement === 'description' && activeStepId === step.id ? primaryColor : 'transparent' }}
-                                className={`text-gray-500 cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'description' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                                style={{ borderColor: selectedElement === 'description' && activeStepId === step.id ? '#000000' : 'transparent' }}
+                                className={`text-gray-600 cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'description' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
                               >
                                 {step.description}
                               </p>
                               <div className="w-full space-y-4">
                                 <div className="flex flex-col gap-4">
-                                  <div className="w-full h-32 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-300 border-2 border-dashed border-gray-100 mb-2">
+                                  <div className="w-full h-32 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-500 border-2 border-dashed border-gray-100 mb-2">
                                     <Plus size={24} />
-                                    <span className="ml-2 text-[10px] font-bold uppercase tracking-wider">Ajouter une photo</span>
+                                    <span className="ml-2 text-[10px] font-bold uppercase tracking-wider">Add a photo</span>
                                   </div>
-                                  <div className="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 flex items-center text-gray-400 text-xs text-left italic">
-                                    {(step.config as Record<string, string | boolean>)?.collectName !== false ? 'Votre nom' : 'Anonyme'}
+                                  <div className="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 flex items-center text-gray-600 text-xs text-left italic">
+                                    {(step.config as Record<string, string | boolean>)?.collectName !== false ? 'Your name' : 'Anonymous'}
                                   </div>
                                 </div>
                                 {(step.config as Record<string, string | boolean>)?.collectEmail !== false && (
-                                  <div className="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 text-gray-400 text-xs text-left italic">votre@email.com</div>
+                                  <div className="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 text-gray-600 text-xs text-left italic">votre@email.com</div>
                                 )}
                                 {(step.config as Record<string, string | boolean>)?.collectCompany && (
-                                  <div className="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 text-gray-400 text-xs text-left italic">Votre entreprise / site web</div>
+                                  <div className="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 text-gray-600 text-xs text-left italic">Your company / website</div>
                                 )}
                               </div>
-                              <button 
+                              <button
                                 onClick={() => handleElementClick('buttonText', step.id)}
                                 style={{ backgroundColor: primaryColor, fontFamily: bodyFont }}
                                 className={`text-white w-full py-4 rounded-xl text-xs font-bold shadow-xl transition-all border-2 ${selectedElement === 'buttonText' && activeStepId === step.id ? 'border-dashed border-white ring-4 ring-black/10' : 'border-transparent'}`}
                               >
-                                {(step.config as Record<string, string | boolean>)?.buttonText || 'Terminer'}
+                                {(step.config as Record<string, string | boolean>)?.buttonText || 'Finish'}
                               </button>
                             </div>
                           )}
 
                           {step.type === 'success' && (
                             <div className="flex flex-col items-center gap-y-6 text-center w-full">
-                              <div 
+                              <div
                                 className="w-32 h-32 rounded-full flex items-center justify-center mx-auto transition-transform hover:scale-110 duration-500 shadow-lg"
                                 style={{ backgroundColor: `${primaryColor}1a`, color: primaryColor }}
                               >
                                 <CheckCircle size={40} />
                               </div>
-                              <h2 
+                              <h2
                                 onClick={() => handleElementClick('title', step.id)}
-                                style={{ borderColor: selectedElement === 'title' && activeStepId === step.id ? primaryColor : 'transparent', fontFamily: headingFont }}
-                                className={`text-3xl font-black tracking-tighter cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                                style={{ borderColor: selectedElement === 'title' && activeStepId === step.id ? '#000000' : 'transparent', fontFamily: headingFont, color: '#000000' }}
+                                className={`text-2xl md:text-3xl font-black tracking-tighter cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
                               >
                                 {step.title}
                               </h2>
-                              <p 
+                              <p
                                 onClick={() => handleElementClick('description', step.id)}
-                                style={{ borderColor: selectedElement === 'description' && activeStepId === step.id ? primaryColor : 'transparent' }}
-                                className={`text-gray-500 cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'description' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                                style={{ borderColor: selectedElement === 'description' && activeStepId === step.id ? '#000000' : 'transparent' }}
+                                className={`text-gray-600 cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'description' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
                               >
                                 {step.description}
                               </p>
@@ -606,15 +611,15 @@ export default function FormEditorPage() {
 
               {/* Add Step Button */}
               <div className="h-[400px] flex items-center justify-center snap-center w-full">
-                <button 
+                <button
                   className="flex flex-col items-center gap-4 group"
                   onClick={() => {
                     const newId = `step_${Date.now()}`
                     const newStep: FormStep = {
                       id: newId,
                       type: 'textarea',
-                      title: 'Nouvelle étape',
-                      description: 'Description de la nouvelle étape',
+                      title: 'New step',
+                      description: 'Description of the new step',
                       isEnabled: true
                     }
                     setForm({ ...form, config: { ...form.config, steps: [...form.config.steps, newStep] } })
@@ -625,21 +630,21 @@ export default function FormEditorPage() {
                   <div className="w-16 h-16 rounded-full bg-white/5 border border-dashed border-white/20 flex items-center justify-center group-hover:bg-[#0D9E75]/10 group-hover:border-[#0D9E75] transition-all">
                     <Plus size={24} className="text-white/40 group-hover:text-[#0D9E75]" />
                   </div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-white/20 group-hover:text-white/60">Ajouter une étape</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-white/20 group-hover:text-white/60">Add a step</span>
                 </button>
               </div>
             </div>
           </section>
 
           {/* Right Sidebar: Settings */}
-          <aside className="bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-3xl flex flex-col overflow-hidden sticky top-8 h-[calc(100vh-140px)]">
-            <div className="flex border-b border-white/5 p-1 bg-white/5">
+          <aside className="order-first lg:order-last w-full lg:w-auto bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-2xl lg:rounded-3xl flex flex-col overflow-hidden lg:sticky top-8 h-[45vh] lg:h-[calc(100vh-140px)] z-40 shadow-2xl">
+            <div className="flex border-b border-white/5 p-1 bg-white/5 shrink-0">
               <button
                 onClick={() => setActiveTab('pages')}
                 className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'pages' ? 'bg-[#0D9E75] text-white shadow-lg shadow-[#0D9E75]/20' : 'text-white/40 hover:text-white/60'}`}
               >
                 <Layout size={14} className="inline mr-2" />
-                Étape
+                Step
               </button>
               <button
                 onClick={() => setActiveTab('design')}
@@ -656,13 +661,13 @@ export default function FormEditorPage() {
                   {/* Selected Step Info */}
                   <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
                     <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#0D9E75] block mb-1">
-                      En cours d'édition
+                      Currently editing
                     </span>
                     <h3 className="text-sm font-bold truncate">
-                      {activeStep ? activeStep.title : "Aucune étape sélectionnée"}
+                      {activeStep ? activeStep.title : "No step selected"}
                     </h3>
                     <p className="text-[10px] text-white/40 mt-1 italic">
-                      Cliquez sur une étape dans le canvas pour la modifier.
+                      Click on a step in the canvas to edit it.
                     </p>
                   </div>
 
@@ -671,7 +676,7 @@ export default function FormEditorPage() {
                   {activeStep && (
                     <div className="space-y-6">
                       <div>
-                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block">Titre de l'étape</label>
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block">Step title</label>
                         <input
                           ref={(el) => { sidebarRefs.current['title'] = el }}
                           type="text"
@@ -681,7 +686,7 @@ export default function FormEditorPage() {
                         />
                       </div>
                       <div>
-                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block text-balance">Description de l'étape</label>
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block text-balance">Step description</label>
                         <textarea
                           ref={(el) => { sidebarRefs.current['description'] = el }}
                           value={activeStep.description}
@@ -691,19 +696,19 @@ export default function FormEditorPage() {
                       </div>
 
                       <div className="pt-6 border-t border-white/5 space-y-6">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-[#0D9E75] block mb-4">Paramètres spécifiques</span>
-                        
+                        <span className="text-[10px] font-black uppercase tracking-widest text-[#0D9E75] block mb-4">Specific settings</span>
+
                         {activeStep.type === 'rating' && (
                           <div className="pt-6 border-t border-white/5 mt-6">
-                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block">Style de notation</label>
+                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block">Rating style</label>
                             <div className="flex gap-2 bg-[var(--v3-bg)] p-1 rounded-xl border border-[var(--v3-border)]">
-                              <button 
+                              <button
                                 onClick={() => updateStep(activeStep.id, { config: { ...activeStep.config, ratingType: 'stars' } })}
                                 className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${((activeStep.config as Record<string, string | boolean>)?.ratingType || 'stars') === 'stars' ? 'bg-[var(--v3-teal)] text-white shadow-lg' : 'text-[var(--v3-muted2)] hover:text-white hover:bg-white/5'}`}
                               >
-                                Étoiles
+                                Stars
                               </button>
-                              <button 
+                              <button
                                 onClick={() => updateStep(activeStep.id, { config: { ...activeStep.config, ratingType: 'emojis' } })}
                                 className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${((activeStep.config as Record<string, string | boolean>)?.ratingType) === 'emojis' ? 'bg-[var(--v3-teal)] text-white shadow-lg' : 'text-[var(--v3-muted2)] hover:text-white hover:bg-white/5'}`}
                               >
@@ -712,16 +717,16 @@ export default function FormEditorPage() {
                             </div>
                           </div>
                         )}
-                        
+
                         {(activeStep.type === 'welcome' || activeStep.type === 'success' || activeStep.type === 'informative' || activeStep.type === 'rating' || activeStep.type === 'textarea' || activeStep.type === 'attribution') && (
                           <div className="pt-6 border-t border-white/5 mt-6">
-                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block">Texte du bouton</label>
+                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block">Button text</label>
                             <input
                               ref={(el) => { sidebarRefs.current['buttonText'] = el }}
                               type="text"
                               value={((activeStep.config as Record<string, string | boolean>)?.buttonText as string) || ''}
                               onChange={(e) => updateStep(activeStep.id, { config: { ...activeStep.config, buttonText: e.target.value } })}
-                              placeholder="Continuer"
+                              placeholder="Continue"
                               className="w-full bg-[var(--v3-bg)] border border-[var(--v3-border)] rounded-xl px-4 py-3 text-sm focus:border-[var(--v3-teal)]/50 transition-all outline-none"
                             />
                           </div>
@@ -729,13 +734,13 @@ export default function FormEditorPage() {
 
                         {activeStep.type === 'textarea' && (
                           <div className="pt-6 border-t border-white/5 mt-6">
-                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block">Texte d'aide (Placeholder)</label>
+                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block">Help text (Placeholder)</label>
                             <input
                               ref={(el) => { sidebarRefs.current['placeholder'] = el }}
                               type="text"
                               value={((activeStep.config as Record<string, string | boolean>)?.placeholder as string) || ''}
                               onChange={(e) => updateStep(activeStep.id, { config: { ...activeStep.config, placeholder: e.target.value } })}
-                              placeholder="Tapez votre témoignage ici..."
+                              placeholder="Type your testimonial here..."
                               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs font-medium focus:border-[#0D9E75]/50 outline-none transition-all"
                             />
                           </div>
@@ -744,7 +749,7 @@ export default function FormEditorPage() {
                         {activeStep.type === 'attribution' && (
                           <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-bold">Collecter l'email</span>
+                              <span className="text-[10px] font-bold">Collect email</span>
                               <button
                                 onClick={() => {
                                   const newSteps = [...form.config.steps]
@@ -758,7 +763,7 @@ export default function FormEditorPage() {
                               </button>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-bold">Collecter l'entreprise</span>
+                              <span className="text-[10px] font-bold">Collect company</span>
                               <button
                                 onClick={() => {
                                   const newSteps = [...form.config.steps]
@@ -777,7 +782,7 @@ export default function FormEditorPage() {
 
                       <div className="pt-6 border-t border-white/5">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold">Activer cette étape</span>
+                          <span className="text-xs font-bold">Enable this step</span>
                           <button
                             onClick={() => {
                               const newSteps = [...form.config.steps]
@@ -803,12 +808,12 @@ export default function FormEditorPage() {
                     <div className="flex items-center gap-3">
                       <ColorPicker
                         value={form.config.branding.primaryColor || '#0D9E75'}
-                        onChange={(color) => setForm({ 
-                          ...form, 
-                          config: { 
-                            ...form.config, 
-                            branding: { ...form.config.branding, primaryColor: color } 
-                          } 
+                        onChange={(color) => setForm({
+                          ...form,
+                          config: {
+                            ...form.config,
+                            branding: { ...form.config.branding, primaryColor: color }
+                          }
                         })}
                         brandColors={form.config.branding.brandColors}
                         onAddBrandColor={(color) => {
@@ -818,9 +823,9 @@ export default function FormEditorPage() {
                               ...form,
                               config: {
                                 ...form.config,
-                                branding: { 
-                                  ...form.config.branding, 
-                                  brandColors: [...currentBrandColors, color] 
+                                branding: {
+                                  ...form.config.branding,
+                                  brandColors: [...currentBrandColors, color]
                                 }
                               }
                             });
@@ -839,7 +844,7 @@ export default function FormEditorPage() {
                           <div className="w-full h-32 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden p-6">
                             <img src={form.config.branding.logoUrl} alt="Logo" className="max-w-full max-h-full object-contain" />
                           </div>
-                          <button 
+                          <button
                             onClick={removeLogo}
                             className="absolute top-2 right-2 w-8 h-8 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500 hover:text-white"
                           >
@@ -852,14 +857,14 @@ export default function FormEditorPage() {
                             <Upload size={18} />
                           </div>
                           <div className="text-center">
-                            <span className="text-xs font-bold block">Charger le logo</span>
-                            <span className="text-[10px] text-white/20">PNG, JPG jusqu'à 2Mo</span>
+                            <span className="text-xs font-bold block">Upload logo</span>
+                            <span className="text-[10px] text-white/20">PNG, JPG up to 2MB</span>
                           </div>
-                          <input 
-                            type="file" 
-                            className="hidden" 
+                          <input
+                            type="file"
+                            className="hidden"
                             accept="image/*"
-                            onChange={handleLogoUpload} 
+                            onChange={handleLogoUpload}
                           />
                         </label>
                       )}
@@ -913,6 +918,14 @@ export default function FormEditorPage() {
           </aside>
         </div>
       </main>
+
+      {/* Toast Notification */}
+      {showSaveSuccess && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-[#0D9E75] text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-bottom-8 duration-300 z-[9999]">
+          <CheckCircle size={20} className="text-white" />
+          <span className="font-bold text-sm">Changes saved!</span>
+        </div>
+      )}
     </div>
   )
 }

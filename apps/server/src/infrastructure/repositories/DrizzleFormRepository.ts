@@ -1,13 +1,13 @@
-import { and, eq } from 'drizzle-orm';
-import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
+import { and, eq, sql, inArray, sum } from 'drizzle-orm';
+import type { BunSQLDatabase } from 'drizzle-orm/bun-sql';
 import * as schema from '../database/schema';
-import { forms } from '../database/schema';
+import { forms, formVisits } from '../database/schema';
 import { Form } from '../../domain/entities/Form';
 import type { FormRepository } from '../../domain/repositories/FormRepository';
 import { Slug } from '../../domain/value-objects/Slug';
 
 export class DrizzleFormRepository implements FormRepository {
-  constructor(private readonly db: PostgresJsDatabase<typeof schema>) {}
+  constructor(private readonly db: BunSQLDatabase<typeof schema>) {}
 
   async findById(id: string): Promise<Form | null> {
     const [row] = await this.db.select().from(forms).where(eq(forms.id, id));
@@ -34,6 +34,17 @@ export class DrizzleFormRepository implements FormRepository {
 
   async findByUser(userId: string): Promise<Form[]> {
     const rows = await this.db.select().from(forms).where(eq(forms.userId, userId));
+    return rows.map(row => this.mapToDomain(row));
+  }
+
+  async findByIdsAndUser(ids: string[], userId: string): Promise<Form[]> {
+    if (!ids || ids.length === 0) return [];
+    
+    const { inArray } = await import('drizzle-orm');
+    const rows = await this.db.select()
+      .from(forms)
+      .where(and(inArray(forms.id, ids), eq(forms.userId, userId)));
+      
     return rows.map(row => this.mapToDomain(row));
   }
 
@@ -88,7 +99,37 @@ export class DrizzleFormRepository implements FormRepository {
     await this.db.delete(forms).where(inArray(forms.id, ids));
   }
 
-  private mapToDomain(row: any): Form {
+  async incrementVisits(formId: string): Promise<void> {
+    const today = new Date().toISOString().split('T')[0];
+    await this.db.insert(formVisits)
+      .values({ formId, date: today, visits: 1 } as any)
+      .onConflictDoUpdate({
+        target: [formVisits.formId, formVisits.date],
+        set: { visits: sql`${formVisits.visits} + 1`, updatedAt: new Date() }
+      });
+  }
+
+  async getVisitsByFormIds(formIds: string[]): Promise<Map<string, number>> {
+    const resultMap = new Map<string, number>();
+    if (!formIds || formIds.length === 0) return resultMap;
+
+    const results = await this.db
+      .select({
+        formId: formVisits.formId,
+        totalVisits: sum(formVisits.visits),
+      })
+      .from(formVisits)
+      .where(inArray(formVisits.formId, formIds))
+      .groupBy(formVisits.formId);
+
+    results.forEach((r) => {
+      resultMap.set(r.formId, Number(r.totalVisits || 0));
+    });
+
+    return resultMap;
+  }
+
+  private mapToDomain(row: typeof forms.$inferSelect): Form {
     return new Form({
       id: row.id,
       userId: row.userId,
@@ -97,7 +138,7 @@ export class DrizzleFormRepository implements FormRepository {
       publicId: row.publicId,
       description: row.description || undefined,
       thankYouMessage: row.thankYouMessage || undefined,
-      config: row.config as Record<string, any>,
+      config: row.config as Record<string, unknown>,
       accentColor: row.accentColor || undefined,
       isActive: row.isActive ?? true,
       createdAt: row.createdAt || undefined,

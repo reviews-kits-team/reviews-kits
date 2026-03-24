@@ -1,8 +1,13 @@
 import { Testimonial } from '../entities/Testimonial';
 
+export interface TestimonialFilters {
+  status?: 'approved' | 'rejected' | 'pending';
+}
+
 export interface TestimonialRepository {
   findById(id: string): Promise<Testimonial | null>;
-  findByUser(userId: string, filters?: any): Promise<Testimonial[]>;
+  findByUser(userId: string, filters?: TestimonialFilters): Promise<Testimonial[]>;
+  findByIdsAndUser(ids: string[], userId: string): Promise<Testimonial[]>;
   save(testimonial: Testimonial): Promise<void>;
   update(testimonial: Testimonial): Promise<void>;
   delete(id: string): Promise<void>;
@@ -15,12 +20,19 @@ export interface TestimonialRepository {
     totalReviews: number;
     averageRating: number;
     uniqueRespondents: number;
+    reviewsGrowth?: number;
+    completionRate?: number;
+    completionGrowth?: number;
   }>;
+  getBasicStatsByFormIds(formIds: string[]): Promise<Map<string, { totalReviews: number; averageRating: number }>>;
   getStatsByFormId(formId: string): Promise<{
     totalReviews: number;
     averageRating: number;
     uniqueRespondents: number;
     ratingDistribution: { rating: number; count: number }[];
     reviewVolume: { label: string; value: number }[];
+    reviewsGrowth?: number;
+    completionRate?: number;
+    completionGrowth?: number;
   }>;
 }

@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, beforeEach, spyOn } from "bun:test";
+import { describe, expect, it, beforeAll, afterAll, beforeEach, spyOn } from "bun:test";
 import { testDb, clearDatabase } from "../IntegrationSetup";
 import { apiKeysRouter } from "../../../src/interface/routes/api-keys";
 import { container } from "../../../src/infrastructure/container";
@@ -11,6 +11,10 @@ describe("API Keys Integration", () => {
 
   beforeAll(async () => {
     await clearDatabase();
+  });
+
+  afterAll(() => {
+    getSessionSpy.mockRestore();
   });
 
   beforeEach(async () => {

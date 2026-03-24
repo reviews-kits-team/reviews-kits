@@ -4,8 +4,8 @@ import { Globe, Bell, Moon } from 'lucide-react'
 export default function SettingsPage() {
   return (
     <SettingsLayout 
-      title="Paramètres" 
-      subtitle="Configure les options générales de ton compte et de l'interface."
+      title="Settings" 
+      subtitle="Configure general options for your account and interface."
     >
       <div className="space-y-6">
         {/* Appearance */}
@@ -17,7 +17,7 @@ export default function SettingsPage() {
                </div>
                <div>
                   <h3 className="font-bold text-[var(--v3-text)]">Mode Sombre</h3>
-                  <p className="text-xs text-[var(--v3-muted2)]">Activer ou désactiver le thème sombre.</p>
+                  <p className="text-xs text-[var(--v3-muted2)]">Enable or disable dark mode.</p>
                </div>
             </div>
             <div className="w-12 h-6 bg-[var(--v3-teal)] rounded-full relative cursor-pointer p-1">
@@ -33,8 +33,8 @@ export default function SettingsPage() {
                 <Globe size={20} />
               </div>
               <div>
-                <h3 className="font-bold text-[var(--v3-text)]">Langue & Région</h3>
-                <p className="text-xs text-[var(--v3-muted2)]">Langue par défaut de l'interface.</p>
+                <h3 className="font-bold text-[var(--v3-text)]">Language & Region</h3>
+                <p className="text-xs text-[var(--v3-muted2)]">Default interface language.</p>
               </div>
            </div>
            
@@ -52,7 +52,7 @@ export default function SettingsPage() {
               </div>
               <div>
                 <h3 className="font-bold text-[var(--v3-text)]">Notifications Email</h3>
-                <p className="text-xs text-[var(--v3-muted2)]">Gère tes préférences de notification.</p>
+                <p className="text-xs text-[var(--v3-muted2)]">Manage your notification preferences.</p>
               </div>
            </div>
            <div className="space-y-4 pt-2">
@@ -68,7 +68,7 @@ export default function SettingsPage() {
         </div>
 
         <button className="w-full py-3.5 bg-white/5 border border-white/5 text-white rounded-xl font-bold text-sm hover:bg-white/10 transition-all opacity-50 cursor-not-allowed">
-          Bientôt disponible
+          Coming soon
         </button>
       </div>
     </SettingsLayout>

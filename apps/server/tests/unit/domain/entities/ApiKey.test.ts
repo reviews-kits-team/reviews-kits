@@ -5,7 +5,8 @@ describe("ApiKey Entity", () => {
   const validProps: ApiKeyProps = {
     id: "key-1",
     userId: "user-1",
-    key: "rk_pk_live_123456",
+    keyHash: "hashed_value_here",
+    keyPrefix: "rk_pk_live_123",
     type: 'public',
     isActive: true,
   };
@@ -16,7 +17,8 @@ describe("ApiKey Entity", () => {
       
       expect(apiKey.id).toBe(validProps.id);
       expect(apiKey.userId).toBe(validProps.userId);
-      expect(apiKey.key).toBe(validProps.key);
+      expect(apiKey.keyHash).toBe(validProps.keyHash);
+      expect(apiKey.keyPrefix).toBe(validProps.keyPrefix);
       expect(apiKey.type).toBe(validProps.type);
       expect(apiKey.getProps().isActive).toBe(true);
       expect(apiKey.createdAt).toBeInstanceOf(Date);

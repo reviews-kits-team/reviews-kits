@@ -1,4 +1,4 @@
-import { expect, it, describe, spyOn, beforeEach, afterEach, afterAll } from "bun:test";
+import { expect, describe, it, beforeAll, afterAll, beforeEach, spyOn } from "bun:test";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { adminRouter } from "../../../src/interface/routes/admin";
 import { auth } from "../../../src/infrastructure/auth/auth";
@@ -18,14 +18,10 @@ describe("Admin Users API Flow", () => {
 
   const getSessionSpy = spyOn(auth.api, "getSession") as any;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     await clearDatabase();
   });
 
-  afterEach(() => {
-    getSessionSpy.mockReset();
-  });
-  
   afterAll(() => {
     getSessionSpy.mockRestore();
   });

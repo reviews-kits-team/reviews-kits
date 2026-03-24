@@ -35,11 +35,11 @@ export const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, formName, loadi
           </div>
 
           <h2 className="text-xl font-black tracking-tight text-[var(--v3-text)] mb-3">
-            Supprimer ce formulaire ?
+            Delete this form?
           </h2>
           <p className="text-[var(--v3-muted2)] text-sm leading-relaxed mb-8">
-            Es-tu sûr de vouloir supprimer <span className="text-[var(--v3-text)] font-bold">"{formName}"</span> ? 
-            Cette action est irréversible et supprimera également tous les témoignages associés.
+            Are you sure you want to delete <span className="text-[var(--v3-text)] font-bold">"{formName}"</span>? 
+            This action is irreversible and will also delete all associated testimonials.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 mt-8">
@@ -47,14 +47,14 @@ export const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, formName, loadi
               onClick={onClose}
               className="flex-1 px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-[var(--v3-muted2)] hover:text-[var(--v3-text)] bg-white/5 hover:bg-white/10 transition-all border border-white/5"
             >
-              Annuler
+              Cancel
             </button>
             <button 
               onClick={onConfirm}
               disabled={loading}
               className="flex-1 px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-rose-400 border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 hover:border-rose-500/40 transition-all disabled:opacity-50"
             >
-              {loading ? 'Suppression...' : 'Supprimer'}
+              {loading ? 'Deleting...' : 'Delete'}
             </button>
           </div>
         </div>

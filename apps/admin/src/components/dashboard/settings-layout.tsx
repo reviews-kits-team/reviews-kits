@@ -10,9 +10,9 @@ interface SettingsLayoutProps {
 }
 
 const navItems = [
-  { label: 'Profil', path: '/profile', icon: User },
-  { label: 'Paramètres', path: '/settings', icon: Settings },
-  { label: 'Sécurité', path: '/security', icon: ShieldCheck },
+  { label: 'Profile', path: '/profile', icon: User },
+  { label: 'Settings', path: '/settings', icon: Settings },
+  { label: 'Security', path: '/security', icon: ShieldCheck },
 ]
 
 export const SettingsLayout = ({ children, title, subtitle }: SettingsLayoutProps) => {
@@ -27,7 +27,7 @@ export const SettingsLayout = ({ children, title, subtitle }: SettingsLayoutProp
             to="/" 
             className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[var(--v3-muted2)] hover:text-[var(--v3-teal)] transition-colors mb-4"
            >
-             <ChevronLeft size={14} /> Retour au Dashboard
+             <ChevronLeft size={14} /> Back to Dashboard
            </Link>
            <h1 className="text-3xl font-black tracking-tight text-[var(--v3-text)] mb-2">{title}</h1>
            <p className="text-sm text-[var(--v3-muted2)]">{subtitle}</p>

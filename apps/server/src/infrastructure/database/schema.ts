@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, boolean, jsonb, integer, index, unique } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, boolean, jsonb, integer, index, unique, date } from 'drizzle-orm/pg-core';
 
 // ═══════════════════════════════════════
 // USERS & AUTH (Better-auth)
@@ -58,7 +58,8 @@ export const verifications = pgTable('verifications', {
 export const apiKeys = pgTable('api_keys', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  key: text('key').unique().notNull(),
+  keyHash: text('key_hash').unique().notNull(),
+  keyPrefix: text('key_prefix').notNull(),
   type: text('type').notNull(), // public | secret
   name: text('name'),
   lastUsed: timestamp('last_used'),
@@ -66,7 +67,7 @@ export const apiKeys = pgTable('api_keys', {
   isActive: boolean('is_active').default(true),
   createdAt: timestamp('created_at').defaultNow(),
 }, (t) => ({
-  keyIdx: index('idx_api_keys_key').on(t.key),
+  hashIdx: index('idx_api_keys_hash').on(t.keyHash),
   userIdIdx: index('idx_api_keys_user').on(t.userId),
 }));
 
@@ -94,6 +95,19 @@ export const forms = pgTable('forms', {
 // ═══════════════════════════════════════
 // TESTIMONIALS & MEDIA
 // ═══════════════════════════════════════
+
+export const formVisits = pgTable('form_visits', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  formId: uuid('form_id').notNull().references(() => forms.id, { onDelete: 'cascade' }),
+  date: date('date').notNull(),
+  visits: integer('visits').notNull().default(0),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+}, (t) => ({
+  formDateUnq: unique('unq_form_visits_date').on(t.formId, t.date),
+  formIdx: index('idx_form_visits_form').on(t.formId),
+  dateIdx: index('idx_form_visits_date').on(t.date),
+}));
 
 export const media = pgTable('media', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -162,3 +176,12 @@ export const webhookLogs = pgTable('webhook_logs', {
   webhookIdx: index('idx_webhook_logs_webhook').on(t.webhookId),
   deliveredIdx: index('idx_webhook_logs_delivered').on(t.delivered),
 }));
+// ═══════════════════════════════════════
+// RATE LIMITING
+// ═══════════════════════════════════════
+
+export const rateLimits = pgTable('rate_limits', {
+  key: text('key').primaryKey(),
+  count: integer('count').notNull().default(0),
+  resetAt: timestamp('reset_at').notNull(),
+});

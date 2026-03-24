@@ -4,19 +4,27 @@ import { Testimonial } from '@/domain/entities/Testimonial';
 import { Rating } from '@/domain/value-objects/Rating';
 import { Email } from '@/domain/value-objects/Email';
 import { randomUUID } from 'node:crypto';
+import { z } from 'zod';
+
+const submitReviewSchema = z.object({
+  formId: z.string().min(1, 'formId is required'),
+  content: z.string().min(1, 'content is required').max(5000, 'content is too long (max 5000 characters)'),
+  authorName: z.string().min(1, 'authorName is required').max(100, 'authorName is too long'),
+  authorEmail: z.string().email('Invalid email format').optional().or(z.literal('')),
+  rating: z.union([z.string(), z.number()]).optional(),
+  authorTitle: z.string().max(100).optional(),
+  authorUrl: z.string().url('Invalid URL format').refine(val => val.startsWith('http://') || val.startsWith('https://'), {
+    message: "Only http and https protocols are allowed for authorUrl"
+  }).optional().or(z.literal('')),
+  _honey: z.string().optional()
+});
 
 export const publicReviewController = {
   /**
    * Fetch approved reviews for a user based on public API key context
    */
-  getReviews: async (c: any) => {
-    // Defensive check to avoid TypeError: c.get is not a function
-    if (!c || typeof c.get !== 'function') {
-      console.error('[API Error] Context c is invalid in getReviews:', typeof c, Object.keys(c || {}));
-      return (c as any)?.json ? (c as any).json({ error: 'Internal context error' }, 500) : new Response('Internal context error', { status: 500 });
-    }
-
-    const userId = c.get('userId');
+  getReviews: async (c: Context) => {
+    const userId = c.get('userId' as any); // Hono context 'get' for variables
     if (!userId) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
@@ -32,14 +40,14 @@ export const publicReviewController = {
     try {
       // Resolve internal ID from public ID
       const form = await container.formRepository.findByPublicId(publicId);
-      if (!form || form.userId !== userId) {
+      if (!form || form.getUserId() !== userId) {
         return c.json({ error: 'Form not found or invalid public ID' }, 404);
       }
 
       const testimonials = await container.testimonialRepository.findApprovedByUser(userId as string, {
         limit: Math.min(limit, 50), // Cap at 50 for performance
         minRating: minRating > 0 ? minRating : undefined,
-        formId: form.id
+        formId: form.getId()
       });
 
       return c.json({
@@ -53,13 +61,14 @@ export const publicReviewController = {
             authorTitle: props.authorTitle,
             authorUrl: props.authorUrl,
             createdAt: props.createdAt,
-            type: props.source
+            source: props.source
           };
         })
       });
     } catch (error) {
       console.error('Failed to fetch public reviews:', error);
-      return c.json({ error: 'Internal server error' }, 500);
+      const isProduction = process.env.NODE_ENV === 'production';
+      return c.json({ error: isProduction ? 'Internal server error' : (error instanceof Error ? error.message : 'Internal server error') }, 500);
     }
   },
 
@@ -67,11 +76,23 @@ export const publicReviewController = {
    * Submit a new review (publicly accessible)
    */
   submitReview: async (c: Context) => {
-    const body = await c.req.json();
-    const { formId, content, authorName, authorEmail, rating, authorTitle, authorUrl } = body;
+    const rawBody = await c.req.json().catch(() => ({}));
+    const validation = submitReviewSchema.safeParse(rawBody);
+    
+    if (!validation.success) {
+      return c.json({ error: validation.error.issues[0]?.message || 'Invalid input' }, 400);
+    }
 
-    if (!formId || !content || !authorName) {
-      return c.json({ error: 'Missing required fields: formId, content, authorName' }, 400);
+    const { formId, content, authorName, authorEmail, rating, authorTitle, authorUrl, _honey } = validation.data;
+
+    // Honeypot check - Spambots usually fill hidden fields
+    if (_honey) {
+      // Silently discard to fool the bot
+      return c.json({ 
+        success: true, 
+        message: 'Review submitted successfully',
+        id: randomUUID()
+      }, 201);
     }
 
     try {
@@ -83,14 +104,14 @@ export const publicReviewController = {
 
       const testimonial = new Testimonial({
         id: randomUUID(),
-        userId: form.userId,
-        formId: form.id,
+        userId: form.getUserId(),
+        formId: form.getId(),
         content,
         authorName,
-        rating: rating ? Rating.create(Number(rating)) : undefined,
-        authorEmail: authorEmail ? Email.create(authorEmail) : undefined,
+        rating: (rating !== undefined && rating !== null && rating !== '') ? Rating.create(Number(rating)) : undefined,
+        authorEmail: (authorEmail && authorEmail !== '') ? Email.create(authorEmail) : undefined,
         authorTitle,
-        authorUrl,
+        authorUrl: (authorUrl && authorUrl !== '') ? authorUrl : undefined,
         status: 'pending',
         source: 'form'
       });
@@ -100,19 +121,21 @@ export const publicReviewController = {
       return c.json({ 
         success: true, 
         message: 'Review submitted successfully',
-        id: testimonial.id
+        id: testimonial.getId()
       }, 201);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to submit public review:', error);
-      return c.json({ error: error.message || 'Internal server error' }, 500);
+      const isProduction = process.env.NODE_ENV === 'production';
+      const message = (isProduction || !(error instanceof Error)) ? 'Internal server error' : error.message;
+      return c.json({ error: message }, 500);
     }
   },
 
   /**
    * Get public form configuration by slug
    */
-  getFormBySlug: async (c: any) => {
-    const slug = (c.req as any).param('slug');
+  getFormBySlug: async (c: Context) => {
+    const slug = c.req.param('slug');
     if (!slug) {
       return c.json({ error: 'Missing slug' }, 400);
     }
@@ -132,6 +155,8 @@ export const publicReviewController = {
       if (!form.getIsActive()) {
         return c.json({ error: 'This form is currently inactive' }, 403);
       }
+
+      await container.formRepository.incrementVisits(form.getId()).catch(console.error);
 
       const props = form.getProps();
       return c.json({

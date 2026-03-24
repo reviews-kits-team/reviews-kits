@@ -18,7 +18,7 @@ export const FormCard = ({ form, onClick }: { form: DashboardForm, onClick: () =
           <div className="text-[15px] font-bold tracking-tight text-[var(--v3-text)] truncate leading-tight mb-0.5">{form.name}</div>
           <div className="text-[10px] uppercase tracking-wider font-bold text-[var(--v3-muted2)] flex items-center gap-1.5 leading-none">
             <div className="w-1 h-1 rounded-full bg-[var(--v3-teal)] shadow-[0_0_8px_var(--v3-teal)]" />
-            {new Date(form.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+            {new Date(form.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
           </div>
         </div>
       </div>
@@ -39,11 +39,11 @@ export const FormCard = ({ form, onClick }: { form: DashboardForm, onClick: () =
 
     <div className="grid grid-cols-3 gap-1.5 mb-5">
       {[
-        { val: form.responses ?? 0, lbl: "Réponses", icon: <MessageSquare size={10} className="text-[var(--v3-teal)] opacity-60" /> },
-        { val: form.rating || "—", lbl: "Note moy.", icon: <Star size={10} className="text-[var(--v3-teal)] opacity-60" /> },
-        { val: `${form.completion ?? 0}%`, lbl: "Complétion", icon: <Percent size={10} className="text-[var(--v3-teal)] opacity-60" /> },
-      ].map((s, i) => (
-        <div key={i} className="bg-white/[0.02] border border-white/5 rounded-lg py-2 px-2.5 transition-all group-hover:bg-white/[0.04] group-hover:border-white/10">
+        { val: form.responses ?? 0, lbl: "Responses", icon: <MessageSquare size={10} className="text-[var(--v3-teal)] opacity-60" /> },
+        { val: form.rating || "—", lbl: "Avg. Rating", icon: <Star size={10} className="text-[var(--v3-teal)] opacity-60" /> },
+        { val: `${form.completion ?? 0}%`, lbl: "Completion", icon: <Percent size={10} className="text-[var(--v3-teal)] opacity-60" /> },
+      ].map((s) => (
+        <div key={s.lbl} className="bg-white/[0.02] border border-white/5 rounded-lg py-2 px-2.5 transition-all group-hover:bg-white/[0.04] group-hover:border-white/10">
           <div className="flex items-center gap-1.5 mb-1 opacity-50">
             {s.icon}
             <span className="text-[8px] font-black uppercase tracking-widest text-[var(--v3-muted2)] truncate">{s.lbl}</span>

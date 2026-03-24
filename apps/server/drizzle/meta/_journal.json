@@ -8,6 +8,20 @@
       "when": 1773677482193,
       "tag": "0000_fearless_morg",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1774200058151,
+      "tag": "0001_brave_cerise",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774298164022,
+      "tag": "0002_complete_dragon_man",
+      "breakpoints": true
     }
   ]
 }

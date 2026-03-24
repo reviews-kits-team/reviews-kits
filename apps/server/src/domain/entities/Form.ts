@@ -39,8 +39,8 @@ export interface FormProps {
 }
 
 export class Form {
-  public readonly id: string;
-  public readonly userId: string;
+  private readonly id: string;
+  private readonly userId: string;
   private name: string;
   private slug: Slug;
   public readonly publicId: string;
@@ -67,7 +67,7 @@ export class Form {
     this.description = props.description;
     this.thankYouMessage = props.thankYouMessage;
     this.config = props.config ?? {};
-    
+
     // Ensure default steps and branding exist if not provided
     if (!this.config.steps || this.config.steps.length === 0) {
       this.config.steps = this.getDefaultSteps();
@@ -108,6 +108,16 @@ export class Form {
     this.updatedAt = new Date();
   }
 
+  public updateDescription(description: string): void {
+    this.description = description;
+    this.updatedAt = new Date();
+  }
+
+  public updateIsActive(isActive: boolean): void {
+    this.isActive = isActive;
+    this.updatedAt = new Date();
+  }
+
   public toggleActive(): void {
     this.isActive = !this.isActive;
     this.updatedAt = new Date();
@@ -122,6 +132,14 @@ export class Form {
     return this.config.steps || [];
   }
 
+  public getUserId(): string {
+    return this.userId;
+  }
+
+  public getId(): string {
+    return this.id;
+  }
+
   public getBranding(): FormBranding | undefined {
     return this.config.branding;
   }
@@ -132,29 +150,29 @@ export class Form {
       {
         id: randomUUID(),
         type: 'rating',
-        title: 'Quelle note nous donneriez-vous ?',
-        description: 'Sur une échelle de 1 à 5, comment évalueriez-vous notre service ?',
+        title: 'How would you rate us?',
+        description: 'On a scale of 1 to 5, how would you rate our service?',
         isEnabled: true
       },
       {
         id: randomUUID(),
         type: 'textarea',
-        title: 'Dites-nous en plus !',
-        description: 'Votre avis nous aide à nous améliorer.',
+        title: 'Tell us more!',
+        description: 'Your feedback helps us improve.',
         isEnabled: true
       },
       {
         id: randomUUID(),
         type: 'attribution',
-        title: 'À propos de vous',
-        description: 'Ces informations seront affichées avec votre témoignage.',
+        title: 'About you',
+        description: 'This information will be displayed with your testimonial.',
         isEnabled: true
       },
       {
         id: randomUUID(),
         type: 'success',
-        title: 'Merci !',
-        description: 'Votre témoignage a été envoyé avec succès.',
+        title: 'Thank you!',
+        description: 'Your testimonial has been submitted successfully.',
         isEnabled: true
       }
     ];

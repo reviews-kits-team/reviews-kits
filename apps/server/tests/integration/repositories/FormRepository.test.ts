@@ -63,7 +63,7 @@ describe("DrizzleFormRepository Integration", () => {
     form.updateConfig({ steps: [{}, {}] as any });
     await repository.update(form);
 
-    const found = await repository.findById(form.id);
+    const found = await repository.findById(form.getId());
     expect(found?.getProps().config?.steps).toHaveLength(2);
   });
 
@@ -71,9 +71,9 @@ describe("DrizzleFormRepository Integration", () => {
     const form = new Form({ id: crypto.randomUUID(), userId: userId, name: "D", slug: Slug.create("d"), publicId: "rk_frm_live_d", config: {} });
 
     await repository.save(form);
-    await repository.delete(form.id);
+    await repository.delete(form.getId());
 
-    const found = await repository.findById(form.id);
+    const found = await repository.findById(form.getId());
     expect(found).toBeNull();
   });
 
@@ -93,5 +93,35 @@ describe("DrizzleFormRepository Integration", () => {
     
     expect(found).not.toBeNull();
     expect(found?.getName()).toBe("Find Me");
+  });
+
+  it("should find forms by multiple IDs and user ID", async () => {
+    const f1 = new Form({ id: crypto.randomUUID(), userId: userId, name: "F1", slug: Slug.create("f1-multi"), publicId: "rk_frm_live_f1m", config: {} });
+    const f2 = new Form({ id: crypto.randomUUID(), userId: userId, name: "F2", slug: Slug.create("f2-multi"), publicId: "rk_frm_live_f2m", config: {} });
+    
+    const otherUserId = crypto.randomUUID();
+    await testDb.insert(schema.users).values({
+      id: otherUserId,
+      email: "other2@example.com",
+      name: "Other User 2",
+      emailVerified: true,
+      isSystemAdmin: false
+    });
+    
+    const f3 = new Form({ id: crypto.randomUUID(), userId: otherUserId, name: "F3", slug: Slug.create("f3-multi"), publicId: "rk_frm_live_f3m", config: {} });
+
+    await repository.save(f1);
+    await repository.save(f2);
+    await repository.save(f3);
+
+    const found = await repository.findByIdsAndUser([f1.getId(), f2.getId(), f3.getId()], userId);
+    expect(found).toHaveLength(2);
+    const foundIds = found.map(f => f.getId());
+    expect(foundIds).toContain(f1.getId());
+    expect(foundIds).toContain(f2.getId());
+    expect(foundIds).not.toContain(f3.getId());
+    
+    const missing = await repository.findByIdsAndUser([f1.getId()], otherUserId);
+    expect(missing).toHaveLength(0);
   });
 });

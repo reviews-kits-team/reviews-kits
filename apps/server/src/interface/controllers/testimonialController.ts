@@ -1,9 +1,10 @@
 import type { Context } from 'hono';
+import { getUserIdFromContext } from '@/shared/utils/auth';
 import { container } from '@/infrastructure/container';
 
 export const testimonialController = {
   updateStatus: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     const id = c.req.param('id');
     const { status } = await c.req.json();
 
@@ -12,7 +13,7 @@ export const testimonialController = {
     }
 
     const testimonial = await container.testimonialRepository.findById(id);
-    if (!testimonial || testimonial.userId !== userId) {
+    if (!testimonial || testimonial.getUserId() !== userId) {
       return c.json({ error: 'Testimonial not found' }, 404);
     }
 
@@ -32,7 +33,7 @@ export const testimonialController = {
   },
 
   deleteTestimonial: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     const id = c.req.param('id');
 
     if (!userId || !id) {
@@ -40,7 +41,7 @@ export const testimonialController = {
     }
 
     const testimonial = await container.testimonialRepository.findById(id);
-    if (!testimonial || testimonial.userId !== userId) {
+    if (!testimonial || testimonial.getUserId() !== userId) {
       return c.json({ error: 'Testimonial not found' }, 404);
     }
 
@@ -49,25 +50,33 @@ export const testimonialController = {
   },
 
   batchUpdateStatus: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     const { ids, status } = await c.req.json();
 
-    if (!userId || !Array.isArray(ids) || !status) {
+    if (!userId || !Array.isArray(ids) || ids.length === 0 || !status) {
       return c.json({ error: 'Unauthorized or invalid data' }, 401);
     }
 
-    // In a real app, we'd verify ownership of each ID. 
-    // For this implementation, we assume the IDs provided belong to the user's forms.
+    const owned = await container.testimonialRepository.findByIdsAndUser(ids, userId);
+    if (owned.length !== ids.length) {
+      return c.json({ error: 'Forbidden: one or more testimonials do not belong to you' }, 403);
+    }
+
     await container.testimonialRepository.batchUpdateStatus(ids, status);
     return c.json({ success: true });
   },
 
   batchDelete: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     const { ids } = await c.req.json();
 
-    if (!userId || !Array.isArray(ids)) {
+    if (!userId || !Array.isArray(ids) || ids.length === 0) {
       return c.json({ error: 'Unauthorized or invalid data' }, 401);
+    }
+
+    const owned = await container.testimonialRepository.findByIdsAndUser(ids, userId);
+    if (owned.length !== ids.length) {
+      return c.json({ error: 'Forbidden: one or more testimonials do not belong to you' }, 403);
     }
 
     await container.testimonialRepository.batchDelete(ids);
@@ -75,11 +84,17 @@ export const testimonialController = {
   },
 
   reorderTestimonials: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
-    const { positions } = await c.req.json(); // Array of { id: string, position: number }
+    const userId = getUserIdFromContext(c);
+    const { positions } = await c.req.json() as { positions: { id: string, position: number }[] };
 
     if (!userId || !Array.isArray(positions)) {
       return c.json({ error: 'Unauthorized or invalid data' }, 401);
+    }
+
+    const ids = positions.map((p) => p.id);
+    const owned = await container.testimonialRepository.findByIdsAndUser(ids, userId);
+    if (owned.length !== ids.length) {
+      return c.json({ error: 'Forbidden: one or more testimonials do not belong to you' }, 403);
     }
 
     await container.testimonialRepository.updatePositions(positions);

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it, beforeEach, afterEach, setSystemTime } from "bun:test";
 import { Testimonial, type TestimonialProps } from "../../../../src/domain/entities/Testimonial";
 import { Rating } from "../../../../src/domain/value-objects/Rating";
 import { Email } from "../../../../src/domain/value-objects/Email";
@@ -12,12 +12,20 @@ describe("Testimonial Entity", () => {
     authorName: "Jane Doe",
   };
 
+  beforeEach(() => {
+    setSystemTime(new Date("2024-01-01T00:00:00Z"));
+  });
+
+  afterEach(() => {
+    setSystemTime(); // Reset to real time
+  });
+
   describe("Creation", () => {
     it("should create a testimonial with all minimal properties", () => {
       const testimonial = new Testimonial(validProps);
       
-      expect(testimonial.id).toBe(validProps.id);
-      expect(testimonial.userId).toBe(validProps.userId);
+      expect(testimonial.getId()).toBe(validProps.id);
+      expect(testimonial.getUserId()).toBe(validProps.userId);
       expect(testimonial.getProps().content).toBe(validProps.content);
       expect(testimonial.getProps().authorName).toBe(validProps.authorName);
       expect(testimonial.createdAt).toBeInstanceOf(Date);
@@ -70,11 +78,12 @@ describe("Testimonial Entity", () => {
   });
 
   describe("Workflow", () => {
-    it("should approve testimonial and refresh updatedAt", async () => {
+    it("should approve testimonial and refresh updatedAt", () => {
       const testimonial = new Testimonial(validProps);
       const initialUpdatedAt = testimonial.getProps().updatedAt!;
       
-      await new Promise(resolve => setTimeout(resolve, 10));
+      // Advance time manually
+      setSystemTime(new Date("2024-01-01T00:00:01Z"));
       
       testimonial.approve();
       
@@ -82,11 +91,12 @@ describe("Testimonial Entity", () => {
       expect(testimonial.getProps().updatedAt!.getTime()).toBeGreaterThan(initialUpdatedAt.getTime());
     });
 
-    it("should reject testimonial and refresh updatedAt", async () => {
+    it("should reject testimonial and refresh updatedAt", () => {
       const testimonial = new Testimonial(validProps);
       const initialUpdatedAt = testimonial.getProps().updatedAt!;
       
-      await new Promise(resolve => setTimeout(resolve, 10));
+      // Advance time manually
+      setSystemTime(new Date("2024-01-01T00:00:01Z"));
       
       testimonial.reject();
       
@@ -96,11 +106,12 @@ describe("Testimonial Entity", () => {
   });
 
   describe("Updates", () => {
-    it("should update content and refresh updatedAt", async () => {
+    it("should update content and refresh updatedAt", () => {
       const testimonial = new Testimonial(validProps);
       const initialUpdatedAt = testimonial.getProps().updatedAt!;
       
-      await new Promise(resolve => setTimeout(resolve, 10));
+      // Advance time manually
+      setSystemTime(new Date("2024-01-01T00:00:01Z"));
       
       testimonial.updateContent("Updated content");
       

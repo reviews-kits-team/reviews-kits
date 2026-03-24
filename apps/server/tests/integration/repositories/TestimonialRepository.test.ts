@@ -34,7 +34,7 @@ describe("DrizzleTestimonialRepository Integration", () => {
 
     await repository.save(testimonial);
 
-    const found = await repository.findById(testimonial.id);
+    const found = await repository.findById(testimonial.getId());
     expect(found).not.toBeNull();
     expect(found?.getProps().content).toBe("Great service!");
     expect(found?.getProps().rating?.getValue()).toBe(5);
@@ -85,7 +85,7 @@ describe("DrizzleTestimonialRepository Integration", () => {
     testimonial.updateContent("New content");
     await repository.update(testimonial);
 
-    const found = await repository.findById(testimonial.id);
+    const found = await repository.findById(testimonial.getId());
     expect(found?.getProps().status).toBe("approved");
     expect(found?.getProps().content).toBe("New content");
   });
@@ -101,9 +101,60 @@ describe("DrizzleTestimonialRepository Integration", () => {
     });
 
     await repository.save(testimonial);
-    await repository.delete(testimonial.id);
+    await repository.delete(testimonial.getId());
 
-    const found = await repository.findById(testimonial.id);
+    const found = await repository.findById(testimonial.getId());
     expect(found).toBeNull();
+  });
+
+  it("should find testimonials by multiple IDs and user ID", async () => {
+    const t1 = new Testimonial({
+      id: crypto.randomUUID(),
+      userId: userId,
+      content: "T1",
+      authorName: "A1",
+      status: "approved",
+      source: "api"
+    });
+    const t2 = new Testimonial({
+      id: crypto.randomUUID(),
+      userId: userId,
+      content: "T2",
+      authorName: "A2",
+      status: "approved",
+      source: "api"
+    });
+
+    const otherUserId = crypto.randomUUID();
+    await testDb.insert(schema.users).values({
+      id: otherUserId,
+      email: "other@example.com",
+      name: "Other User",
+      emailVerified: true,
+      isSystemAdmin: false
+    });
+
+    const t3 = new Testimonial({
+      id: crypto.randomUUID(),
+      userId: otherUserId,
+      content: "T3",
+      authorName: "A3",
+      status: "approved",
+      source: "api"
+    });
+
+    await repository.save(t1);
+    await repository.save(t2);
+    await repository.save(t3);
+
+    const found = await repository.findByIdsAndUser([t1.getId(), t2.getId(), t3.getId()], userId);
+    expect(found).toHaveLength(2);
+    const foundIds = found.map(f => f.getId());
+    expect(foundIds).toContain(t1.getId());
+    expect(foundIds).toContain(t2.getId());
+    expect(foundIds).not.toContain(t3.getId());
+
+    const missing = await repository.findByIdsAndUser([t1.getId()], otherUserId);
+    expect(missing).toHaveLength(0);
   });
 });

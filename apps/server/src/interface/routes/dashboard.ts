@@ -21,6 +21,8 @@ const getStatsRoute = createRoute({
             averageRating: z.number(),
             uniqueRespondents: z.number(),
             completionRate: z.number(),
+            reviewsGrowth: z.number().optional(),
+            completionGrowth: z.number().optional(),
           })
         }
       },

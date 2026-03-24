@@ -51,7 +51,7 @@ export const ProfileMenu = ({ isOpen, onClose }: ProfileMenuProps) => {
   }
 
   const handleRotateKeys = async () => {
-    if (!confirm("Régénérer vos clés ? Les anciennes deviendront invalides.")) return
+    if (!confirm("Regenerate your keys? Old ones will become invalid.")) return
     try {
       const res = await fetch('/api/v1/api-keys/rotate', { method: 'POST' })
       if (res.ok) setApiKeys(await res.json())
@@ -104,7 +104,7 @@ export const ProfileMenu = ({ isOpen, onClose }: ProfileMenuProps) => {
                 <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[var(--v3-muted2)] group-hover:text-[var(--v3-teal)] transition-colors">
                   <User size={16} />
                 </div>
-                Mon Profil
+                My Profile
               </div>
               <ChevronRight size={14} className="text-[var(--v3-muted)]" />
             </Link>
@@ -118,7 +118,7 @@ export const ProfileMenu = ({ isOpen, onClose }: ProfileMenuProps) => {
                 <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[var(--v3-muted2)] group-hover:text-[var(--v3-teal)] transition-colors">
                   <Settings size={16} />
                 </div>
-                Paramètres
+                Settings
               </div>
               <ChevronRight size={14} className="text-[var(--v3-muted)]" />
             </Link>
@@ -132,7 +132,7 @@ export const ProfileMenu = ({ isOpen, onClose }: ProfileMenuProps) => {
                 <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[var(--v3-muted2)] group-hover:text-[var(--v3-teal)] transition-colors">
                   <ShieldCheck size={16} />
                 </div>
-                Sécurité
+                Security
               </div>
               <ChevronRight size={14} className="text-[var(--v3-muted)]" />
             </Link>
@@ -147,7 +147,7 @@ export const ProfileMenu = ({ isOpen, onClose }: ProfileMenuProps) => {
                   <div className={`w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center transition-colors ${showApiKeys ? 'text-[var(--v3-teal)]' : 'text-[var(--v3-muted2)] group-hover:text-[var(--v3-teal)]'}`}>
                     <Key size={16} />
                   </div>
-                  Clés API
+                  API Keys
                 </div>
                 <div className="flex items-center gap-2">
                   {loadingKeys && <RefreshCw size={10} className="animate-spin text-[var(--v3-muted2)]" />}
@@ -209,7 +209,7 @@ export const ProfileMenu = ({ isOpen, onClose }: ProfileMenuProps) => {
               <div className="w-8 h-8 rounded-lg bg-rose-500/5 flex items-center justify-center">
                 <LogOut size={16} />
               </div>
-              Déconnexion
+              Logout
             </button>
           </div>
         </div>

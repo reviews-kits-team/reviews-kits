@@ -1,4 +1,4 @@
-import { expect, test, describe, spyOn, afterEach, afterAll } from "bun:test";
+import { describe, expect, it, beforeAll, afterAll, afterEach, spyOn } from "bun:test";
 import { Hono } from "hono";
 import { isSystemAdmin } from "../../../src/shared/middlewares/rbac";
 import { auth } from "../../../src/infrastructure/auth/auth";
@@ -14,16 +14,12 @@ describe("RBAC Route Protection - Exhaustive Integration", () => {
 
   const getSessionSpy = spyOn(auth.api, "getSession") as any;
 
-  afterEach(() => {
-    getSessionSpy.mockReset();
-  });
-
   afterAll(() => {
     getSessionSpy.mockRestore();
   });
 
   describe("System Admin access", () => {
-    test("Favorable: System Admin should access admin routes", async () => {
+    it("Favorable: System Admin should access admin routes", async () => {
       getSessionSpy.mockImplementation((async () => ({
         user: { id: "admin-id", isSystemAdmin: true },
         session: { id: "s1", userId: "admin-id", expiresAt: new Date(), token: "t1", createdAt: new Date(), updatedAt: new Date() }
@@ -36,7 +32,7 @@ describe("RBAC Route Protection - Exhaustive Integration", () => {
   });
 
   describe("Regular Member access", () => {
-    test("Unfavorable: Regular user should NOT access admin routes", async () => {
+    it("Unfavorable: Regular user should NOT access admin routes", async () => {
       getSessionSpy.mockImplementation((async () => ({
         user: { id: "user-id", isSystemAdmin: false },
         session: { id: "s2", userId: "user-id", expiresAt: new Date(), token: "t2", createdAt: new Date(), updatedAt: new Date() }
@@ -48,7 +44,7 @@ describe("RBAC Route Protection - Exhaustive Integration", () => {
   });
 
   describe("Anonymous access", () => {
-    test("Unfavorable: Visitor without session should be blocked from admin routes", async () => {
+    it("Unfavorable: Visitor without session should be blocked from admin routes", async () => {
       getSessionSpy.mockImplementation((async () => null) as any);
 
       const resAdmin = await app.request("/api/v1/admin/users");

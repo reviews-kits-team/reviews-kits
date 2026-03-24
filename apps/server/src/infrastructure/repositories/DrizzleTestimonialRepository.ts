@@ -1,14 +1,14 @@
-import { eq, and, sql, count, avg, countDistinct } from 'drizzle-orm';
-import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
+import { eq, and, sql, count, avg, countDistinct, type SQL } from 'drizzle-orm';
+import type { BunSQLDatabase } from 'drizzle-orm/bun-sql';
 import * as schema from '../database/schema';
 import { testimonials } from '../database/schema';
 import { Testimonial } from '../../domain/entities/Testimonial';
-import type { TestimonialRepository } from '../../domain/repositories/TestimonialRepository';
+import type { TestimonialRepository, TestimonialFilters } from '../../domain/repositories/TestimonialRepository';
 import { Rating } from '../../domain/value-objects/Rating';
 import { Email } from '../../domain/value-objects/Email';
 
 export class DrizzleTestimonialRepository implements TestimonialRepository {
-  constructor(private readonly db: PostgresJsDatabase<typeof schema>) {}
+  constructor(private readonly db: BunSQLDatabase<typeof schema>) {}
 
   async findById(id: string): Promise<Testimonial | null> {
     const [row] = await this.db.select().from(testimonials).where(eq(testimonials.id, id));
@@ -17,7 +17,7 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
     return this.mapToDomain(row);
   }
 
-  async findByUser(userId: string, filters?: any): Promise<Testimonial[]> {
+  async findByUser(userId: string, filters?: TestimonialFilters): Promise<Testimonial[]> {
     const whereConditions = [eq(testimonials.userId, userId)];
     
     if (filters?.status) {
@@ -27,6 +27,17 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
     const rows = await this.db.select()
       .from(testimonials)
       .where(and(...whereConditions));
+      
+    return rows.map(row => this.mapToDomain(row));
+  }
+
+  async findByIdsAndUser(ids: string[], userId: string): Promise<Testimonial[]> {
+    if (!ids || ids.length === 0) return [];
+    
+    const { inArray } = await import('drizzle-orm');
+    const rows = await this.db.select()
+      .from(testimonials)
+      .where(and(inArray(testimonials.id, ids), eq(testimonials.userId, userId)));
       
     return rows.map(row => this.mapToDomain(row));
   }
@@ -115,8 +126,10 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
     const sortField = options?.sort;
     const sortOrder = options?.order || 'desc';
     
-    if (sortField) {
-      const column = (testimonials as any)[sortField] || testimonials.createdAt;
+    const allowedSortFields = ['createdAt', 'rating', 'position', 'status', 'authorName'];
+    
+    if (sortField && allowedSortFields.includes(sortField)) {
+      const column = (testimonials as Record<string, any>)[sortField];
       query.orderBy(sortOrder === 'desc' ? desc(column) : asc(column));
     } else {
       // Default order: position ASC (manual order), then createdAt DESC (newest first)
@@ -144,19 +157,37 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
   }
 
   async updatePositions(positions: { id: string; position: number }[]): Promise<void> {
-    await this.db.transaction(async (tx) => {
-      for (const { id, position } of positions) {
-        await tx.update(testimonials)
-          .set({ position, updatedAt: new Date() })
-          .where(eq(testimonials.id, id));
-      }
-    });
+    if (positions.length === 0) return;
+
+    const ids = positions.map(p => p.id);
+    const sqlChunks: SQL[] = [];
+    sqlChunks.push(sql`(case`);
+    
+    for (const { id, position } of positions) {
+      sqlChunks.push(sql`when ${testimonials.id} = ${id} then ${position}::integer`);
+    }
+    
+    sqlChunks.push(sql`end)`);
+
+    const finalSql = sql.join(sqlChunks, sql.raw(' '));
+
+    const { inArray } = await import('drizzle-orm');
+    
+    await this.db.update(testimonials)
+      .set({ 
+        position: finalSql, 
+        updatedAt: new Date() 
+      })
+      .where(inArray(testimonials.id, ids));
   }
 
   async getStatsByUser(userId: string): Promise<{
     totalReviews: number;
     averageRating: number;
     uniqueRespondents: number;
+    reviewsGrowth?: number;
+    completionRate?: number;
+    completionGrowth?: number;
   }> {
     const [result] = await this.db.select({
       totalReviews: count(testimonials.id),
@@ -166,11 +197,104 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
     .from(testimonials)
     .where(eq(testimonials.userId, userId));
 
+    const totalReviews = Number(result?.totalReviews || 0);
+
+    // 1. Reviews Growth (Current 30 days vs Prev 30 days)
+    const [current30] = await this.db.select({ count: count(testimonials.id) })
+      .from(testimonials)
+      .where(and(
+        eq(testimonials.userId, userId),
+        sql`${testimonials.createdAt} >= NOW() - INTERVAL '30 days'`
+      ));
+    
+    const [prev30] = await this.db.select({ count: count(testimonials.id) })
+      .from(testimonials)
+      .where(and(
+        eq(testimonials.userId, userId),
+        sql`${testimonials.createdAt} >= NOW() - INTERVAL '60 days'`,
+        sql`${testimonials.createdAt} < NOW() - INTERVAL '30 days'`
+      ));
+
+    const current30Count = Number(current30?.count || 0);
+    const prev30Count = Number(prev30?.count || 0);
+    
+    let reviewsGrowth = 0;
+    if (prev30Count === 0) {
+      reviewsGrowth = current30Count > 0 ? 100 : 0;
+    } else {
+      reviewsGrowth = Math.round(((current30Count - prev30Count) / prev30Count) * 100);
+    }
+
+    // 2. Completion Rate and Growth
+    const { formVisits, forms } = await import('../database/schema');
+    
+    const [visitsBasic] = await this.db.select({ totalVisits: sql<number>`sum(${formVisits.visits})` })
+      .from(formVisits)
+      .innerJoin(forms, eq(formVisits.formId, forms.id))
+      .where(eq(forms.userId, userId));
+      
+    const totalVisits = Number(visitsBasic?.totalVisits || 0);
+    const completionRate = totalVisits > 0 ? Math.round((totalReviews / totalVisits) * 100) : 100;
+
+    const [current30VisitsResult] = await this.db.select({ count: sql<number>`sum(${formVisits.visits})` })
+      .from(formVisits)
+      .innerJoin(forms, eq(formVisits.formId, forms.id))
+      .where(and(
+        eq(forms.userId, userId),
+        sql`${formVisits.date} >= NOW() - INTERVAL '30 days'`
+      ));
+      
+    const [prev30VisitsResult] = await this.db.select({ count: sql<number>`sum(${formVisits.visits})` })
+      .from(formVisits)
+      .innerJoin(forms, eq(formVisits.formId, forms.id))
+      .where(and(
+        eq(forms.userId, userId),
+        sql`${formVisits.date} >= NOW() - INTERVAL '60 days'`,
+        sql`${formVisits.date} < NOW() - INTERVAL '30 days'`
+      ));
+      
+    const current30Visits = Number(current30VisitsResult?.count || 0);
+    const prev30Visits = Number(prev30VisitsResult?.count || 0);
+    
+    const current30Rate = current30Visits > 0 ? (current30Count / current30Visits) * 100 : (current30Count > 0 ? 100 : 0);
+    const prev30Rate = prev30Visits > 0 ? (prev30Count / prev30Visits) * 100 : (prev30Count > 0 ? 100 : 0);
+    const completionGrowth = Math.round(current30Rate - prev30Rate);
+
     return {
-      totalReviews: Number(result?.totalReviews) || 0,
-      averageRating: Number(result?.averageRating) || 0,
-      uniqueRespondents: Number(result?.uniqueRespondents) || 0,
+      totalReviews: totalReviews,
+      averageRating: Number(result?.averageRating || 0),
+      uniqueRespondents: Number(result?.uniqueRespondents || 0),
+      reviewsGrowth,
+      completionRate,
+      completionGrowth,
     };
+  }
+
+  async getBasicStatsByFormIds(formIds: string[]): Promise<Map<string, { totalReviews: number; averageRating: number }>> {
+    const statsMap = new Map<string, { totalReviews: number; averageRating: number }>();
+    if (!formIds || formIds.length === 0) return statsMap;
+
+    const { inArray } = await import('drizzle-orm');
+    
+    const rows = await this.db.select({
+      formId: testimonials.formId,
+      totalReviews: count(testimonials.id),
+      averageRating: avg(testimonials.rating),
+    })
+    .from(testimonials)
+    .where(inArray(testimonials.formId, formIds))
+    .groupBy(testimonials.formId);
+
+    for (const row of rows) {
+      if (row.formId) {
+        statsMap.set(row.formId, {
+          totalReviews: Number(row.totalReviews) || 0,
+          averageRating: Number(row.averageRating) || 0,
+        });
+      }
+    }
+
+    return statsMap;
   }
 
   async getStatsByFormId(formId: string): Promise<{
@@ -179,6 +303,9 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
     uniqueRespondents: number;
     ratingDistribution: { rating: number; count: number }[];
     reviewVolume: { label: string; value: number }[];
+    reviewsGrowth?: number;
+    completionRate?: number;
+    completionGrowth?: number;
   }> {
     // Basic stats
     const [basicStats] = await this.db.select({
@@ -204,7 +331,6 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
     }));
 
     // Review volume (Last 12 weeks)
-    // Using simple approach: group by date_trunc 'week'
     const volumeRows = await this.db.select({
       week: sql`date_trunc('week', ${testimonials.createdAt})`.as('week'),
       count: count(testimonials.id),
@@ -222,8 +348,66 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
       value: Number(row.count) || 0,
     }));
 
-    // Ensure we have 12 entries if possible, or just return what we have
-    // For simplicity, we'll just return the actual rows found in the last 12 weeks
+    // Dynamic Growth Metrics
+    
+    // 1. Reviews Growth (Current 30 days vs Prev 30 days)
+    const [current30] = await this.db.select({ count: count(testimonials.id) })
+      .from(testimonials)
+      .where(and(
+        eq(testimonials.formId, formId),
+        sql`${testimonials.createdAt} >= NOW() - INTERVAL '30 days'`
+      ));
+    
+    const [prev30] = await this.db.select({ count: count(testimonials.id) })
+      .from(testimonials)
+      .where(and(
+        eq(testimonials.formId, formId),
+        sql`${testimonials.createdAt} >= NOW() - INTERVAL '60 days'`,
+        sql`${testimonials.createdAt} < NOW() - INTERVAL '30 days'`
+      ));
+      
+    const current30Count = Number(current30?.count || 0);
+    const prev30Count = Number(prev30?.count || 0);
+    
+    let reviewsGrowth = 0;
+    if (prev30Count === 0) {
+      reviewsGrowth = current30Count > 0 ? 100 : 0;
+    } else {
+      reviewsGrowth = Math.round(((current30Count - prev30Count) / prev30Count) * 100);
+    }
+
+    // 2. Completion Rate and Growth
+    const { formVisits } = await import('../database/schema');
+    
+    const [visitsBasic] = await this.db.select({ totalVisits: sql<number>`sum(${formVisits.visits})` })
+      .from(formVisits)
+      .where(eq(formVisits.formId, formId));
+      
+    const totalVisits = Number(visitsBasic?.totalVisits || 0);
+    const totalReviews = Number(basicStats?.totalReviews || 0);
+    const completionRate = totalVisits > 0 ? Math.round((totalReviews / totalVisits) * 100) : 100;
+
+    const [current30VisitsResult] = await this.db.select({ count: sql<number>`sum(${formVisits.visits})` })
+      .from(formVisits)
+      .where(and(
+        eq(formVisits.formId, formId),
+        sql`${formVisits.date} >= NOW() - INTERVAL '30 days'`
+      ));
+      
+    const [prev30VisitsResult] = await this.db.select({ count: sql<number>`sum(${formVisits.visits})` })
+      .from(formVisits)
+      .where(and(
+        eq(formVisits.formId, formId),
+        sql`${formVisits.date} >= NOW() - INTERVAL '60 days'`,
+        sql`${formVisits.date} < NOW() - INTERVAL '30 days'`
+      ));
+      
+    const current30Visits = Number(current30VisitsResult?.count || 0);
+    const prev30Visits = Number(prev30VisitsResult?.count || 0);
+    
+    const current30Rate = current30Visits > 0 ? (current30Count / current30Visits) * 100 : (current30Count > 0 ? 100 : 0);
+    const prev30Rate = prev30Visits > 0 ? (prev30Count / prev30Visits) * 100 : (prev30Count > 0 ? 100 : 0);
+    const completionGrowth = Math.round(current30Rate - prev30Rate);
 
     return {
       totalReviews: Number(basicStats?.totalReviews) || 0,
@@ -231,17 +415,20 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
       uniqueRespondents: Number(basicStats?.uniqueRespondents) || 0,
       ratingDistribution,
       reviewVolume,
+      reviewsGrowth,
+      completionRate,
+      completionGrowth,
     };
   }
 
-  private mapToDomain(row: any): Testimonial {
+  private mapToDomain(row: typeof testimonials.$inferSelect): Testimonial {
     return new Testimonial({
       id: row.id,
       userId: row.userId,
       content: row.content,
       authorName: row.authorName,
-      status: row.status as any,
-      source: row.source as any,
+      status: row.status as 'approved' | 'rejected' | 'pending',
+      source: row.source as 'form' | 'import' | 'api',
       rating: row.rating ? Rating.create(row.rating) : undefined,
       authorEmail: row.authorEmail ? Email.create(row.authorEmail) : undefined,
       authorTitle: row.authorTitle || undefined,

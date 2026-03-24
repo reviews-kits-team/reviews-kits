@@ -1,8 +1,14 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { bearer } from "better-auth/plugins";
+import { sql } from "drizzle-orm";
 import { db } from "../database/db";
 import * as schema from "../database/schema";
+
+const secret = process.env.BETTER_AUTH_SECRET;
+if (!secret) {
+  throw new Error("BETTER_AUTH_SECRET environment variable is required for session encryption. Please set it in your .env file.");
+}
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -43,10 +49,15 @@ export const auth = betterAuth({
             }
           }
 
-          const userCount = await db.select().from(schema.users);
-          if (userCount.length === 0) {
-            userData.isSystemAdmin = true;
-          }
+          await db.transaction(async (tx) => {
+            const [result] = await tx
+              .select({ count: sql<number>`count(*)` })
+              .from(schema.users);
+            
+            if (result && Number(result.count) === 0) {
+              userData.isSystemAdmin = true;
+            }
+          });
 
           return { data: userData };
         },
@@ -59,15 +70,15 @@ export const auth = betterAuth({
     },
   },
   // Secret for session encryption/signing
-  secret: process.env.BETTER_AUTH_SECRET,
+  secret,
   // Base URL for auth endpoints
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000/api/auth",
-  trustedOrigins: [
-    "http://localhost:5180", // Admin Frontend
-    "http://172.20.0.1:5180",
-    "http://localhost:3000", // Swagger / Local API
-    "http://localhost",       // Tests
-    "http://localhost:5174",
-    "http://172.20.0.1:5174",
-  ],
+  trustedOrigins: process.env.AUTH_TRUSTED_ORIGINS 
+    ? process.env.AUTH_TRUSTED_ORIGINS.split(',').map(o => o.trim())
+    : [
+        "http://localhost:5180", // Admin Frontend
+        "http://localhost:3000", // Swagger / Local API
+        "http://localhost",       // Tests
+        "http://localhost:5174",
+      ],
 });

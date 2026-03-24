@@ -1,4 +1,5 @@
 import type { Context } from 'hono';
+import { getUserIdFromContext } from '@/shared/utils/auth';
 import { container } from '@/infrastructure/container';
 import { Form } from '@/domain/entities/Form';
 import { Slug } from '@/domain/value-objects/Slug';
@@ -7,36 +8,51 @@ import { ApiKeyGenerator } from '@/shared/utils/ApiKeyGenerator';
 
 export const formController = {
   listForms: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     
     if (!userId) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
 
     const forms = await container.formRepository.findByUser(userId);
-    const formsWithStats = await Promise.all(forms.map(async f => {
+    
+    const formIds = forms.map(f => f.getProps().id);
+    const [statsMap, visitsMap] = await Promise.all([
+      container.testimonialRepository.getBasicStatsByFormIds(formIds),
+      container.formRepository.getVisitsByFormIds(formIds)
+    ]);
+
+    const formsWithStats = forms.map(f => {
       const props = f.getProps();
-      const stats = await container.testimonialRepository.getStatsByFormId(props.id);
+      const stats = statsMap.get(props.id) || { totalReviews: 0, averageRating: 0 };
+      const visits = visitsMap.get(props.id) || 0;
+      
+      let completion = 0;
+      if (visits > 0) {
+        completion = Math.min(100, Math.round((stats.totalReviews / visits) * 100));
+      }
+
       return { 
         ...props, 
         slug: props.slug.getValue(),
         publicId: props.publicId,
         responses: stats.totalReviews,
         rating: stats.averageRating,
-        completion: 100 // Placeholder for now
+        completion
       };
-    }));
+    });
+    
     return c.json(formsWithStats);
   },
 
   createForm: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     
     if (!userId) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
 
-    const body = await c.req.json();
+    const body = await c.req.json() as { name: string, slug: string, description?: string };
     const { name, slug, description } = body;
 
     if (!name || !slug) {
@@ -57,17 +73,18 @@ export const formController = {
       await container.formRepository.save(form);
       const props = form.getProps();
       return c.json({ ...props, slug: props.slug.getValue() }, 201);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to create form:", err);
-      if (err.message?.includes('unique constraint') && err.message?.includes('slug')) {
-        return c.json({ error: 'Ce slug est déjà utilisé par un autre formulaire.' }, 409);
+      const message = err instanceof Error ? err.message : '';
+      if (message.includes('unique constraint') && message.includes('slug')) {
+        return c.json({ error: 'This slug is already in use by another form.' }, 409);
       }
-      return c.json({ error: err.message || 'Erreur lors de la création du formulaire' }, 500);
+      return c.json({ error: message || 'Error occurred while creating the form' }, 500);
     }
   },
 
   getFormDetails: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     const formId = c.req.param('id');
 
     if (!userId || !formId) {
@@ -76,24 +93,33 @@ export const formController = {
 
     const form = await container.formRepository.findById(formId);
     
-    if (!form || !form.userId || form.userId !== userId) {
+    if (!form || form.getUserId() !== userId) {
       return c.json({ error: 'Form not found' }, 404);
     }
 
     const props = form.getProps();
-    const stats = await container.testimonialRepository.getStatsByFormId(props.id);
+    const [stats, visitsMap] = await Promise.all([
+      container.testimonialRepository.getStatsByFormId(props.id),
+      container.formRepository.getVisitsByFormIds([props.id])
+    ]);
     
+    const visits = visitsMap.get(props.id) || 0;
+    let completion = 0;
+    if (visits > 0) {
+      completion = Math.min(100, Math.round((stats.totalReviews / visits) * 100));
+    }
+
     return c.json({ 
       ...props, 
       slug: props.slug.getValue(),
       responses: stats.totalReviews,
       rating: stats.averageRating,
-      completion: 100
+      completion
     });
   },
 
   deleteForm: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     const formId = c.req.param('id');
 
     if (!userId || !formId) {
@@ -101,7 +127,7 @@ export const formController = {
     }
 
     const form = await container.formRepository.findById(formId);
-    if (!form || form.userId !== userId) {
+    if (!form || form.getUserId() !== userId) {
       return c.json({ error: 'Form not found' }, 404);
     }
 
@@ -110,7 +136,7 @@ export const formController = {
   },
 
   updateForm: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     const formId = c.req.param('id');
     const body = await c.req.json();
     const { name, description, config, isActive } = body;
@@ -120,14 +146,14 @@ export const formController = {
     }
 
     const form = await container.formRepository.findById(formId);
-    if (!form || form.userId !== userId) {
+    if (!form || form.getUserId() !== userId) {
       return c.json({ error: 'Form not found' }, 404);
     }
 
     if (name) form.updateName(name);
-    if (description !== undefined) (form as any).description = description; // Using as any if property is private but needed
+    if (description !== undefined) form.updateDescription(description);
     if (config) form.updateConfig(config);
-    if (isActive !== undefined) (form as any).isActive = isActive;
+    if (isActive !== undefined) form.updateIsActive(isActive);
 
     await container.formRepository.update(form);
     
@@ -136,7 +162,7 @@ export const formController = {
   },
 
   toggleFormStatus: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     const formId = c.req.param('id');
 
     if (!userId || !formId) {
@@ -144,7 +170,7 @@ export const formController = {
     }
 
     const form = await container.formRepository.findById(formId);
-    if (!form || form.userId !== userId) {
+    if (!form || form.getUserId() !== userId) {
       return c.json({ error: 'Form not found' }, 404);
     }
 
@@ -156,7 +182,7 @@ export const formController = {
   },
 
   duplicateForm: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     const formId = c.req.param('id');
 
     if (!userId || !formId) {
@@ -164,7 +190,7 @@ export const formController = {
     }
 
     const originalForm = await container.formRepository.findById(formId);
-    if (!originalForm || originalForm.userId !== userId) {
+    if (!originalForm || originalForm.getUserId() !== userId) {
       return c.json({ error: 'Form not found' }, 404);
     }
 
@@ -190,50 +216,57 @@ export const formController = {
   },
 
   batchToggleStatus: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     if (!userId) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
 
-    const { ids, isActive } = await c.req.json();
+    const { ids, isActive } = await c.req.json() as { ids: string[], isActive: boolean };
     if (!Array.isArray(ids) || ids.length === 0) {
       return c.json({ error: 'Invalid form IDs' }, 400);
     }
 
     try {
-      // Security check: ensure all forms belong to the user
-      // For simplicity in this demo, we assume the IDs are valid, 
-      // but in production we'd verify ownership for each ID.
+      const owned = await container.formRepository.findByIdsAndUser(ids, userId);
+      if (owned.length !== ids.length) {
+        return c.json({ error: 'Forbidden: one or more forms do not belong to you' }, 403);
+      }
+
       await container.formRepository.batchUpdateStatus(ids, isActive);
       return c.json({ success: true, isActive });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to batch toggle form status:", err);
-      return c.json({ error: 'Erreur lors de la mise à jour groupée' }, 500);
+      return c.json({ error: 'Error during batch update' }, 500);
     }
   },
 
   batchDeleteForms: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     if (!userId) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
 
-    const { ids } = await c.req.json();
+    const { ids } = await c.req.json() as { ids: string[] };
     if (!Array.isArray(ids) || ids.length === 0) {
       return c.json({ error: 'Invalid form IDs' }, 400);
     }
 
     try {
+      const owned = await container.formRepository.findByIdsAndUser(ids, userId);
+      if (owned.length !== ids.length) {
+        return c.json({ error: 'Forbidden: one or more forms do not belong to you' }, 403);
+      }
+
       await container.formRepository.batchDelete(ids);
       return c.json({ success: true });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to batch delete forms:", err);
-      return c.json({ error: 'Erreur lors de la suppression groupée' }, 500);
+      return c.json({ error: 'Error during batch deletion' }, 500);
     }
   },
 
   getFormStats: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     const formId = c.req.param('id');
 
     if (!userId || !formId) {
@@ -242,7 +275,7 @@ export const formController = {
 
     // Verify ownership
     const form = await container.formRepository.findById(formId);
-    if (!form || form.userId !== userId) {
+    if (!form || form.getUserId() !== userId) {
       return c.json({ error: 'Form not found' }, 404);
     }
 
@@ -251,7 +284,7 @@ export const formController = {
   },
 
   getFormTestimonials: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     const formId = c.req.param('id');
     const page = parseInt(c.req.query('page') || '1', 10);
     const limit = 10;
@@ -263,7 +296,7 @@ export const formController = {
 
     // Verify ownership
     const form = await container.formRepository.findById(formId);
-    if (!form || form.userId !== userId) {
+    if (!form || form.getUserId() !== userId) {
       return c.json({ error: 'Form not found' }, 404);
     }
 
