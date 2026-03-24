@@ -28,7 +28,7 @@
   "devDependencies": {
     "@reviewskits/types": "workspace:*",
     "@vue/test-utils": "^2.4.3",
-    "happy-dom": "^12.10.3",
+    "happy-dom": "^20.0.0",
     "msw": "^2.0.11",
     "tsup": "^8.3.5",
     "typescript": "^5.2.2",
