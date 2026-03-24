@@ -58,26 +58,6 @@ describe("Testimonial Controller Integration", () => {
     expect(updated?.getStatus()).toBe("approved");
   });
 
-  it("should delete testimonial", async () => {
-    const testimonial = new Testimonial({
-      id: crypto.randomUUID(),
-      userId,
-      content: "To be deleted",
-      authorName: "Author",
-      status: "pending",
-      source: "api"
-    });
-    await container.testimonialRepository.save(testimonial);
-
-    const res = await testimonialsRouter.request(`/${testimonial.getId()}`, {
-      method: "DELETE",
-      headers: authHeaders
-    });
-
-    expect(res.status).toBe(200);
-    const updated = await container.testimonialRepository.findById(testimonial.getId());
-    expect(updated).toBeNull();
-  });
 
   it("should batch update status", async () => {
     const t1 = new Testimonial({ id: crypto.randomUUID(), userId, content: "T1", authorName: "A1", status: "pending", source: "api" });
@@ -98,24 +78,6 @@ describe("Testimonial Controller Integration", () => {
     expect(updated2?.getStatus()).toBe("approved");
   });
 
-  it("should batch delete testimonials", async () => {
-    const t1 = new Testimonial({ id: crypto.randomUUID(), userId, content: "T1", authorName: "A1", status: "pending", source: "api" });
-    const t2 = new Testimonial({ id: crypto.randomUUID(), userId, content: "T2", authorName: "A2", status: "pending", source: "api" });
-    await container.testimonialRepository.save(t1);
-    await container.testimonialRepository.save(t2);
-
-    const res = await testimonialsRouter.request("/batch-delete", {
-      method: "POST",
-      body: JSON.stringify({ ids: [t1.getId(), t2.getId()] }),
-      headers: authHeaders
-    });
-
-    expect(res.status).toBe(200);
-    const updated1 = await container.testimonialRepository.findById(t1.getId());
-    const updated2 = await container.testimonialRepository.findById(t2.getId());
-    expect(updated1).toBeNull();
-    expect(updated2).toBeNull();
-  });
 
   it("should reject batch operations if user does not own all testimonials", async () => {
     const otherUserId = crypto.randomUUID();

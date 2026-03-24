@@ -33,20 +33,6 @@ const updateStatusRoute = createRoute({
   }
 });
 
-const deleteTestimonialRoute = createRoute({
-  method: 'delete',
-  path: '/{id}',
-  summary: 'Delete testimonial',
-  tags: ['Testimonials'],
-  params: z.object({
-    id: z.string()
-  }),
-  responses: {
-    200: { description: 'Testimonial deleted' },
-    401: { description: 'Unauthorized' },
-    404: { description: 'Testimonial not found' }
-  }
-});
 
 const batchUpdateStatusRoute = createRoute({
   method: 'post',
@@ -71,27 +57,6 @@ const batchUpdateStatusRoute = createRoute({
   }
 });
 
-const batchDeleteRoute = createRoute({
-  method: 'post',
-  path: '/batch-delete',
-  summary: 'Batch delete testimonials',
-  tags: ['Testimonials'],
-  request: {
-    body: {
-      content: {
-        'application/json': {
-          schema: z.object({
-            ids: z.array(z.string())
-          })
-        }
-      }
-    }
-  },
-  responses: {
-    200: { description: 'Batch delete successful' },
-    401: { description: 'Unauthorized' }
-  }
-});
 
 const reorderTestimonialsRoute = createRoute({
   method: 'post',
@@ -119,7 +84,5 @@ const reorderTestimonialsRoute = createRoute({
 });
 
 testimonialsRouter.openapi(updateStatusRoute, testimonialController.updateStatus as any);
-testimonialsRouter.openapi(deleteTestimonialRoute, testimonialController.deleteTestimonial as any);
 testimonialsRouter.openapi(batchUpdateStatusRoute, testimonialController.batchUpdateStatus as any);
-testimonialsRouter.openapi(batchDeleteRoute, testimonialController.batchDelete as any);
 testimonialsRouter.openapi(reorderTestimonialsRoute, testimonialController.reorderTestimonials as any);

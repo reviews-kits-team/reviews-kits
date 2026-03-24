@@ -10,11 +10,9 @@ export interface TestimonialRepository {
   findByIdsAndUser(ids: string[], userId: string): Promise<Testimonial[]>;
   save(testimonial: Testimonial): Promise<void>;
   update(testimonial: Testimonial): Promise<void>;
-  delete(id: string): Promise<void>;
   findApprovedByUser(userId: string, options: { limit?: number; minRating?: number; formId: string }): Promise<Testimonial[]>;
   findByFormId(formId: string, options?: { limit?: number; offset?: number; sort?: string; order?: 'asc' | 'desc' }): Promise<Testimonial[]>;
   batchUpdateStatus(ids: string[], status: 'approved' | 'rejected' | 'pending'): Promise<void>;
-  batchDelete(ids: string[]): Promise<void>;
   updatePositions(positions: { id: string; position: number }[]): Promise<void>;
   getStatsByUser(userId: string): Promise<{
     totalReviews: number;

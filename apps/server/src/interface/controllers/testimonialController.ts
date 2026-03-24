@@ -32,22 +32,6 @@ export const testimonialController = {
     return c.json({ success: true, status: testimonial.getStatus() });
   },
 
-  deleteTestimonial: async (c: Context) => {
-    const userId = getUserIdFromContext(c);
-    const id = c.req.param('id');
-
-    if (!userId || !id) {
-      return c.json({ error: 'Unauthorized or missing ID' }, 401);
-    }
-
-    const testimonial = await container.testimonialRepository.findById(id);
-    if (!testimonial || testimonial.getUserId() !== userId) {
-      return c.json({ error: 'Testimonial not found' }, 404);
-    }
-
-    await container.testimonialRepository.delete(id);
-    return c.json({ success: true });
-  },
 
   batchUpdateStatus: async (c: Context) => {
     const userId = getUserIdFromContext(c);
@@ -66,22 +50,6 @@ export const testimonialController = {
     return c.json({ success: true });
   },
 
-  batchDelete: async (c: Context) => {
-    const userId = getUserIdFromContext(c);
-    const { ids } = await c.req.json();
-
-    if (!userId || !Array.isArray(ids) || ids.length === 0) {
-      return c.json({ error: 'Unauthorized or invalid data' }, 401);
-    }
-
-    const owned = await container.testimonialRepository.findByIdsAndUser(ids, userId);
-    if (owned.length !== ids.length) {
-      return c.json({ error: 'Forbidden: one or more testimonials do not belong to you' }, 403);
-    }
-
-    await container.testimonialRepository.batchDelete(ids);
-    return c.json({ success: true });
-  },
 
   reorderTestimonials: async (c: Context) => {
     const userId = getUserIdFromContext(c);

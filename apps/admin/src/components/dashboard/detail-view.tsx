@@ -11,7 +11,6 @@ import {
   RefreshCw,
   Check,
   XCircle,
-  Trash2,
   ChevronRight,
   Copy,
   Plus,
@@ -38,6 +37,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { StatCard } from './stat-card'
 import { Stars, Badge, Checkbox } from './ui'
+import { ReviewModal } from './review-modal'
 import type { DashboardForm } from './types'
 
 interface FormStats {
@@ -76,10 +76,10 @@ interface SortableTestimonialRowProps {
   isSelected: boolean
   onSelect: (id: string) => void
   onStatusUpdate: (id: string, status: string) => void
-  onDelete: (id: string) => void
   formatDate: (date: string) => string
   getRandomGradient: (name: string) => string
   getInitials: (name: string) => string
+  onView: (testimonial: Testimonial) => void
 }
 
 const SortableTestimonialRow = ({ 
@@ -87,10 +87,10 @@ const SortableTestimonialRow = ({
   isSelected, 
   onSelect, 
   onStatusUpdate, 
-  onDelete, 
   formatDate, 
   getRandomGradient, 
-  getInitials 
+  getInitials,
+  onView
 }: SortableTestimonialRowProps) => {
   const {
     attributes,
@@ -113,14 +113,13 @@ const SortableTestimonialRow = ({
       ref={setNodeRef}
       style={style}
       className={`group hover:bg-white/[0.03] transition-colors ${isSelected ? 'bg-[var(--v3-teal)]/5' : ''} ${isDragging ? 'bg-[var(--v3-teal)]/10 shadow-2xl relative z-50' : ''}`}
-      onClick={() => onSelect(testimonial.id)}
     >
       <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-3">
           <div 
             {...attributes} 
             {...listeners}
-            className="cursor-grab active:cursor-grabbing text-[var(--v3-muted2)] hover:text-[var(--v3-text)] p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="w-6 h-6 flex items-center justify-center cursor-grab active:cursor-grabbing text-[var(--v3-muted2)] hover:text-[var(--v3-text)] p-1 opacity-0 group-hover:opacity-100 transition-opacity"
           >
             <GripVertical size={14} />
           </div>
@@ -143,9 +142,13 @@ const SortableTestimonialRow = ({
           </div>
         </div>
       </td>
-      <td className="px-6 py-4 max-w-sm">
-        <p className="text-[13px] text-[var(--v3-muted2)] leading-relaxed italic group-hover:text-[var(--v3-text)] transition-colors">
-          "{testimonial.content.length > 70 ? testimonial.content.substring(0, 70) + '...' : testimonial.content}"
+      <td className="px-6 py-4 max-w-sm cursor-pointer group/content" onClick={() => onView(testimonial)}>
+        <p className="text-[13px] text-[var(--v3-muted2)] leading-relaxed italic group-hover/content:text-[var(--v3-text)] transition-colors">
+          "{testimonial.content.length > 48 ? (
+            <>
+              {testimonial.content.substring(0, 48)}...
+            </>
+          ) : testimonial.content}"
         </p>
       </td>
       <td className="px-6 py-4 text-center">
@@ -175,13 +178,6 @@ const SortableTestimonialRow = ({
             >
               <XCircle size={12} />
             </button>
-            <button 
-              onClick={() => onDelete(testimonial.id)}
-              className="w-6 h-6 flex items-center justify-center rounded-md bg-white/5 text-[var(--v3-muted2)] hover:bg-red-600 hover:text-white transition-all"
-              title="Delete"
-            >
-              <Trash2 size={12} />
-            </button>
           </div>
         </div>
       </td>
@@ -200,6 +196,8 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
   const [copyingId, setCopyingId] = useState(false)
   const [showSharePopover, setShowSharePopover] = useState(false)
   const [copiedLink, setCopiedLink] = useState(false)
+  const [selectedReview, setSelectedReview] = useState<Testimonial | null>(null)
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -251,20 +249,6 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this review? This action is irreversible.")) return
-    try {
-      const res = await fetch(`/api/v1/testimonials/${id}`, {
-        method: 'DELETE'
-      })
-      if (res.ok) {
-        await fetchData(page)
-      }
-    } catch (error) {
-      console.error("Failed to delete testimonial", error)
-    }
-  }
-
   const handleBatchStatusUpdate = async (newStatus: 'approved' | 'rejected' | 'pending') => {
     try {
       const res = await fetch('/api/v1/testimonials/batch-status', {
@@ -278,23 +262,6 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
       }
     } catch (error) {
       console.error("Batch update failed", error)
-    }
-  }
-
-  const handleBatchDelete = async () => {
-    if (!confirm(`Delete ${selectedIds.length} reviews?`)) return
-    try {
-      const res = await fetch('/api/v1/testimonials/batch-delete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids: selectedIds })
-      })
-      if (res.ok) {
-        setSelectedIds([])
-        await fetchData(page)
-      }
-    } catch (error) {
-      console.error("Batch delete failed", error)
     }
   }
 
@@ -525,10 +492,10 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-5 mb-8">
-        <div className="bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-2xl p-6">
+        <div className="bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-2xl p-6 flex flex-col">
           <div className="text-sm font-bold text-[var(--v3-text)] mb-1.5">Review Volume</div>
-          <div className="text-[12px] text-[var(--v3-muted2)] mb-5">Last 12 weeks</div>
-          <div className="flex items-end gap-1.5 h-[120px]">
+          <div className="text-[12px] text-[var(--v3-muted2)] mb-5">Last 14 days</div>
+          <div className="flex items-end gap-1.5 h-[200px] mt-auto">
             {stats?.reviewVolume.length === 0 ? (
                 <div className="w-full h-full flex items-center justify-center text-[10px] text-[var(--v3-muted)] italic">Not enough data yet</div>
             ) : (
@@ -597,11 +564,14 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="border-b border-[var(--v3-border)] text-left bg-white/[0.01]">
-                    <th className="px-6 py-4 w-10">
-                      <Checkbox 
-                        checked={testimonials.length > 0 && selectedIds.length === testimonials.length} 
-                        onChange={toggleSelectAll} 
-                      />
+                    <th className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 shrink-0" /> {/* Space for grip icon */}
+                        <Checkbox 
+                          checked={testimonials.length > 0 && selectedIds.length === testimonials.length} 
+                          onChange={toggleSelectAll} 
+                        />
+                      </div>
                     </th>
                     <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--v3-muted2)] cursor-pointer hover:text-[var(--v3-teal)] transition-colors" onClick={() => handleSort('authorName')}>
                       <div className="flex items-center">Author <SortIcon field="authorName" sortConfig={sortConfig} /></div>
@@ -633,10 +603,13 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
                         isSelected={selectedIds.includes(r.id)}
                         onSelect={toggleSelectOne}
                         onStatusUpdate={handleStatusUpdate}
-                        onDelete={handleDelete}
                         formatDate={formatDate}
                         getRandomGradient={getRandomGradient}
                         getInitials={getInitials}
+                        onView={(t) => {
+                          setSelectedReview(t)
+                          setIsReviewModalOpen(true)
+                        }}
                       />
                     ))
                   )}
@@ -668,12 +641,6 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
                 className="flex items-center gap-2 bg-red-500/10 text-red-400 border border-red-500/20 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all"
               >
                 <XCircle size={14} /> Reject
-              </button>
-              <button 
-                onClick={handleBatchDelete}
-                className="flex items-center gap-2 bg-white/5 text-[var(--v3-muted2)] border border-white/10 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white hover:border-red-600 transition-all"
-              >
-                <Trash2 size={14} /> Delete
               </button>
             </div>
 
@@ -709,6 +676,16 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
           </div>
         </div>
       </div>
+
+      <ReviewModal 
+        review={selectedReview}
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        onStatusUpdate={handleStatusUpdate}
+        formatDate={formatDate}
+        getRandomGradient={getRandomGradient}
+        getInitials={getInitials}
+      />
     </main>
   )
 }
