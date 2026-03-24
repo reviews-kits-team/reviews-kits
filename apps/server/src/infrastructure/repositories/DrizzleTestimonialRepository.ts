@@ -126,8 +126,10 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
     const sortField = options?.sort;
     const sortOrder = options?.order || 'desc';
     
-    if (sortField) {
-      const column = (testimonials as any)[sortField] || testimonials.createdAt;
+    const allowedSortFields = ['createdAt', 'rating', 'position', 'status', 'authorName'];
+    
+    if (sortField && allowedSortFields.includes(sortField)) {
+      const column = (testimonials as any)[sortField];
       query.orderBy(sortOrder === 'desc' ? desc(column) : asc(column));
     } else {
       // Default order: position ASC (manual order), then createdAt DESC (newest first)
