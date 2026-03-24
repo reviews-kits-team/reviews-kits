@@ -8,7 +8,7 @@ export default function ProfilePage() {
   return (
     <SettingsLayout 
       title="Mon Profil" 
-      subtitle="Gère tes informations personnelles et ton identité visuelle."
+      subtitle="Manage your personal information and visual identity."
     >
       <div className="space-y-8">
         {/* Avatar Section */}
@@ -24,7 +24,7 @@ export default function ProfilePage() {
               </div>
               <div>
                 <h3 className="font-bold text-[var(--v3-text)] text-lg">Photo de profil</h3>
-                <p className="text-xs text-[var(--v3-muted2)] mt-1">Cliquez sur l'icône pour modifier votre avatar.</p>
+                <p className="text-xs text-[var(--v3-muted2)] mt-1">Click on the icon to modify your avatar.</p>
               </div>
            </div>
         </section>
@@ -60,7 +60,7 @@ export default function ProfilePage() {
                     className="w-full bg-[var(--v3-bg2)] border border-[var(--v3-border)] opacity-50 cursor-not-allowed rounded-xl py-3 pl-12 pr-4 text-sm text-[var(--v3-text)] outline-none"
                   />
                 </div>
-                <p className="text-[10px] text-amber-500/70 ml-1 italic italic">L'email ne peut pas être modifié pour le moment.</p>
+                <p className="text-[10px] text-amber-500/70 ml-1 italic italic">Email cannot be changed at this time.</p>
               </div>
            </div>
 

@@ -54,14 +54,14 @@ export default function PublicFormPage() {
         const res = await fetch(`/api/v1/public/forms/${slug}`)
         if (!res.ok) {
           const data = await res.json()
-          throw new Error(data.error || 'Formulaire non trouvé')
+          throw new Error(data.error || 'Form not found')
         }
         const data = await res.json()
         // Filter enabled steps
         data.config.steps = data.config.steps.filter((s: FormStep) => s.isEnabled)
         setForm(data)
       } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+        setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
         setLoading(false)
       }
@@ -140,11 +140,11 @@ export default function PublicFormPage() {
         }
       } else {
         const data = await res.json()
-        alert(data.error || "Une erreur est survenue lors de l'envoi.")
+        alert(data.error || "An error occurred while sending.")
       }
     } catch (error) {
       console.error("Submission failed", error)
-      alert("Erreur réseau. Veuillez réessayer.")
+      alert("Network error. Please try again.")
     } finally {
       setSubmitting(false)
     }
@@ -158,8 +158,8 @@ export default function PublicFormPage() {
 
   if (error || !form) return (
     <div className="min-h-screen bg-[#F9FAFB] flex flex-col items-center justify-center p-6 text-center">
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">Oups !</h1>
-      <p className="text-gray-600">{error || 'Le formulaire est introuvable.'}</p>
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">Oops!</h1>
+      <p className="text-gray-600">{error || 'The form could not be found.'}</p>
     </div>
   )
 
@@ -206,7 +206,7 @@ export default function PublicFormPage() {
                 style={{ backgroundColor: primaryColor }}
                 className="w-full py-5 rounded-2xl text-white font-bold text-lg shadow-[0_10px_30px_rgba(0,0,0,0.1)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3"
               >
-                {(currentStep.config as Record<string, string | boolean>)?.buttonText || 'Commencer'} <ArrowRight size={22} />
+                {(currentStep.config as Record<string, string | boolean>)?.buttonText || 'Start'} <ArrowRight size={22} />
               </button>
             </div>
           )}
@@ -225,7 +225,7 @@ export default function PublicFormPage() {
                 style={{ backgroundColor: primaryColor }}
                 className="w-full py-5 rounded-2xl text-white font-bold text-lg shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3"
               >
-                {(currentStep.config as Record<string, string | boolean>)?.buttonText || 'Continuer'} <ArrowRight size={22} />
+                {(currentStep.config as Record<string, string | boolean>)?.buttonText || 'Continue'} <ArrowRight size={22} />
               </button>
             </div>
           )}
@@ -270,7 +270,7 @@ export default function PublicFormPage() {
                 style={{ backgroundColor: rating > 0 ? primaryColor : '#E5E7EB' }}
                 className="w-full py-5 rounded-2xl text-white font-bold text-lg shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all disabled:cursor-not-allowed flex items-center justify-center gap-3"
               >
-                {(currentStep.config as Record<string, string | boolean>)?.buttonText || 'Continuer'} <ArrowRight size={22} />
+                {(currentStep.config as Record<string, string | boolean>)?.buttonText || 'Continue'} <ArrowRight size={22} />
               </button>
             </div>
           )}
@@ -287,7 +287,7 @@ export default function PublicFormPage() {
                 autoFocus
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder={((currentStep.config as Record<string, string | boolean>)?.placeholder as string) || "Tapez votre témoignage ici..."}
+                placeholder={((currentStep.config as Record<string, string | boolean>)?.placeholder as string) || "Type your testimonial here..."}
                 className="w-full h-48 p-8 rounded-[2rem] border-2 border-gray-100 bg-gray-50 mb-8 focus:ring-4 focus:ring-gray-100 focus:border-gray-200 outline-none transition-all text-black text-lg resize-none placeholder:text-gray-400"
               />
 
@@ -304,7 +304,7 @@ export default function PublicFormPage() {
                   style={{ backgroundColor: content.length >= 5 ? primaryColor : '#E5E7EB' }}
                   className="flex-1 py-5 rounded-2xl text-white font-bold text-lg shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
                 >
-                  {(currentStep.config as Record<string, string | boolean>)?.buttonText || 'Suivant'} <ArrowRight size={22} />
+                  {(currentStep.config as Record<string, string | boolean>)?.buttonText || 'Next'} <ArrowRight size={22} />
                 </button>
               </div>
             </div>
@@ -322,13 +322,13 @@ export default function PublicFormPage() {
                 <div className="flex flex-col gap-4">
                   <div className="w-full h-32 rounded-[2rem] bg-gray-50 border-2 border-dashed border-gray-100 flex flex-col items-center justify-center gap-2 text-gray-500 hover:bg-gray-100 hover:border-gray-200 transition-all cursor-pointer group">
                     <Plus size={32} className="group-hover:scale-110 transition-transform" />
-                    <span className="text-xs font-black uppercase tracking-widest">Ajouter une photo</span>
+                    <span className="text-xs font-black uppercase tracking-widest">Add a photo</span>
                   </div>
                   
                   <input
                     required
                     type="text"
-                    placeholder="Votre nom complet"
+                    placeholder="Your full name"
                     value={authorName}
                     onChange={(e) => setAuthorName(e.target.value)}
                     className="w-full px-8 py-5 rounded-2xl border-2 border-gray-50 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-gray-100 focus:border-gray-100 outline-none transition-all text-lg text-black placeholder:text-gray-400"
@@ -350,14 +350,14 @@ export default function PublicFormPage() {
                   <div className="flex gap-4">
                     <input
                       type="text"
-                      placeholder="Votre entreprise"
+                      placeholder="Your company"
                       value={authorTitle}
                       onChange={(e) => setAuthorTitle(e.target.value)}
                       className="w-full px-8 py-5 rounded-2xl border-2 border-gray-50 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-gray-100 focus:border-gray-100 outline-none transition-all text-lg text-black placeholder:text-gray-400"
                     />
                     <input
                       type="url"
-                      placeholder="Site web"
+                      placeholder="Website"
                       value={authorUrl}
                       onChange={(e) => setAuthorUrl(e.target.value)}
                       className="w-full px-8 py-5 rounded-2xl border-2 border-gray-50 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-gray-100 focus:border-gray-100 outline-none transition-all text-lg text-black placeholder:text-gray-400"
@@ -379,7 +379,7 @@ export default function PublicFormPage() {
                   style={{ backgroundColor: authorName ? primaryColor : '#E5E7EB' }}
                   className="flex-1 py-5 rounded-2xl text-white font-bold text-lg shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
                 >
-                  {submitting ? <Loader2 size={28} className="animate-spin" /> : (currentStep.config as Record<string, string | boolean>)?.buttonText || 'Terminer'}
+                  {submitting ? <Loader2 size={28} className="animate-spin" /> : (currentStep.config as Record<string, string | boolean>)?.buttonText || 'Finish'}
                 </button>
               </div>
             </div>

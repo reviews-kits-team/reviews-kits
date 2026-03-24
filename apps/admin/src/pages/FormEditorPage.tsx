@@ -224,8 +224,8 @@ export default function FormEditorPage() {
     }
   }
 
-  if (loading) return <div className="flex items-center justify-center h-screen text-white">Chargement...</div>
-  if (!form) return <div className="flex items-center justify-center h-screen text-white">Formulaire non trouvé</div>
+  if (loading) return <div className="flex items-center justify-center h-screen text-white">Loading...</div>
+  if (!form) return <div className="flex items-center justify-center h-screen text-white">Form not found</div>
 
   const activeStep = form.config.steps.find(s => s.id === activeStepId)
 
@@ -246,13 +246,13 @@ export default function FormEditorPage() {
             <div className="h-6 w-px bg-white/10" />
             <div className="flex-1 max-w-md">
               <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--v3-teal)] block opacity-60">
-                Éditeur
+                Editor
               </span>
               <input
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 className="w-full bg-transparent border-none p-0 text-base font-bold tracking-tight text-[var(--v3-text)] focus:ring-0 outline-none placeholder:opacity-20"
-                placeholder="Nom du formulaire..."
+                placeholder="Form name..."
               />
             </div>
           </div>
@@ -278,14 +278,14 @@ export default function FormEditorPage() {
                 className="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all border border-white/10"
               >
                 <Link size={14} />
-                Partager
+                Share
               </button>
 
               {showSharePopover && (
                 <div className="absolute top-full right-0 mt-2 w-72 bg-[#0A0A0A] border border-white/10 rounded-2xl shadow-2xl p-4 z-[300] animate-in fade-in zoom-in-95 duration-200">
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Lien Public</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Public Link</span>
                       <button onClick={() => setShowSharePopover(false)} className="text-white/20 hover:text-white">
                         <Plus size={14} className="rotate-45" />
                       </button>
@@ -307,7 +307,7 @@ export default function FormEditorPage() {
                       rel="noopener noreferrer"
                       className="text-[10px] font-bold text-[#0D9E75] hover:underline flex items-center gap-1 mt-1"
                     >
-                      Ouvrir le lien <ArrowRight size={10} />
+                      Open link <ArrowRight size={10} />
                     </a>
                   </div>
                 </div>
@@ -318,7 +318,7 @@ export default function FormEditorPage() {
               className="flex items-center gap-2 bg-[#0D9E75] hover:bg-[#0BA87E] text-white px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-lg shadow-[#0D9E75]/20"
             >
               <Save size={14} />
-              Enregistrer
+              Save
             </button>
           </div>
         </div>
@@ -348,7 +348,7 @@ export default function FormEditorPage() {
                   disabled={form.config.steps.findIndex(s => s.id === activeStepId) <= 0}
                   onClick={() => moveStep(form.config.steps.findIndex(s => s.id === activeStepId), 'up')}
                   className="p-2 text-[#0D9E75] hover:bg-[#0D9E75]/10 rounded-lg transition-all disabled:opacity-20"
-                  title="Déplacer l'étape actuelle vers le haut"
+                  title="Move current step up"
                 >
                   <ChevronUp size={16} strokeWidth={3} />
                 </button>
@@ -356,7 +356,7 @@ export default function FormEditorPage() {
                   disabled={form.config.steps.findIndex(s => s.id === activeStepId) >= form.config.steps.length - 1}
                   onClick={() => moveStep(form.config.steps.findIndex(s => s.id === activeStepId), 'down')}
                   className="p-2 text-[#0D9E75] hover:bg-[#0D9E75]/10 rounded-lg transition-all disabled:opacity-20"
-                  title="Déplacer l'étape actuelle vers le bas"
+                  title="Move current step down"
                 >
                   <ChevronDown size={16} strokeWidth={3} />
                 </button>
@@ -384,7 +384,7 @@ export default function FormEditorPage() {
                     {/* Step Badge */}
                     <div className="absolute top-4 left-4 z-20">
                       <div className="bg-[#0A0A0A]/80 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white border border-white/10">
-                        Étape {index + 1}: {step.type}
+                        Step {index + 1}: {step.type}
                       </div>
                     </div>
 
@@ -445,7 +445,7 @@ export default function FormEditorPage() {
                                 style={{ backgroundColor: primaryColor, fontFamily: bodyFont }}
                                 className={`text-white w-full py-4 rounded-xl text-xs font-bold shadow-xl transition-all border-2 ${selectedElement === 'buttonText' && activeStepId === step.id ? 'border-dashed border-white ring-4 ring-black/10' : 'border-transparent'}`}
                               >
-                                {(step.config as Record<string, string | boolean>)?.buttonText || 'Continuer'}
+                                {(step.config as Record<string, string | boolean>)?.buttonText || 'Continue'}
                               </button>
                             </div>
                           )}
@@ -516,14 +516,14 @@ export default function FormEditorPage() {
                                 onClick={() => handleElementClick('placeholder', step.id)}
                                 className={`w-full h-48 p-6 rounded-2xl border-2 bg-gray-50 outline-none transition-all placeholder:text-gray-400 italic cursor-pointer ${selectedElement === 'placeholder' && activeStepId === step.id ? 'border-dashed border-gray-100' : 'border-gray-100 hover:border-black/5'}`}
                                 style={{ borderColor: selectedElement === 'placeholder' && activeStepId === step.id ? '#000000' : undefined }}
-                                placeholder={((step.config as Record<string, string | boolean>)?.placeholder as string) || "Tapez votre témoignage ici..."}
+                                placeholder={((step.config as Record<string, string | boolean>)?.placeholder as string) || "Type your testimonial here..."}
                               />
                               <button
                                 onClick={() => handleElementClick('buttonText', step.id)}
                                 style={{ backgroundColor: primaryColor, fontFamily: bodyFont }}
                                 className={`text-white w-full py-4 rounded-xl text-xs font-bold shadow-xl transition-all border-2 ${selectedElement === 'buttonText' && activeStepId === step.id ? 'border-dashed border-white ring-4 ring-black/10' : 'border-transparent'}`}
                               >
-                                {(step.config as Record<string, string | boolean>)?.buttonText || 'Suivant'}
+                                {(step.config as Record<string, string | boolean>)?.buttonText || 'Next'}
                               </button>
                             </div>
                           )}
@@ -548,17 +548,17 @@ export default function FormEditorPage() {
                                 <div className="flex flex-col gap-4">
                                   <div className="w-full h-32 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-500 border-2 border-dashed border-gray-100 mb-2">
                                     <Plus size={24} />
-                                    <span className="ml-2 text-[10px] font-bold uppercase tracking-wider">Ajouter une photo</span>
+                                    <span className="ml-2 text-[10px] font-bold uppercase tracking-wider">Add a photo</span>
                                   </div>
                                   <div className="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 flex items-center text-gray-600 text-xs text-left italic">
-                                    {(step.config as Record<string, string | boolean>)?.collectName !== false ? 'Votre nom' : 'Anonyme'}
+                                    {(step.config as Record<string, string | boolean>)?.collectName !== false ? 'Your name' : 'Anonymous'}
                                   </div>
                                 </div>
                                 {(step.config as Record<string, string | boolean>)?.collectEmail !== false && (
                                   <div className="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 text-gray-600 text-xs text-left italic">votre@email.com</div>
                                 )}
                                 {(step.config as Record<string, string | boolean>)?.collectCompany && (
-                                  <div className="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 text-gray-600 text-xs text-left italic">Votre entreprise / site web</div>
+                                  <div className="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 text-gray-600 text-xs text-left italic">Your company / website</div>
                                 )}
                               </div>
                               <button
@@ -566,7 +566,7 @@ export default function FormEditorPage() {
                                 style={{ backgroundColor: primaryColor, fontFamily: bodyFont }}
                                 className={`text-white w-full py-4 rounded-xl text-xs font-bold shadow-xl transition-all border-2 ${selectedElement === 'buttonText' && activeStepId === step.id ? 'border-dashed border-white ring-4 ring-black/10' : 'border-transparent'}`}
                               >
-                                {(step.config as Record<string, string | boolean>)?.buttonText || 'Terminer'}
+                                {(step.config as Record<string, string | boolean>)?.buttonText || 'Finish'}
                               </button>
                             </div>
                           )}
@@ -618,8 +618,8 @@ export default function FormEditorPage() {
                     const newStep: FormStep = {
                       id: newId,
                       type: 'textarea',
-                      title: 'Nouvelle étape',
-                      description: 'Description de la nouvelle étape',
+                      title: 'New step',
+                      description: 'Description of the new step',
                       isEnabled: true
                     }
                     setForm({ ...form, config: { ...form.config, steps: [...form.config.steps, newStep] } })
@@ -630,7 +630,7 @@ export default function FormEditorPage() {
                   <div className="w-16 h-16 rounded-full bg-white/5 border border-dashed border-white/20 flex items-center justify-center group-hover:bg-[#0D9E75]/10 group-hover:border-[#0D9E75] transition-all">
                     <Plus size={24} className="text-white/40 group-hover:text-[#0D9E75]" />
                   </div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-white/20 group-hover:text-white/60">Ajouter une étape</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-white/20 group-hover:text-white/60">Add a step</span>
                 </button>
               </div>
             </div>
@@ -644,7 +644,7 @@ export default function FormEditorPage() {
                 className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'pages' ? 'bg-[#0D9E75] text-white shadow-lg shadow-[#0D9E75]/20' : 'text-white/40 hover:text-white/60'}`}
               >
                 <Layout size={14} className="inline mr-2" />
-                Étape
+                Step
               </button>
               <button
                 onClick={() => setActiveTab('design')}
@@ -661,13 +661,13 @@ export default function FormEditorPage() {
                   {/* Selected Step Info */}
                   <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
                     <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#0D9E75] block mb-1">
-                      En cours d'édition
+                      Currently editing
                     </span>
                     <h3 className="text-sm font-bold truncate">
-                      {activeStep ? activeStep.title : "Aucune étape sélectionnée"}
+                      {activeStep ? activeStep.title : "No step selected"}
                     </h3>
                     <p className="text-[10px] text-white/40 mt-1 italic">
-                      Cliquez sur une étape dans le canvas pour la modifier.
+                      Click on a step in the canvas to edit it.
                     </p>
                   </div>
 
@@ -676,7 +676,7 @@ export default function FormEditorPage() {
                   {activeStep && (
                     <div className="space-y-6">
                       <div>
-                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block">Titre de l'étape</label>
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block">Step title</label>
                         <input
                           ref={(el) => { sidebarRefs.current['title'] = el }}
                           type="text"
@@ -686,7 +686,7 @@ export default function FormEditorPage() {
                         />
                       </div>
                       <div>
-                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block text-balance">Description de l'étape</label>
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block text-balance">Step description</label>
                         <textarea
                           ref={(el) => { sidebarRefs.current['description'] = el }}
                           value={activeStep.description}
@@ -696,17 +696,17 @@ export default function FormEditorPage() {
                       </div>
 
                       <div className="pt-6 border-t border-white/5 space-y-6">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-[#0D9E75] block mb-4">Paramètres spécifiques</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-[#0D9E75] block mb-4">Specific settings</span>
 
                         {activeStep.type === 'rating' && (
                           <div className="pt-6 border-t border-white/5 mt-6">
-                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block">Style de notation</label>
+                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block">Rating style</label>
                             <div className="flex gap-2 bg-[var(--v3-bg)] p-1 rounded-xl border border-[var(--v3-border)]">
                               <button
                                 onClick={() => updateStep(activeStep.id, { config: { ...activeStep.config, ratingType: 'stars' } })}
                                 className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${((activeStep.config as Record<string, string | boolean>)?.ratingType || 'stars') === 'stars' ? 'bg-[var(--v3-teal)] text-white shadow-lg' : 'text-[var(--v3-muted2)] hover:text-white hover:bg-white/5'}`}
                               >
-                                Étoiles
+                                Stars
                               </button>
                               <button
                                 onClick={() => updateStep(activeStep.id, { config: { ...activeStep.config, ratingType: 'emojis' } })}
@@ -720,13 +720,13 @@ export default function FormEditorPage() {
 
                         {(activeStep.type === 'welcome' || activeStep.type === 'success' || activeStep.type === 'informative' || activeStep.type === 'rating' || activeStep.type === 'textarea' || activeStep.type === 'attribution') && (
                           <div className="pt-6 border-t border-white/5 mt-6">
-                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block">Texte du bouton</label>
+                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block">Button text</label>
                             <input
                               ref={(el) => { sidebarRefs.current['buttonText'] = el }}
                               type="text"
                               value={((activeStep.config as Record<string, string | boolean>)?.buttonText as string) || ''}
                               onChange={(e) => updateStep(activeStep.id, { config: { ...activeStep.config, buttonText: e.target.value } })}
-                              placeholder="Continuer"
+                              placeholder="Continue"
                               className="w-full bg-[var(--v3-bg)] border border-[var(--v3-border)] rounded-xl px-4 py-3 text-sm focus:border-[var(--v3-teal)]/50 transition-all outline-none"
                             />
                           </div>
@@ -734,13 +734,13 @@ export default function FormEditorPage() {
 
                         {activeStep.type === 'textarea' && (
                           <div className="pt-6 border-t border-white/5 mt-6">
-                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block">Texte d'aide (Placeholder)</label>
+                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block">Help text (Placeholder)</label>
                             <input
                               ref={(el) => { sidebarRefs.current['placeholder'] = el }}
                               type="text"
                               value={((activeStep.config as Record<string, string | boolean>)?.placeholder as string) || ''}
                               onChange={(e) => updateStep(activeStep.id, { config: { ...activeStep.config, placeholder: e.target.value } })}
-                              placeholder="Tapez votre témoignage ici..."
+                              placeholder="Type your testimonial here..."
                               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs font-medium focus:border-[#0D9E75]/50 outline-none transition-all"
                             />
                           </div>
@@ -749,7 +749,7 @@ export default function FormEditorPage() {
                         {activeStep.type === 'attribution' && (
                           <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-bold">Collecter l'email</span>
+                              <span className="text-[10px] font-bold">Collect email</span>
                               <button
                                 onClick={() => {
                                   const newSteps = [...form.config.steps]
@@ -763,7 +763,7 @@ export default function FormEditorPage() {
                               </button>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-bold">Collecter l'entreprise</span>
+                              <span className="text-[10px] font-bold">Collect company</span>
                               <button
                                 onClick={() => {
                                   const newSteps = [...form.config.steps]
@@ -782,7 +782,7 @@ export default function FormEditorPage() {
 
                       <div className="pt-6 border-t border-white/5">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold">Activer cette étape</span>
+                          <span className="text-xs font-bold">Enable this step</span>
                           <button
                             onClick={() => {
                               const newSteps = [...form.config.steps]
@@ -857,8 +857,8 @@ export default function FormEditorPage() {
                             <Upload size={18} />
                           </div>
                           <div className="text-center">
-                            <span className="text-xs font-bold block">Charger le logo</span>
-                            <span className="text-[10px] text-white/20">PNG, JPG jusqu'à 2Mo</span>
+                            <span className="text-xs font-bold block">Upload logo</span>
+                            <span className="text-[10px] text-white/20">PNG, JPG up to 2MB</span>
                           </div>
                           <input
                             type="file"
@@ -923,7 +923,7 @@ export default function FormEditorPage() {
       {showSaveSuccess && (
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-[#0D9E75] text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-bottom-8 duration-300 z-[9999]">
           <CheckCircle size={20} className="text-white" />
-          <span className="font-bold text-sm">Modifications enregistrées !</span>
+          <span className="font-bold text-sm">Changes saved!</span>
         </div>
       )}
     </div>

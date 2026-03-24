@@ -164,21 +164,21 @@ const SortableTestimonialRow = ({
             <button 
               onClick={() => onStatusUpdate(testimonial.id, 'approved')}
               className="w-6 h-6 flex items-center justify-center rounded-md bg-[var(--v3-teal)]/10 text-[var(--v3-teal)] hover:bg-[var(--v3-teal)] hover:text-white transition-all shadow-sm"
-              title="Approuver"
+              title="Approve"
             >
               <Check size={12} />
             </button>
             <button 
               onClick={() => onStatusUpdate(testimonial.id, 'rejected')}
               className="w-6 h-6 flex items-center justify-center rounded-md bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all shadow-sm"
-              title="Rejeter"
+              title="Reject"
             >
               <XCircle size={12} />
             </button>
             <button 
               onClick={() => onDelete(testimonial.id)}
               className="w-6 h-6 flex items-center justify-center rounded-md bg-white/5 text-[var(--v3-muted2)] hover:bg-red-600 hover:text-white transition-all"
-              title="Supprimer"
+              title="Delete"
             >
               <Trash2 size={12} />
             </button>
@@ -252,7 +252,7 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Es-tu sûr de vouloir supprimer cet avis ? Cette action est irréversible.")) return
+    if (!confirm("Are you sure you want to delete this review? This action is irreversible.")) return
     try {
       const res = await fetch(`/api/v1/testimonials/${id}`, {
         method: 'DELETE'
@@ -282,7 +282,7 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
   }
 
   const handleBatchDelete = async () => {
-    if (!confirm(`Supprimer ${selectedIds.length} avis ?`)) return
+    if (!confirm(`Delete ${selectedIds.length} reviews?`)) return
     try {
       const res = await fetch('/api/v1/testimonials/batch-delete', {
         method: 'POST',
@@ -387,11 +387,11 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
     const diffInHours = Math.floor(diffInMinutes / 60)
     const diffInDays = Math.floor(diffInHours / 24)
     
-    if (diffInSeconds < 60) return "À l'instant"
+    if (diffInSeconds < 60) return "Just now"
     if (diffInMinutes < 60) return `${diffInMinutes}min`
     if (diffInHours < 24) return `${diffInHours}h`
-    if (diffInDays < 7) return `${diffInDays}j`
-    return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    if (diffInDays < 7) return `${diffInDays}d`
+    return date.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' })
   }
 
   if (loading && !stats) {
@@ -399,7 +399,7 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
       <main className="max-w-[1140px] mx-auto px-6 py-12 pb-20 relative z-10">
         <div className="flex flex-col items-center justify-center py-20 text-[var(--v3-muted)]">
           <RefreshCw size={24} className="animate-spin mb-4 text-[var(--v3-teal)]" />
-          <p className="text-sm font-medium">Chargement des données...</p>
+          <p className="text-sm font-medium">Loading data...</p>
         </div>
       </main>
     )
@@ -413,12 +413,12 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
         className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[var(--v3-muted2)] hover:text-[var(--v3-teal)] transition-colors mb-6"
       >
         <ChevronLeftIcon size={14} />
-        Retour au Dashboard
+        Back to Dashboard
       </button>
 
       <div className="mb-8">
         <span className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--v3-teal)] mb-2.5 block">
-          // formulaire
+          // form
         </span>
         <div className="flex flex-wrap justify-between items-start gap-4">
           <div className="flex-1">
@@ -443,7 +443,7 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
                 className="flex items-center gap-2 bg-white/5 border border-white/10 text-[var(--v3-text)] px-4 py-2 rounded-xl text-xs font-bold hover:bg-white/10 hover:border-white/20 transition-all group"
               >
                 <Pencil size={13} className="text-[var(--v3-muted2)] group-hover:text-[var(--v3-teal)] transition-colors" />
-                Modifier
+                Edit
               </button>
 
               <div className="relative">
@@ -453,14 +453,14 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                   <Share2 size={13} />
-                  Partager
+                  Share
                 </button>
 
                 {showSharePopover && (
                   <div className="absolute top-full right-0 mt-2 w-72 bg-[#0A0A0A] border border-white/10 rounded-2xl shadow-2xl p-4 z-[400] animate-in fade-in zoom-in-95 duration-200">
                     <div className="flex flex-col gap-3">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Lien Public</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Public Link</span>
                         <button onClick={() => setShowSharePopover(false)} className="text-white/20 hover:text-white">
                           <Plus size={14} className="rotate-45" />
                         </button>
@@ -482,7 +482,7 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
                         rel="noopener noreferrer"
                         className="text-[10px] font-bold text-[var(--v3-teal)] hover:underline flex items-center gap-1 mt-1"
                       >
-                        Ouvrir le lien <ChevronRight size={10} />
+                        Open link <ChevronRight size={10} />
                       </a>
                     </div>
                   </div>
@@ -515,22 +515,22 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
         />
         <StatCard 
           icon={<TrendingUp size={18} />} 
-          label="Complétion" 
+          label="Completion" 
           value={`${stats?.completionRate ?? form.completion ?? 100}%`} 
           delta={stats?.completionGrowth !== undefined ? (stats.completionGrowth > 0 ? `↑ +${stats.completionGrowth}%` : stats.completionGrowth < 0 ? `↓ ${stats.completionGrowth}%` : "0%") : "—"} 
           colorClass="bg-sky-500/10 border-sky-500/20 text-sky-500" 
         />
-        <StatCard icon={<Star size={18} />} label="Note moyenne" value={avgRating > 0 ? avgRating.toFixed(1) : "—"} colorClass="bg-amber-500/10 border-amber-500/20 text-amber-500" />
-        <StatCard icon={<Users size={18} />} label="Répondants uniques" value={(stats?.uniqueRespondents || 0).toString()} colorClass="bg-purple-500/10 border-purple-500/20 text-purple-500" />
+        <StatCard icon={<Star size={18} />} label="Average rating" value={avgRating > 0 ? avgRating.toFixed(1) : "—"} colorClass="bg-amber-500/10 border-amber-500/20 text-amber-500" />
+        <StatCard icon={<Users size={18} />} label="Unique respondents" value={(stats?.uniqueRespondents || 0).toString()} colorClass="bg-purple-500/10 border-purple-500/20 text-purple-500" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-5 mb-8">
         <div className="bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-2xl p-6">
-          <div className="text-sm font-bold text-[var(--v3-text)] mb-1.5">Volume de reviews</div>
-          <div className="text-[12px] text-[var(--v3-muted2)] mb-5">12 dernières semaines</div>
+          <div className="text-sm font-bold text-[var(--v3-text)] mb-1.5">Review Volume</div>
+          <div className="text-[12px] text-[var(--v3-muted2)] mb-5">Last 12 weeks</div>
           <div className="flex items-end gap-1.5 h-[120px]">
             {stats?.reviewVolume.length === 0 ? (
-                <div className="w-full h-full flex items-center justify-center text-[10px] text-[var(--v3-muted)] italic">Pas encore assez de données</div>
+                <div className="w-full h-full flex items-center justify-center text-[10px] text-[var(--v3-muted)] italic">Not enough data yet</div>
             ) : (
                 stats?.reviewVolume.map((v, i) => {
                     const maxVolume = Math.max(...stats.reviewVolume.map(rv => rv.value), 1)
@@ -548,7 +548,7 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
           </div>
         </div>
         <div className="bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-2xl p-6">
-          <div className="text-sm font-bold text-[var(--v3-text)] mb-1.5">Répartition des notes</div>
+          <div className="text-sm font-bold text-[var(--v3-text)] mb-1.5">Rating Distribution</div>
           <div className="text-[12px] text-[var(--v3-muted2)] mb-5">{totReviews} reviews</div>
           <div className="space-y-3 mb-4">
             {(stats?.ratingDistribution || []).map((s, i) => (
@@ -571,7 +571,7 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
             <span className="text-[32px] font-black tracking-tighter text-[var(--v3-text)]">{avgRating > 0 ? avgRating.toFixed(1) : "0.0"}</span>
             <div>
               <Stars rating={avgRating} size={13} />
-              <div className="text-[10px] font-bold text-[var(--v3-muted)] mt-0.5 uppercase tracking-wider">Moyenne</div>
+              <div className="text-[10px] font-bold text-[var(--v3-muted)] mt-0.5 uppercase tracking-wider">Average</div>
             </div>
           </div>
         </div>
@@ -580,10 +580,10 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
       <div className="bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-2xl overflow-hidden shadow-2xl relative">
         <div className="flex justify-between items-center px-6 py-5 border-b border-[var(--v3-border)] bg-white/[0.01]">
           <span className="text-[14px] font-black uppercase tracking-widest text-[var(--v3-text)] opacity-80">
-            // Gestion des avis
+            // Review Management
           </span>
           <div className="flex items-center gap-4">
-            <span className="text-[11px] font-bold text-[var(--v3-muted2)]">{totReviews} au total</span>
+            <span className="text-[11px] font-bold text-[var(--v3-muted2)]">{totReviews} total</span>
           </div>
         </div>
         
@@ -604,14 +604,14 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
                       />
                     </th>
                     <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--v3-muted2)] cursor-pointer hover:text-[var(--v3-teal)] transition-colors" onClick={() => handleSort('authorName')}>
-                      <div className="flex items-center">Auteur <SortIcon field="authorName" sortConfig={sortConfig} /></div>
+                      <div className="flex items-center">Author <SortIcon field="authorName" sortConfig={sortConfig} /></div>
                     </th>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--v3-muted2)]">Avis</th>
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--v3-muted2)]">Review</th>
                     <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--v3-muted2)] text-center cursor-pointer hover:text-[var(--v3-teal)] transition-colors" onClick={() => handleSort('rating')}>
-                      <div className="flex items-center justify-center">Note <SortIcon field="rating" sortConfig={sortConfig} /></div>
+                      <div className="flex items-center justify-center">Rating <SortIcon field="rating" sortConfig={sortConfig} /></div>
                     </th>
                     <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--v3-muted2)] text-center cursor-pointer hover:text-[var(--v3-teal)] transition-colors" onClick={() => handleSort('status')}>
-                      <div className="flex items-center justify-center">Statut <SortIcon field="status" sortConfig={sortConfig} /></div>
+                      <div className="flex items-center justify-center">Status <SortIcon field="status" sortConfig={sortConfig} /></div>
                     </th>
                     <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[var(--v3-muted2)] text-right cursor-pointer hover:text-[var(--v3-teal)] transition-colors" onClick={() => handleSort('createdAt')}>
                       <div className="flex items-center justify-end">Date <SortIcon field="createdAt" sortConfig={sortConfig} /></div>
@@ -622,7 +622,7 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
                   {testimonials.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="py-16 text-center text-[var(--v3-muted2)] italic text-sm">
-                        Aucun avis trouvé.
+                        No reviews found.
                       </td>
                     </tr>
                   ) : (
@@ -653,7 +653,7 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
               <div className="w-6 h-6 rounded-full bg-[var(--v3-teal)] text-white text-[11px] font-black flex items-center justify-center shadow-[0_0_15px_rgba(45,212,191,0.4)]">
                 {selectedIds.length}
               </div>
-              <span className="text-[11px] font-black uppercase tracking-widest text-[var(--v3-text)]">Sélectionnés</span>
+              <span className="text-[11px] font-black uppercase tracking-widest text-[var(--v3-text)]">Selected</span>
             </div>
             
             <div className="flex items-center gap-3">
@@ -661,19 +661,19 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
                 onClick={() => handleBatchStatusUpdate('approved')}
                 className="flex items-center gap-2 bg-[var(--v3-teal)]/10 text-[var(--v3-teal)] border border-[var(--v3-teal)]/20 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[var(--v3-teal)] hover:text-white transition-all"
               >
-                <Check size={14} /> Approuver
+                <Check size={14} /> Approve
               </button>
               <button 
                 onClick={() => handleBatchStatusUpdate('rejected')}
                 className="flex items-center gap-2 bg-red-500/10 text-red-400 border border-red-500/20 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all"
               >
-                <XCircle size={14} /> Rejeter
+                <XCircle size={14} /> Reject
               </button>
               <button 
                 onClick={handleBatchDelete}
                 className="flex items-center gap-2 bg-white/5 text-[var(--v3-muted2)] border border-white/10 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white hover:border-red-600 transition-all"
               >
-                <Trash2 size={14} /> Supprimer
+                <Trash2 size={14} /> Delete
               </button>
             </div>
 
@@ -681,7 +681,7 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
               onClick={() => setSelectedIds([])}
               className="text-[10px] font-black uppercase tracking-widest text-[var(--v3-muted2)] hover:text-[var(--v3-text)] ml-2"
             >
-              Annuler
+              Cancel
             </button>
           </div>
         )}
@@ -689,7 +689,7 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
         {/* Pagination Footer */}
         <div className="flex justify-between items-center px-6 py-4 bg-white/[0.01] border-t border-[var(--v3-border)]">
           <div className="text-[11px] font-bold text-[var(--v3-muted2)]">
-            Page <span className="text-[var(--v3-text)]">{page}</span> sur <span className="text-[var(--v3-text)]">{Math.ceil(totReviews / 10) || 1}</span>
+            Page <span className="text-[var(--v3-text)]">{page}</span> of <span className="text-[var(--v3-text)]">{Math.ceil(totReviews / 10) || 1}</span>
           </div>
           <div className="flex items-center gap-2">
             <button 
@@ -697,14 +697,14 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
               onClick={() => setPage(p => Math.max(1, p - 1))}
               className="p-1 px-3 rounded-lg border border-white/5 bg-white/5 text-[var(--v3-muted2)] text-[11px] font-bold hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 transition-all flex items-center gap-1"
             >
-              <ChevronLeftIcon size={12} /> Précédent
+              <ChevronLeftIcon size={12} /> Previous
             </button>
             <button 
               disabled={page >= Math.ceil(totReviews / 10)}
               onClick={() => setPage(p => p + 1)}
               className="p-1 px-3 rounded-lg border border-white/5 bg-white/5 text-[var(--v3-muted2)] text-[11px] font-bold hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 transition-all flex items-center gap-1"
             >
-              Suivant <ChevronRight size={12} />
+              Next <ChevronRight size={12} />
             </button>
           </div>
         </div>
