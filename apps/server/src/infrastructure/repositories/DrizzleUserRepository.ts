@@ -8,8 +8,13 @@ import { User } from '../../domain/entities/User';
 export class DrizzleUserRepository implements IUserRepository {
   constructor(private readonly db: BunSQLDatabase<typeof schema> = globalDb as any) {}
 
-  async findAll(): Promise<User[]> {
-    const results = await this.db.select().from(schema.users);
+  async findAll(options?: { limit?: number; offset?: number }): Promise<User[]> {
+    const query = this.db.select().from(schema.users);
+    
+    if (options?.limit) query.limit(options.limit);
+    if (options?.offset) query.offset(options.offset);
+
+    const results = await query;
     return results.map(row => this.mapToDomain(row));
   }
 
