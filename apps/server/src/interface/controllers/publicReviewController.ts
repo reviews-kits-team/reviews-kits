@@ -9,14 +9,8 @@ export const publicReviewController = {
   /**
    * Fetch approved reviews for a user based on public API key context
    */
-  getReviews: async (c: any) => {
-    // Defensive check to avoid TypeError: c.get is not a function
-    if (!c || typeof c.get !== 'function') {
-      console.error('[API Error] Context c is invalid in getReviews:', typeof c, Object.keys(c || {}));
-      return (c as any)?.json ? (c as any).json({ error: 'Internal context error' }, 500) : new Response('Internal context error', { status: 500 });
-    }
-
-    const userId = c.get('userId');
+  getReviews: async (c: Context) => {
+    const userId = c.get('userId' as any); // Hono context 'get' for variables
     if (!userId) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
@@ -67,7 +61,16 @@ export const publicReviewController = {
    * Submit a new review (publicly accessible)
    */
   submitReview: async (c: Context) => {
-    const body = await c.req.json();
+    const body = await c.req.json() as { 
+      formId: string, 
+      content: string, 
+      authorName: string, 
+      authorEmail?: string, 
+      rating?: string | number, 
+      authorTitle?: string, 
+      authorUrl?: string, 
+      _honey?: string 
+    };
     const { formId, content, authorName, authorEmail, rating, authorTitle, authorUrl, _honey } = body;
 
     // Honeypot check - Spambots usually fill hidden fields
@@ -112,17 +115,18 @@ export const publicReviewController = {
         message: 'Review submitted successfully',
         id: testimonial.getId()
       }, 201);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to submit public review:', error);
-      return c.json({ error: error.message || 'Internal server error' }, 500);
+      const message = error instanceof Error ? error.message : 'Internal server error';
+      return c.json({ error: message }, 500);
     }
   },
 
   /**
    * Get public form configuration by slug
    */
-  getFormBySlug: async (c: any) => {
-    const slug = (c.req as any).param('slug');
+  getFormBySlug: async (c: Context) => {
+    const slug = c.req.param('slug');
     if (!slug) {
       return c.json({ error: 'Missing slug' }, 400);
     }

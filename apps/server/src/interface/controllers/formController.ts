@@ -52,7 +52,7 @@ export const formController = {
       return c.json({ error: 'Unauthorized' }, 401);
     }
 
-    const body = await c.req.json();
+    const body = await c.req.json() as { name: string, slug: string, description?: string };
     const { name, slug, description } = body;
 
     if (!name || !slug) {
@@ -73,12 +73,13 @@ export const formController = {
       await container.formRepository.save(form);
       const props = form.getProps();
       return c.json({ ...props, slug: props.slug.getValue() }, 201);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to create form:", err);
-      if (err.message?.includes('unique constraint') && err.message?.includes('slug')) {
+      const message = err instanceof Error ? err.message : '';
+      if (message.includes('unique constraint') && message.includes('slug')) {
         return c.json({ error: 'This slug is already in use by another form.' }, 409);
       }
-      return c.json({ error: err.message || 'Error occurred while creating the form' }, 500);
+      return c.json({ error: message || 'Error occurred while creating the form' }, 500);
     }
   },
 
@@ -220,7 +221,7 @@ export const formController = {
       return c.json({ error: 'Unauthorized' }, 401);
     }
 
-    const { ids, isActive } = await c.req.json();
+    const { ids, isActive } = await c.req.json() as { ids: string[], isActive: boolean };
     if (!Array.isArray(ids) || ids.length === 0) {
       return c.json({ error: 'Invalid form IDs' }, 400);
     }
@@ -233,7 +234,7 @@ export const formController = {
 
       await container.formRepository.batchUpdateStatus(ids, isActive);
       return c.json({ success: true, isActive });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to batch toggle form status:", err);
       return c.json({ error: 'Error during batch update' }, 500);
     }
@@ -245,7 +246,7 @@ export const formController = {
       return c.json({ error: 'Unauthorized' }, 401);
     }
 
-    const { ids } = await c.req.json();
+    const { ids } = await c.req.json() as { ids: string[] };
     if (!Array.isArray(ids) || ids.length === 0) {
       return c.json({ error: 'Invalid form IDs' }, 400);
     }
@@ -258,7 +259,7 @@ export const formController = {
 
       await container.formRepository.batchDelete(ids);
       return c.json({ success: true });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to batch delete forms:", err);
       return c.json({ error: 'Error during batch deletion' }, 500);
     }

@@ -6,7 +6,7 @@ import type { IUserRepository } from '../../domain/repositories/UserRepository';
 import { User } from '../../domain/entities/User';
 
 export class DrizzleUserRepository implements IUserRepository {
-  constructor(private readonly db: BunSQLDatabase<typeof schema> = globalDb as any) {}
+  constructor(private readonly db: BunSQLDatabase<typeof schema> = globalDb) {}
 
   async findAll(options?: { limit?: number; offset?: number }): Promise<User[]> {
     const query = this.db.select().from(schema.users);
@@ -30,7 +30,7 @@ export class DrizzleUserRepository implements IUserRepository {
     return this.mapToDomain(row);
   }
 
-  private mapToDomain(row: any): User {
+  private mapToDomain(row: typeof schema.users.$inferSelect): User {
     return new User({
       id: row.id,
       email: row.email,

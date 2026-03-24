@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { 
-  Plus, 
-  MessageSquare, 
-  CheckCircle2, 
-  Star, 
+import {
+  Plus,
+  MessageSquare,
+  CheckCircle2,
+  Star,
   Users,
   AlertCircle,
   X
@@ -73,7 +73,7 @@ export default function DashboardPage() {
     fetchStats();
   }, [])
 
-  const selectedForm = useMemo(() => 
+  const selectedForm = useMemo(() =>
     forms.find(f => f.id === selectedFormId), [selectedFormId, forms]
   )
 
@@ -84,7 +84,7 @@ export default function DashboardPage() {
 
   const confirmDelete = async () => {
     if (!deletingFormId) return;
-    
+
     setIsDeleting(true);
     setError(null);
     try {
@@ -148,7 +148,7 @@ export default function DashboardPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids, isActive })
       });
-      
+
       if (res.ok) {
         setForms(forms.map(f => ids.includes(f.id) ? { ...f, isActive } : f));
       } else {
@@ -162,7 +162,7 @@ export default function DashboardPage() {
 
   const confirmBulkDelete = async () => {
     if (!bulkDeletingIds) return;
-    
+
     setIsDeleting(true);
     setError(null);
     try {
@@ -171,7 +171,7 @@ export default function DashboardPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids: bulkDeletingIds })
       });
-      
+
       if (res.ok) {
         setForms(forms.filter(f => !bulkDeletingIds.includes(f.id)));
         setBulkDeletingIds(null);
@@ -192,11 +192,11 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen">
       <TopBar />
-      
+
       {selectedFormId && selectedForm ? (
-        <DetailView 
-          form={selectedForm} 
-          onBack={() => setSelectedFormId(null)} 
+        <DetailView
+          form={selectedForm}
+          onBack={() => setSelectedFormId(null)}
         />
       ) : (
         <main className="max-w-[1140px] mx-auto px-6 py-12 pb-20 relative z-10">
@@ -218,7 +218,7 @@ export default function DashboardPage() {
                 </div>
                 <p className="text-sm font-medium text-[var(--v3-red)]">{error}</p>
               </div>
-              <button 
+              <button
                 onClick={() => setError(null)}
                 className="text-[var(--v3-red)]/50 hover:text-[var(--v3-red)] transition-colors p-1"
               >
@@ -228,32 +228,32 @@ export default function DashboardPage() {
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-14">
-            <StatCard 
-              icon={<MessageSquare size={18} />} 
-              label="Total reviews" 
-              value={stats.totalReviews.toString()} 
-              delta={stats.reviewsGrowth !== undefined ? (stats.reviewsGrowth > 0 ? `↑ +${stats.reviewsGrowth}%` : stats.reviewsGrowth < 0 ? `↓ ${stats.reviewsGrowth}%` : "0%") : "—"} 
-              colorClass="bg-[var(--v3-teal-dim)] border-[var(--v3-teal)]/20 text-[var(--v3-teal)]" 
+            <StatCard
+              icon={<MessageSquare size={18} />}
+              label="Total reviews"
+              value={stats.totalReviews.toString()}
+              delta={stats.reviewsGrowth !== undefined ? (stats.reviewsGrowth > 0 ? `↑ +${stats.reviewsGrowth}%` : stats.reviewsGrowth < 0 ? `↓ ${stats.reviewsGrowth}%` : "0%") : "—"}
+              colorClass="bg-[var(--v3-teal-dim)] border-[var(--v3-teal)]/20 text-[var(--v3-teal)]"
             />
-            <StatCard 
-              icon={<CheckCircle2 size={18} />} 
-              label="Completion rate" 
-              value={`${stats.completionRate}%`} 
-              delta={stats.completionGrowth !== undefined ? (stats.completionGrowth > 0 ? `↑ +${stats.completionGrowth}%` : stats.completionGrowth < 0 ? `↓ ${stats.completionGrowth}%` : "0%") : "—"} 
-              colorClass="bg-emerald-500/10 border-emerald-500/20 text-emerald-500" 
+            <StatCard
+              icon={<CheckCircle2 size={18} />}
+              label="Completion rate"
+              value={`${stats.completionRate}%`}
+              delta={stats.completionGrowth !== undefined ? (stats.completionGrowth > 0 ? `↑ +${stats.completionGrowth}%` : stats.completionGrowth < 0 ? `↓ ${stats.completionGrowth}%` : "0%") : "—"}
+              colorClass="bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
             />
-            <StatCard 
-              icon={<Star size={18} />} 
-              label="Average rating" 
-              value={stats.averageRating.toFixed(1)} 
-              colorClass="bg-amber-500/10 border-amber-500/20 text-amber-500" 
+            <StatCard
+              icon={<Star size={18} />}
+              label="Average rating"
+              value={stats.averageRating.toFixed(1)}
+              colorClass="bg-amber-500/10 border-amber-500/20 text-amber-500"
             />
-            <StatCard 
-              icon={<Users size={18} />} 
-              label="Unique respondents" 
-              value={stats.uniqueRespondents.toString()} 
-              delta="—" 
-              colorClass="bg-sky-500/10 border-sky-500/20 text-sky-500" 
+            <StatCard
+              icon={<Users size={18} />}
+              label="Unique respondents"
+              value={stats.uniqueRespondents.toString()}
+              delta="—"
+              colorClass="bg-sky-500/10 border-sky-500/20 text-sky-500"
             />
           </div>
 
@@ -264,7 +264,7 @@ export default function DashboardPage() {
                 {forms.length} forms
               </span>
             </div>
-            <button 
+            <button
               onClick={() => setIsModalOpen(true)}
               className="flex items-center gap-2 bg-[var(--v3-teal)] text-white px-5.5 py-2.5 rounded-lg text-sm font-semibold hover:-translate-y-0.5 hover:shadow-[0_8px_24px_var(--v3-teal-glow)] transition-all overflow-hidden relative group"
             >
@@ -278,8 +278,8 @@ export default function DashboardPage() {
             {loading ? (
               <div className="py-20 text-center text-[var(--v3-muted)] italic">Loading...</div>
             ) : forms.length > 0 ? (
-              <FormTable 
-                forms={forms} 
+              <FormTable
+                forms={forms}
                 onReorder={setForms}
                 onOpenForm={setSelectedFormId}
                 onDeleteForm={handleDeleteForm}
@@ -293,7 +293,7 @@ export default function DashboardPage() {
             ) : (
               <div className="py-20 bg-[var(--v3-bg2)] border border-dashed border-white/5 rounded-2xl text-center">
                 <p className="text-[var(--v3-muted)] mb-4">You don't have any forms yet.</p>
-                <button 
+                <button
                   onClick={() => setIsModalOpen(true)}
                   className="text-[var(--v3-teal)] font-bold hover:underline"
                 >
@@ -305,13 +305,13 @@ export default function DashboardPage() {
         </main>
       )}
 
-      <CreateFormModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      <CreateFormModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         onCreated={(newForm) => setForms([newForm, ...forms])}
       />
 
-      <DeleteConfirmModal 
+      <DeleteConfirmModal
         isOpen={!!deletingFormId}
         onClose={() => setDeletingFormId(null)}
         onConfirm={confirmDelete}
@@ -319,7 +319,7 @@ export default function DashboardPage() {
         loading={isDeleting}
       />
 
-      <BulkDeleteModal 
+      <BulkDeleteModal
         isOpen={!!bulkDeletingIds}
         onClose={() => setBulkDeletingIds(null)}
         onConfirm={confirmBulkDelete}
@@ -327,7 +327,7 @@ export default function DashboardPage() {
         loading={isDeleting}
       />
 
-      <ShareModal 
+      <ShareModal
         isOpen={!!sharingFormId}
         onClose={() => setSharingFormId(null)}
         formName={forms.find(f => f.id === sharingFormId)?.name || ''}

@@ -129,7 +129,7 @@ export class DrizzleFormRepository implements FormRepository {
     return resultMap;
   }
 
-  private mapToDomain(row: any): Form {
+  private mapToDomain(row: typeof forms.$inferSelect): Form {
     return new Form({
       id: row.id,
       userId: row.userId,
@@ -138,7 +138,7 @@ export class DrizzleFormRepository implements FormRepository {
       publicId: row.publicId,
       description: row.description || undefined,
       thankYouMessage: row.thankYouMessage || undefined,
-      config: row.config as Record<string, any>,
+      config: row.config as Record<string, unknown>,
       accentColor: row.accentColor || undefined,
       isActive: row.isActive ?? true,
       createdAt: row.createdAt || undefined,

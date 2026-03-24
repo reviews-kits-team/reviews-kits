@@ -1,9 +1,9 @@
-import { eq, and, sql, count, avg, countDistinct } from 'drizzle-orm';
+import { eq, and, sql, count, avg, countDistinct, type SQL } from 'drizzle-orm';
 import type { BunSQLDatabase } from 'drizzle-orm/bun-sql';
 import * as schema from '../database/schema';
 import { testimonials } from '../database/schema';
 import { Testimonial } from '../../domain/entities/Testimonial';
-import type { TestimonialRepository } from '../../domain/repositories/TestimonialRepository';
+import type { TestimonialRepository, TestimonialFilters } from '../../domain/repositories/TestimonialRepository';
 import { Rating } from '../../domain/value-objects/Rating';
 import { Email } from '../../domain/value-objects/Email';
 
@@ -17,7 +17,7 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
     return this.mapToDomain(row);
   }
 
-  async findByUser(userId: string, filters?: any): Promise<Testimonial[]> {
+  async findByUser(userId: string, filters?: TestimonialFilters): Promise<Testimonial[]> {
     const whereConditions = [eq(testimonials.userId, userId)];
     
     if (filters?.status) {
@@ -129,7 +129,7 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
     const allowedSortFields = ['createdAt', 'rating', 'position', 'status', 'authorName'];
     
     if (sortField && allowedSortFields.includes(sortField)) {
-      const column = (testimonials as any)[sortField];
+      const column = (testimonials as Record<string, any>)[sortField];
       query.orderBy(sortOrder === 'desc' ? desc(column) : asc(column));
     } else {
       // Default order: position ASC (manual order), then createdAt DESC (newest first)
@@ -160,7 +160,7 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
     if (positions.length === 0) return;
 
     const ids = positions.map(p => p.id);
-    const sqlChunks: any[] = [];
+    const sqlChunks: SQL[] = [];
     sqlChunks.push(sql`(case`);
     
     for (const { id, position } of positions) {
@@ -421,14 +421,14 @@ export class DrizzleTestimonialRepository implements TestimonialRepository {
     };
   }
 
-  private mapToDomain(row: any): Testimonial {
+  private mapToDomain(row: typeof testimonials.$inferSelect): Testimonial {
     return new Testimonial({
       id: row.id,
       userId: row.userId,
       content: row.content,
       authorName: row.authorName,
-      status: row.status as any,
-      source: row.source as any,
+      status: row.status as 'approved' | 'rejected' | 'pending',
+      source: row.source as 'form' | 'import' | 'api',
       rating: row.rating ? Rating.create(row.rating) : undefined,
       authorEmail: row.authorEmail ? Email.create(row.authorEmail) : undefined,
       authorTitle: row.authorTitle || undefined,

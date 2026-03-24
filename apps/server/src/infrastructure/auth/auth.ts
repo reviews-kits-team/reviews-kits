@@ -67,10 +67,12 @@ export const auth = betterAuth({
   secret,
   // Base URL for auth endpoints
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000/api/auth",
-  trustedOrigins: [
-    "http://localhost:5180", // Admin Frontend
-    "http://localhost:3000", // Swagger / Local API
-    "http://localhost",       // Tests
-    "http://localhost:5174",
-  ],
+  trustedOrigins: process.env.AUTH_TRUSTED_ORIGINS 
+    ? process.env.AUTH_TRUSTED_ORIGINS.split(',').map(o => o.trim())
+    : [
+        "http://localhost:5180", // Admin Frontend
+        "http://localhost:3000", // Swagger / Local API
+        "http://localhost",       // Tests
+        "http://localhost:5174",
+      ],
 });
