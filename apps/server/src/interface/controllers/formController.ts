@@ -1,4 +1,5 @@
 import type { Context } from 'hono';
+import { getUserIdFromContext } from '@/shared/utils/auth';
 import { container } from '@/infrastructure/container';
 import { Form } from '@/domain/entities/Form';
 import { Slug } from '@/domain/value-objects/Slug';
@@ -7,7 +8,7 @@ import { ApiKeyGenerator } from '@/shared/utils/ApiKeyGenerator';
 
 export const formController = {
   listForms: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     
     if (!userId) {
       return c.json({ error: 'Unauthorized' }, 401);
@@ -35,7 +36,7 @@ export const formController = {
   },
 
   createForm: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     
     if (!userId) {
       return c.json({ error: 'Unauthorized' }, 401);
@@ -72,7 +73,7 @@ export const formController = {
   },
 
   getFormDetails: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     const formId = c.req.param('id');
 
     if (!userId || !formId) {
@@ -98,7 +99,7 @@ export const formController = {
   },
 
   deleteForm: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     const formId = c.req.param('id');
 
     if (!userId || !formId) {
@@ -115,7 +116,7 @@ export const formController = {
   },
 
   updateForm: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     const formId = c.req.param('id');
     const body = await c.req.json();
     const { name, description, config, isActive } = body;
@@ -141,7 +142,7 @@ export const formController = {
   },
 
   toggleFormStatus: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     const formId = c.req.param('id');
 
     if (!userId || !formId) {
@@ -161,7 +162,7 @@ export const formController = {
   },
 
   duplicateForm: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     const formId = c.req.param('id');
 
     if (!userId || !formId) {
@@ -195,7 +196,7 @@ export const formController = {
   },
 
   batchToggleStatus: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     if (!userId) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
@@ -220,7 +221,7 @@ export const formController = {
   },
 
   batchDeleteForms: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     if (!userId) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
@@ -245,7 +246,7 @@ export const formController = {
   },
 
   getFormStats: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     const formId = c.req.param('id');
 
     if (!userId || !formId) {
@@ -263,7 +264,7 @@ export const formController = {
   },
 
   getFormTestimonials: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     const formId = c.req.param('id');
     const page = parseInt(c.req.query('page') || '1', 10);
     const limit = 10;

@@ -1,9 +1,10 @@
 import type { Context } from 'hono';
+import { getUserIdFromContext } from '@/shared/utils/auth';
 import { container } from '@/infrastructure/container';
 
 export const testimonialController = {
   updateStatus: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     const id = c.req.param('id');
     const { status } = await c.req.json();
 
@@ -32,7 +33,7 @@ export const testimonialController = {
   },
 
   deleteTestimonial: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     const id = c.req.param('id');
 
     if (!userId || !id) {
@@ -49,7 +50,7 @@ export const testimonialController = {
   },
 
   batchUpdateStatus: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     const { ids, status } = await c.req.json();
 
     if (!userId || !Array.isArray(ids) || ids.length === 0 || !status) {
@@ -66,7 +67,7 @@ export const testimonialController = {
   },
 
   batchDelete: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     const { ids } = await c.req.json();
 
     if (!userId || !Array.isArray(ids) || ids.length === 0) {
@@ -83,7 +84,7 @@ export const testimonialController = {
   },
 
   reorderTestimonials: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     const { positions } = await c.req.json(); // Array of { id: string, position: number }
 
     if (!userId || !Array.isArray(positions)) {

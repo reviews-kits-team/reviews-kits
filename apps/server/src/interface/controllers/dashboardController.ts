@@ -1,9 +1,10 @@
 import type { Context } from 'hono';
+import { getUserIdFromContext } from '@/shared/utils/auth';
 import { container } from '@/infrastructure/container';
 
 export const dashboardController = {
   getStats: async (c: Context) => {
-    const userId = c.get('userId') || (c.get('session') as any)?.user?.id;
+    const userId = getUserIdFromContext(c);
     
     if (!userId) {
       return c.json({ error: 'Unauthorized' }, 401);
