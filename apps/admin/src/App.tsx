@@ -5,7 +5,6 @@ import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 import ProfilePage from './pages/ProfilePage'
 import SettingsPage from './pages/SettingsPage'
-import SecurityPage from './pages/SecurityPage'
 import FormEditorPage from './pages/FormEditorPage'
 import PublicFormPage from './pages/PublicFormPage'
 import './App.css'
@@ -28,7 +27,6 @@ function App() {
         <Route path="/" element={<DashboardPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/security" element={<SecurityPage />} />
         <Route path="/forms/:id/edit" element={<FormEditorPage />} />
       </Route>
 
