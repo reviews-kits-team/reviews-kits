@@ -14,9 +14,13 @@ export const formController = {
     }
 
     const forms = await container.formRepository.findByUser(userId);
-    const formsWithStats = await Promise.all(forms.map(async f => {
+    
+    const formIds = forms.map(f => f.getProps().id);
+    const statsMap = await container.testimonialRepository.getBasicStatsByFormIds(formIds);
+
+    const formsWithStats = forms.map(f => {
       const props = f.getProps();
-      const stats = await container.testimonialRepository.getStatsByFormId(props.id);
+      const stats = statsMap.get(props.id) || { totalReviews: 0, averageRating: 0 };
       return { 
         ...props, 
         slug: props.slug.getValue(),
@@ -25,7 +29,8 @@ export const formController = {
         rating: stats.averageRating,
         completion: 100 // Placeholder for now
       };
-    }));
+    });
+    
     return c.json(formsWithStats);
   },
 
