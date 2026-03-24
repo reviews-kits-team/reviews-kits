@@ -85,13 +85,13 @@ export const testimonialController = {
 
   reorderTestimonials: async (c: Context) => {
     const userId = getUserIdFromContext(c);
-    const { positions } = await c.req.json(); // Array of { id: string, position: number }
+    const { positions } = await c.req.json() as { positions: { id: string, position: number }[] };
 
     if (!userId || !Array.isArray(positions)) {
       return c.json({ error: 'Unauthorized or invalid data' }, 401);
     }
 
-    const ids = positions.map((p: any) => p.id);
+    const ids = positions.map((p) => p.id);
     const owned = await container.testimonialRepository.findByIdsAndUser(ids, userId);
     if (owned.length !== ids.length) {
       return c.json({ error: 'Forbidden: one or more testimonials do not belong to you' }, 403);

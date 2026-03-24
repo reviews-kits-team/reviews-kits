@@ -98,7 +98,7 @@ describe("Forms Integration Suite", () => {
         session: { userId }
       }));
       await testDb.execute(sql.raw(`INSERT INTO "users" (id, name, email) VALUES ('${userId}', 'Test User', 'test@example.com')`));
-      
+
       // Create a base form for actions
       const res = await formsRouter.request("/", {
         method: "POST",
@@ -115,7 +115,7 @@ describe("Forms Integration Suite", () => {
       }, { session: { user: { id: userId } } } as any);
 
       expect(res.status).toBe(200);
-      
+
       // Verify it's gone
       const listRes = await formsRouter.request("/", { method: "GET" }, { session: { user: { id: userId } } } as any);
       const listData = await listRes.json() as any;

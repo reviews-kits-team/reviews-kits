@@ -35,12 +35,14 @@ app.onError((err, c) => {
   }
 
   // Default error response
+  const isProduction = process.env.NODE_ENV === 'production';
   console.error('[API Error]:', err);
+  
   return c.json({
     success: false,
     error: {
-      name: err.name || 'InternalServerError',
-      message: err.message || 'An unexpected error occurred',
+      name: isProduction ? 'InternalServerError' : (err.name || 'InternalServerError'),
+      message: isProduction ? 'An unexpected error occurred' : (err.message || 'An unexpected error occurred'),
     }
   }, 500);
 });

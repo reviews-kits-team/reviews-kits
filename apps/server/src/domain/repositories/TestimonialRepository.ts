@@ -1,8 +1,12 @@
 import { Testimonial } from '../entities/Testimonial';
 
+export interface TestimonialFilters {
+  status?: 'approved' | 'rejected' | 'pending';
+}
+
 export interface TestimonialRepository {
   findById(id: string): Promise<Testimonial | null>;
-  findByUser(userId: string, filters?: any): Promise<Testimonial[]>;
+  findByUser(userId: string, filters?: TestimonialFilters): Promise<Testimonial[]>;
   findByIdsAndUser(ids: string[], userId: string): Promise<Testimonial[]>;
   save(testimonial: Testimonial): Promise<void>;
   update(testimonial: Testimonial): Promise<void>;
