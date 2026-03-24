@@ -131,9 +131,9 @@ export const formController = {
     }
 
     if (name) form.updateName(name);
-    if (description !== undefined) (form as any).description = description; // Using as any if property is private but needed
+    if (description !== undefined) form.updateDescription(description);
     if (config) form.updateConfig(config);
-    if (isActive !== undefined) (form as any).isActive = isActive;
+    if (isActive !== undefined) form.updateIsActive(isActive);
 
     await container.formRepository.update(form);
     
