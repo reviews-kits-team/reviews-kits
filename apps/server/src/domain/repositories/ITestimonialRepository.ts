@@ -9,6 +9,7 @@ export interface ITestimonialRepository {
   findByUser(userId: string, filters?: TestimonialFilters): Promise<Testimonial[]>;
   findByIdsAndUser(ids: string[], userId: string): Promise<Testimonial[]>;
   save(testimonial: Testimonial): Promise<void>;
+  batchSave(testimonials: Testimonial[]): Promise<void>;
   update(testimonial: Testimonial): Promise<void>;
   findApprovedByUser(userId: string, options: { limit?: number; minRating?: number; formId: string }): Promise<Testimonial[]>;
   findByFormId(formId: string, options?: { limit?: number; offset?: number; sort?: string; order?: 'asc' | 'desc' }): Promise<Testimonial[]>;

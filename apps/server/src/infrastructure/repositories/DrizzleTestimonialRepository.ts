@@ -64,6 +64,34 @@ export class DrizzleTestimonialRepository implements ITestimonialRepository {
     });
   }
 
+  async batchSave(testimonialsList: Testimonial[]): Promise<void> {
+    if (testimonialsList.length === 0) return;
+    
+    const values = testimonialsList.map(t => {
+      const props = t.getProps();
+      return {
+        id: props.id,
+        userId: props.userId,
+        formId: props.formId,
+        content: props.content,
+        authorName: props.authorName,
+        status: props.status,
+        source: props.source,
+        rating: props.rating?.getValue(),
+        authorEmail: props.authorEmail?.getValue(),
+        authorTitle: props.authorTitle,
+        authorUrl: props.authorUrl,
+        mediaId: props.mediaId,
+        position: props.position,
+        metadata: props.metadata,
+        createdAt: props.createdAt,
+        updatedAt: props.updatedAt,
+      };
+    });
+
+    await this.db.insert(testimonials).values(values);
+  }
+
   async update(testimonial: Testimonial): Promise<void> {
     const props = testimonial.getProps();
     await this.db.update(testimonials)

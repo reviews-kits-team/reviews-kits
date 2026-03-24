@@ -62,5 +62,62 @@ export const testimonialController = {
     } catch (err: any) {
       return c.json({ error: err.message }, 403);
     }
+  },
+
+  exportTestimonials: async (c: Context) => {
+    const userId = getUserIdFromContext(c);
+    const formId = c.req.query('formId');
+
+    if (!userId || !formId) {
+      return c.json({ error: 'Unauthorized or missing formId' }, 401);
+    }
+
+    try {
+      const data = await container.exportTestimonialsUseCase.execute({
+        userId,
+        formId
+      });
+
+      // Simple CSV generation
+      const firstItem = data[0];
+      if (!firstItem) {
+        return c.text('No testimonials to export', 404);
+      }
+
+      const headers = Object.keys(firstItem).join(',');
+      const rows = data.map(item => 
+        Object.values(item).map(v => 
+          typeof v === 'string' ? `"${v.replace(/"/g, '""')}"` : v
+        ).join(',')
+      ).join('\n');
+
+      const csv = `${headers}\n${rows}`;
+
+      c.header('Content-Type', 'text/csv');
+      c.header('Content-Disposition', `attachment; filename="testimonials-${formId}.csv"`);
+      return c.text(csv);
+    } catch (err: any) {
+      return c.json({ error: err.message }, 400);
+    }
+  },
+
+  importTestimonials: async (c: Context) => {
+    const userId = getUserIdFromContext(c);
+    const { formId, data } = await c.req.json();
+
+    if (!userId || !formId || !Array.isArray(data)) {
+      return c.json({ error: 'Unauthorized or invalid data' }, 401);
+    }
+
+    try {
+      const result = await container.importTestimonialsUseCase.execute({
+        userId,
+        formId,
+        data
+      });
+      return c.json({ success: true, ...result });
+    } catch (err: any) {
+      return c.json({ error: err.message }, 400);
+    }
   }
 };
