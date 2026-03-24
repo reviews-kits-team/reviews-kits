@@ -4,6 +4,20 @@ import { Testimonial } from '@/domain/entities/Testimonial';
 import { Rating } from '@/domain/value-objects/Rating';
 import { Email } from '@/domain/value-objects/Email';
 import { randomUUID } from 'node:crypto';
+import { z } from 'zod';
+
+const submitReviewSchema = z.object({
+  formId: z.string().min(1, 'formId is required'),
+  content: z.string().min(1, 'content is required').max(5000, 'content is too long (max 5000 characters)'),
+  authorName: z.string().min(1, 'authorName is required').max(100, 'authorName is too long'),
+  authorEmail: z.string().email('Invalid email format').optional().or(z.literal('')),
+  rating: z.union([z.string(), z.number()]).optional(),
+  authorTitle: z.string().max(100).optional(),
+  authorUrl: z.string().url('Invalid URL format').refine(val => val.startsWith('http://') || val.startsWith('https://'), {
+    message: "Only http and https protocols are allowed for authorUrl"
+  }).optional().or(z.literal('')),
+  _honey: z.string().optional()
+});
 
 export const publicReviewController = {
   /**
@@ -53,7 +67,8 @@ export const publicReviewController = {
       });
     } catch (error) {
       console.error('Failed to fetch public reviews:', error);
-      return c.json({ error: 'Internal server error' }, 500);
+      const isProduction = process.env.NODE_ENV === 'production';
+      return c.json({ error: isProduction ? 'Internal server error' : (error instanceof Error ? error.message : 'Internal server error') }, 500);
     }
   },
 
@@ -61,17 +76,14 @@ export const publicReviewController = {
    * Submit a new review (publicly accessible)
    */
   submitReview: async (c: Context) => {
-    const body = await c.req.json() as { 
-      formId: string, 
-      content: string, 
-      authorName: string, 
-      authorEmail?: string, 
-      rating?: string | number, 
-      authorTitle?: string, 
-      authorUrl?: string, 
-      _honey?: string 
-    };
-    const { formId, content, authorName, authorEmail, rating, authorTitle, authorUrl, _honey } = body;
+    const rawBody = await c.req.json().catch(() => ({}));
+    const validation = submitReviewSchema.safeParse(rawBody);
+    
+    if (!validation.success) {
+      return c.json({ error: validation.error.issues[0]?.message || 'Invalid input' }, 400);
+    }
+
+    const { formId, content, authorName, authorEmail, rating, authorTitle, authorUrl, _honey } = validation.data;
 
     // Honeypot check - Spambots usually fill hidden fields
     if (_honey) {
@@ -81,10 +93,6 @@ export const publicReviewController = {
         message: 'Review submitted successfully',
         id: randomUUID()
       }, 201);
-    }
-
-    if (!formId || !content || !authorName) {
-      return c.json({ error: 'Missing required fields: formId, content, authorName' }, 400);
     }
 
     try {
@@ -100,10 +108,10 @@ export const publicReviewController = {
         formId: form.getId(),
         content,
         authorName,
-        rating: rating ? Rating.create(Number(rating)) : undefined,
-        authorEmail: authorEmail ? Email.create(authorEmail) : undefined,
+        rating: (rating !== undefined && rating !== null && rating !== '') ? Rating.create(Number(rating)) : undefined,
+        authorEmail: (authorEmail && authorEmail !== '') ? Email.create(authorEmail) : undefined,
         authorTitle,
-        authorUrl,
+        authorUrl: (authorUrl && authorUrl !== '') ? authorUrl : undefined,
         status: 'pending',
         source: 'form'
       });
@@ -117,7 +125,8 @@ export const publicReviewController = {
       }, 201);
     } catch (error: unknown) {
       console.error('Failed to submit public review:', error);
-      const message = error instanceof Error ? error.message : 'Internal server error';
+      const isProduction = process.env.NODE_ENV === 'production';
+      const message = (isProduction || !(error instanceof Error)) ? 'Internal server error' : error.message;
       return c.json({ error: message }, 500);
     }
   },

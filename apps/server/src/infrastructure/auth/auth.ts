@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { bearer } from "better-auth/plugins";
+import { sql } from "drizzle-orm";
 import { db } from "../database/db";
 import * as schema from "../database/schema";
 
@@ -48,10 +49,15 @@ export const auth = betterAuth({
             }
           }
 
-          const userCount = await db.select().from(schema.users);
-          if (userCount.length === 0) {
-            userData.isSystemAdmin = true;
-          }
+          await db.transaction(async (tx) => {
+            const [result] = await tx
+              .select({ count: sql<number>`count(*)` })
+              .from(schema.users);
+            
+            if (result && Number(result.count) === 0) {
+              userData.isSystemAdmin = true;
+            }
+          });
 
           return { data: userData };
         },

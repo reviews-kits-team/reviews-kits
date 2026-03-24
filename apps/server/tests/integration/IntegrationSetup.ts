@@ -1,6 +1,6 @@
 import { drizzle } from 'drizzle-orm/bun-sql';
 import * as schema from '../../src/infrastructure/database/schema';
-import { sql } from 'drizzle-orm';
+import { sql, eq } from 'drizzle-orm';
 
 // Build DATABASE_URL from environment variables
 const POSTGRES_USER = process.env.POSTGRES_USER || 'postgres';
@@ -27,7 +27,8 @@ export async function clearDatabase() {
     'sessions',
     'accounts',
     'verifications',
-    'users'
+    'users',
+    'rate_limits'
   ];
 
   for (const table of tables) {

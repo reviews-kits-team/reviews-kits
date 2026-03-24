@@ -176,3 +176,12 @@ export const webhookLogs = pgTable('webhook_logs', {
   webhookIdx: index('idx_webhook_logs_webhook').on(t.webhookId),
   deliveredIdx: index('idx_webhook_logs_delivered').on(t.delivered),
 }));
+// ═══════════════════════════════════════
+// RATE LIMITING
+// ═══════════════════════════════════════
+
+export const rateLimits = pgTable('rate_limits', {
+  key: text('key').primaryKey(),
+  count: integer('count').notNull().default(0),
+  resetAt: timestamp('reset_at').notNull(),
+});
