@@ -13,7 +13,7 @@ export const testimonialController = {
     }
 
     const testimonial = await container.testimonialRepository.findById(id);
-    if (!testimonial || testimonial.userId !== userId) {
+    if (!testimonial || testimonial.getUserId() !== userId) {
       return c.json({ error: 'Testimonial not found' }, 404);
     }
 
@@ -41,7 +41,7 @@ export const testimonialController = {
     }
 
     const testimonial = await container.testimonialRepository.findById(id);
-    if (!testimonial || testimonial.userId !== userId) {
+    if (!testimonial || testimonial.getUserId() !== userId) {
       return c.json({ error: 'Testimonial not found' }, 404);
     }
 

@@ -22,8 +22,8 @@ export interface TestimonialProps {
 }
 
 export class Testimonial {
-  public readonly id: string;
-  public readonly userId: string;
+  private readonly id: string;
+  private readonly userId: string;
   private content: string;
   private authorName: string;
   private status: TestimonialStatus;
@@ -111,6 +111,14 @@ export class Testimonial {
 
   public getStatus(): TestimonialStatus {
     return this.status;
+  }
+
+  public getUserId(): string {
+    return this.userId;
+  }
+
+  public getId(): string {
+    return this.id;
   }
 
   public getRatingValue(): number | undefined {

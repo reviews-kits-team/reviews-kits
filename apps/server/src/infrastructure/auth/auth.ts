@@ -64,10 +64,8 @@ export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000/api/auth",
   trustedOrigins: [
     "http://localhost:5180", // Admin Frontend
-    "http://172.20.0.1:5180",
     "http://localhost:3000", // Swagger / Local API
     "http://localhost",       // Tests
     "http://localhost:5174",
-    "http://172.20.0.1:5174",
   ],
 });
