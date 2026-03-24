@@ -108,6 +108,16 @@ export class Form {
     this.updatedAt = new Date();
   }
 
+  public updateDescription(description: string): void {
+    this.description = description;
+    this.updatedAt = new Date();
+  }
+
+  public updateIsActive(isActive: boolean): void {
+    this.isActive = isActive;
+    this.updatedAt = new Date();
+  }
+
   public toggleActive(): void {
     this.isActive = !this.isActive;
     this.updatedAt = new Date();
