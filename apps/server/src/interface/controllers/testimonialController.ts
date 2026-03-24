@@ -12,26 +12,18 @@ export const testimonialController = {
       return c.json({ error: 'Unauthorized or missing data' }, 401);
     }
 
-    const testimonial = await container.testimonialRepository.findById(id);
-    if (!testimonial || testimonial.getUserId() !== userId) {
-      return c.json({ error: 'Testimonial not found' }, 404);
+    try {
+      const result = await container.updateTestimonialStatusUseCase.execute({
+        id,
+        userId,
+        status: status as 'approved' | 'rejected' | 'pending'
+      });
+      return c.json({ success: true, status: result.status });
+    } catch (err: any) {
+      const status = err.message === 'Testimonial not found' ? 404 : 400;
+      return c.json({ error: err.message }, status);
     }
-
-    if (status === 'approved') {
-      testimonial.approve();
-    } else if (status === 'rejected') {
-      testimonial.reject();
-    } else {
-      // For any other status, we might want a generic update, 
-      // but the domain model currently has specific methods.
-      // We could add a generic setStatus if needed.
-      return c.json({ error: 'Invalid status' }, 400);
-    }
-
-    await container.testimonialRepository.update(testimonial);
-    return c.json({ success: true, status: testimonial.getStatus() });
   },
-
 
   batchUpdateStatus: async (c: Context) => {
     const userId = getUserIdFromContext(c);
@@ -41,15 +33,17 @@ export const testimonialController = {
       return c.json({ error: 'Unauthorized or invalid data' }, 401);
     }
 
-    const owned = await container.testimonialRepository.findByIdsAndUser(ids, userId);
-    if (owned.length !== ids.length) {
-      return c.json({ error: 'Forbidden: one or more testimonials do not belong to you' }, 403);
+    try {
+      await container.batchUpdateTestimonialStatusUseCase.execute({
+        ids,
+        userId,
+        status: status as 'approved' | 'rejected' | 'pending'
+      });
+      return c.json({ success: true });
+    } catch (err: any) {
+      return c.json({ error: err.message }, 403);
     }
-
-    await container.testimonialRepository.batchUpdateStatus(ids, status);
-    return c.json({ success: true });
   },
-
 
   reorderTestimonials: async (c: Context) => {
     const userId = getUserIdFromContext(c);
@@ -59,13 +53,14 @@ export const testimonialController = {
       return c.json({ error: 'Unauthorized or invalid data' }, 401);
     }
 
-    const ids = positions.map((p) => p.id);
-    const owned = await container.testimonialRepository.findByIdsAndUser(ids, userId);
-    if (owned.length !== ids.length) {
-      return c.json({ error: 'Forbidden: one or more testimonials do not belong to you' }, 403);
+    try {
+      await container.reorderTestimonialsUseCase.execute({
+        userId,
+        positions
+      });
+      return c.json({ success: true });
+    } catch (err: any) {
+      return c.json({ error: err.message }, 403);
     }
-
-    await container.testimonialRepository.updatePositions(positions);
-    return c.json({ success: true });
   }
 };

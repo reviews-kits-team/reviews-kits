@@ -1,5 +1,5 @@
-import { describe, expect, it, beforeEach, afterAll } from "bun:test";
-import { testDb, clearDatabase, closeConnection } from "../IntegrationSetup";
+import { describe, expect, it, beforeEach } from "bun:test";
+import { testDb, clearDatabase } from "../IntegrationSetup";
 import { DrizzleFormRepository } from "../../../src/infrastructure/repositories/DrizzleFormRepository";
 import { Form } from "../../../src/domain/entities/Form";
 import { Slug } from "../../../src/domain/value-objects/Slug";

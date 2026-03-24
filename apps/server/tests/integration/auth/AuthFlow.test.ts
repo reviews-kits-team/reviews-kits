@@ -3,7 +3,7 @@ process.env.BETTER_AUTH_URL = "http://localhost/api/auth";
 process.env.NODE_ENV = "test";
 process.env.BETTER_AUTH_SECRET = "wOMDxFn6aefAaCfvVX3go2j6ZLRCCofl";
 
-import { expect, test, describe, beforeAll, afterAll } from "bun:test";
+import { expect, test, describe, beforeAll } from "bun:test";
 import { auth } from "../../../src/infrastructure/auth/auth";
 import { clearDatabase } from "../IntegrationSetup";
 import { db } from "../../../src/infrastructure/database/db";

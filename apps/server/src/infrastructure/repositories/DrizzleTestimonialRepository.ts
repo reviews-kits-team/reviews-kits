@@ -3,11 +3,11 @@ import type { BunSQLDatabase } from 'drizzle-orm/bun-sql';
 import * as schema from '../database/schema';
 import { testimonials } from '../database/schema';
 import { Testimonial } from '../../domain/entities/Testimonial';
-import type { TestimonialRepository, TestimonialFilters } from '../../domain/repositories/TestimonialRepository';
+import type { ITestimonialRepository, TestimonialFilters } from '../../domain/repositories/ITestimonialRepository';
 import { Rating } from '../../domain/value-objects/Rating';
 import { Email } from '../../domain/value-objects/Email';
 
-export class DrizzleTestimonialRepository implements TestimonialRepository {
+export class DrizzleTestimonialRepository implements ITestimonialRepository {
   constructor(private readonly db: BunSQLDatabase<typeof schema>) {}
 
   async findById(id: string): Promise<Testimonial | null> {

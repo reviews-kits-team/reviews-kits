@@ -1,4 +1,4 @@
-import type { TestimonialRepository } from '../../../domain/repositories/TestimonialRepository';
+import type { ITestimonialRepository } from '../../../domain/repositories/ITestimonialRepository';
 
 export interface DashboardStats {
   totalReviews: number;
@@ -10,7 +10,7 @@ export interface DashboardStats {
 }
 
 export class GetDashboardStats {
-  constructor(private readonly testimonialRepository: TestimonialRepository) {}
+  constructor(private readonly testimonialRepository: ITestimonialRepository) {}
 
   async execute(userId: string): Promise<DashboardStats> {
     const stats = await this.testimonialRepository.getStatsByUser(userId);

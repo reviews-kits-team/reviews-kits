@@ -1,8 +1,7 @@
-import { describe, expect, it, beforeEach, afterAll } from "bun:test";
-import { testDb, clearDatabase, closeConnection } from "../IntegrationSetup";
+import { describe, expect, it, beforeEach } from "bun:test";
+import { testDb, clearDatabase } from "../IntegrationSetup";
 import { DrizzleTestimonialRepository } from "../../../src/infrastructure/repositories/DrizzleTestimonialRepository";
 import { Testimonial } from "../../../src/domain/entities/Testimonial";
-import { Slug } from "../../../src/domain/value-objects/Slug";
 import { Rating } from "../../../src/domain/value-objects/Rating";
 import * as schema from "../../../src/infrastructure/database/schema";
 

@@ -4,7 +4,6 @@ import { publicRouter } from "../../../src/interface/routes/public";
 import { container } from "../../../src/infrastructure/container";
 import { Form } from "../../../src/domain/entities/Form";
 import { Slug } from "../../../src/domain/value-objects/Slug";
-import crypto from "node:crypto";
 import { sql } from "drizzle-orm";
 
 describe("Public Review Controller Integration", () => {

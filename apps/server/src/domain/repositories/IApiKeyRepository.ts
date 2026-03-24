@@ -1,6 +1,6 @@
 import { ApiKey } from '../entities/ApiKey';
 
-export interface ApiKeyRepository {
+export interface IApiKeyRepository {
   findById(id: string): Promise<ApiKey | null>;
   findByHash(keyHash: string): Promise<ApiKey | null>;
   findByUser(userId: string): Promise<ApiKey[]>;

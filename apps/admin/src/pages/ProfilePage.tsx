@@ -1,9 +1,39 @@
+import { useState } from 'react'
 import { SettingsLayout } from '../components/dashboard/settings-layout'
 import { authClient } from '../lib/auth-client'
-import { Camera, Mail, User as UserIcon } from 'lucide-react'
+import { Camera, Mail, User as UserIcon, Loader2, Check } from 'lucide-react'
 
 export default function ProfilePage() {
   const { data: session } = authClient.useSession()
+  const [name, setName] = useState(session?.user?.name || '')
+  const [email, setEmail] = useState(session?.user?.email || '')
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [updateSuccess, setUpdateSuccess] = useState(false)
+
+  const handleSave = async () => {
+    setIsUpdating(true)
+    setUpdateSuccess(false)
+    try {
+      const res = await fetch('/api/v1/me', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name, email })
+      })
+
+      if (res.ok) {
+        setUpdateSuccess(true)
+        setTimeout(() => setUpdateSuccess(false), 3000)
+        // Refresh session to show updated name elsewhere if needed
+        window.location.reload() 
+      }
+    } catch (error) {
+      console.error("Failed to update profile", error)
+    } finally {
+      setIsUpdating(false)
+    }
+  }
 
   return (
     <SettingsLayout 
@@ -40,7 +70,8 @@ export default function ProfilePage() {
                   </div>
                   <input 
                     type="text" 
-                    defaultValue={session?.user?.name || ''}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     className="w-full bg-[var(--v3-bg2)] border border-[var(--v3-border)] focus:border-[var(--v3-teal)]/50 rounded-xl py-3 pl-12 pr-4 text-sm text-[var(--v3-text)] outline-none transition-all focus:ring-4 focus:ring-[var(--v3-teal)]/5"
                     placeholder="Your name..."
                   />
@@ -55,17 +86,22 @@ export default function ProfilePage() {
                   </div>
                   <input 
                     type="email" 
-                    defaultValue={session?.user?.email || ''}
-                    disabled
-                    className="w-full bg-[var(--v3-bg2)] border border-[var(--v3-border)] opacity-50 cursor-not-allowed rounded-xl py-3 pl-12 pr-4 text-sm text-[var(--v3-text)] outline-none"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full bg-[var(--v3-bg2)] border border-[var(--v3-border)] focus:border-[var(--v3-teal)]/50 rounded-xl py-3 pl-12 pr-4 text-sm text-[var(--v3-text)] outline-none transition-all focus:ring-4 focus:ring-[var(--v3-teal)]/5"
+                    placeholder="Your email..."
                   />
                 </div>
-                <p className="text-[10px] text-amber-500/70 ml-1 italic italic">Email cannot be changed at this time.</p>
               </div>
            </div>
 
-           <button className="w-full py-3.5 bg-[var(--v3-teal)] text-white rounded-xl font-bold text-sm shadow-xl hover:-translate-y-0.5 transition-all">
-             Save changes
+           <button 
+             onClick={handleSave}
+             disabled={isUpdating || !name || !email || (name === session?.user?.name && email === session?.user?.email)}
+             className="w-full py-3.5 bg-[var(--v3-teal)] text-white rounded-xl font-bold text-sm shadow-xl hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2"
+           >
+             {isUpdating ? <Loader2 className="animate-spin" size={18} /> : updateSuccess ? <Check size={18} /> : null}
+             {isUpdating ? 'Saving...' : updateSuccess ? 'Saved!' : 'Save changes'}
            </button>
         </section>
       </div>

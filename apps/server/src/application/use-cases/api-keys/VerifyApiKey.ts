@@ -1,9 +1,9 @@
-import type { ApiKeyRepository } from '../../../domain/repositories/ApiKeyRepository';
+import type { IApiKeyRepository } from '../../../domain/repositories/IApiKeyRepository';
 import type { ApiKey } from '../../../domain/entities/ApiKey';
 import { createHash } from 'node:crypto';
 
 export class VerifyApiKey {
-  constructor(private readonly apiKeyRepository: ApiKeyRepository) {}
+  constructor(private readonly apiKeyRepository: IApiKeyRepository) {}
 
   async execute(keyStr: string): Promise<ApiKey | null> {
     const keyHash = createHash('sha256').update(keyStr).digest('hex');

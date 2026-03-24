@@ -48,4 +48,39 @@ const getMeRoute = createRoute({
   }
 });
 
+const updateMeRoute = createRoute({
+  method: 'patch',
+  path: '/',
+  summary: 'Update current user profile info',
+  tags: ['Profile'],
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            name: z.string().optional(),
+            email: z.string().email().optional(),
+            avatarUrl: z.string().nullable().optional()
+          })
+        }
+      }
+    }
+  },
+  responses: {
+    200: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            success: z.boolean()
+          })
+        }
+      },
+      description: 'Successfully updated profile'
+    },
+    400: { description: 'Bad request' },
+    401: { description: 'Unauthorized' }
+  }
+});
+
 meRouter.openapi(getMeRoute, meController.getMe);
+meRouter.openapi(updateMeRoute, meController.updateMe);

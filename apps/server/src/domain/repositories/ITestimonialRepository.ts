@@ -4,7 +4,7 @@ export interface TestimonialFilters {
   status?: 'approved' | 'rejected' | 'pending';
 }
 
-export interface TestimonialRepository {
+export interface ITestimonialRepository {
   findById(id: string): Promise<Testimonial | null>;
   findByUser(userId: string, filters?: TestimonialFilters): Promise<Testimonial[]>;
   findByIdsAndUser(ids: string[], userId: string): Promise<Testimonial[]>;

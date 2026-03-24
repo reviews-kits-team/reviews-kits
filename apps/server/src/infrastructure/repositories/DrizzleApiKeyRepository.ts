@@ -3,9 +3,9 @@ import type { BunSQLDatabase } from 'drizzle-orm/bun-sql';
 import * as schema from '../database/schema';
 import { apiKeys } from '../database/schema';
 import { ApiKey } from '../../domain/entities/ApiKey';
-import type { ApiKeyRepository } from '../../domain/repositories/ApiKeyRepository';
+import type { IApiKeyRepository } from '../../domain/repositories/IApiKeyRepository';
 
-export class DrizzleApiKeyRepository implements ApiKeyRepository {
+export class DrizzleApiKeyRepository implements IApiKeyRepository {
   constructor(private readonly db: BunSQLDatabase<typeof schema>) {}
 
   async findById(id: string): Promise<ApiKey | null> {
