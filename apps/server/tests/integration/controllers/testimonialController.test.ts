@@ -139,4 +139,45 @@ describe("Testimonial Controller Integration", () => {
     const updated1 = await container.testimonialRepository.findById(t1.getId());
     expect(updated1?.getStatus()).toBe("pending"); // Should NOT have changed
   });
+
+  it("should reject reordering if user does not own all testimonials", async () => {
+    const otherUserId = crypto.randomUUID();
+    await testDb.execute(sql`
+      INSERT INTO "users" (id, name, email) 
+      VALUES (${otherUserId}, 'Other User Reorder', 'other-reorder@example.com')
+    `);
+
+    const t1 = new Testimonial({ id: crypto.randomUUID(), userId: otherUserId, content: "Not Mine", authorName: "Other", status: "pending", source: "api" });
+    await container.testimonialRepository.save(t1);
+
+    const res = await testimonialsRouter.request("/reorder", {
+      method: "POST",
+      body: JSON.stringify({ positions: [{ id: t1.getId(), position: 1 }] }),
+      headers: authHeaders
+    });
+
+    expect(res.status).toBe(403);
+  });
+
+  it("should allow reordering if user owns all testimonials", async () => {
+    const t1 = new Testimonial({ id: crypto.randomUUID(), userId, content: "Mine 1", authorName: "Me", status: "pending", source: "api" });
+    const t2 = new Testimonial({ id: crypto.randomUUID(), userId, content: "Mine 2", authorName: "Me", status: "pending", source: "api" });
+    await container.testimonialRepository.save(t1);
+    await container.testimonialRepository.save(t2);
+
+    const res = await testimonialsRouter.request("/reorder", {
+      method: "POST",
+      body: JSON.stringify({ 
+        positions: [
+          { id: t1.getId(), position: 2 },
+          { id: t2.getId(), position: 1 }
+        ] 
+      }),
+      headers: authHeaders
+    });
+
+    expect(res.status).toBe(200);
+    const data = await res.json() as any;
+    expect(data.success).toBe(true);
+  });
 });

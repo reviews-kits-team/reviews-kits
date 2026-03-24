@@ -91,6 +91,12 @@ export const testimonialController = {
       return c.json({ error: 'Unauthorized or invalid data' }, 401);
     }
 
+    const ids = positions.map((p: any) => p.id);
+    const owned = await container.testimonialRepository.findByIdsAndUser(ids, userId);
+    if (owned.length !== ids.length) {
+      return c.json({ error: 'Forbidden: one or more testimonials do not belong to you' }, 403);
+    }
+
     await container.testimonialRepository.updatePositions(positions);
     return c.json({ success: true });
   }
