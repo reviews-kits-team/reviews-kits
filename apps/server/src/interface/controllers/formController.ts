@@ -17,18 +17,28 @@ export const formController = {
     const forms = await container.formRepository.findByUser(userId);
     
     const formIds = forms.map(f => f.getProps().id);
-    const statsMap = await container.testimonialRepository.getBasicStatsByFormIds(formIds);
+    const [statsMap, visitsMap] = await Promise.all([
+      container.testimonialRepository.getBasicStatsByFormIds(formIds),
+      container.formRepository.getVisitsByFormIds(formIds)
+    ]);
 
     const formsWithStats = forms.map(f => {
       const props = f.getProps();
       const stats = statsMap.get(props.id) || { totalReviews: 0, averageRating: 0 };
+      const visits = visitsMap.get(props.id) || 0;
+      
+      let completion = 0;
+      if (visits > 0) {
+        completion = Math.min(100, Math.round((stats.totalReviews / visits) * 100));
+      }
+
       return { 
         ...props, 
         slug: props.slug.getValue(),
         publicId: props.publicId,
         responses: stats.totalReviews,
         rating: stats.averageRating,
-        completion: 100 // Placeholder for now
+        completion
       };
     });
     
@@ -87,14 +97,23 @@ export const formController = {
     }
 
     const props = form.getProps();
-    const stats = await container.testimonialRepository.getStatsByFormId(props.id);
+    const [stats, visitsMap] = await Promise.all([
+      container.testimonialRepository.getStatsByFormId(props.id),
+      container.formRepository.getVisitsByFormIds([props.id])
+    ]);
     
+    const visits = visitsMap.get(props.id) || 0;
+    let completion = 0;
+    if (visits > 0) {
+      completion = Math.min(100, Math.round((stats.totalReviews / visits) * 100));
+    }
+
     return c.json({ 
       ...props, 
       slug: props.slug.getValue(),
       responses: stats.totalReviews,
       rating: stats.averageRating,
-      completion: 100
+      completion
     });
   },
 
