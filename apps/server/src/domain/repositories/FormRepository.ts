@@ -12,4 +12,5 @@ export interface FormRepository {
   batchUpdateStatus(ids: string[], isActive: boolean): Promise<void>;
   batchDelete(ids: string[]): Promise<void>;
   incrementVisits(formId: string): Promise<void>;
+  getVisitsByFormIds(formIds: string[]): Promise<Map<string, number>>;
 }

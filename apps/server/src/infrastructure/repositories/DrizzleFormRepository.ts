@@ -1,4 +1,4 @@
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, sql, inArray, sum } from 'drizzle-orm';
 import type { BunSQLDatabase } from 'drizzle-orm/bun-sql';
 import * as schema from '../database/schema';
 import { forms, formVisits } from '../database/schema';
@@ -107,6 +107,26 @@ export class DrizzleFormRepository implements FormRepository {
         target: [formVisits.formId, formVisits.date],
         set: { visits: sql`${formVisits.visits} + 1`, updatedAt: new Date() }
       });
+  }
+
+  async getVisitsByFormIds(formIds: string[]): Promise<Map<string, number>> {
+    const resultMap = new Map<string, number>();
+    if (!formIds || formIds.length === 0) return resultMap;
+
+    const results = await this.db
+      .select({
+        formId: formVisits.formId,
+        totalVisits: sum(formVisits.visits),
+      })
+      .from(formVisits)
+      .where(inArray(formVisits.formId, formIds))
+      .groupBy(formVisits.formId);
+
+    results.forEach((r) => {
+      resultMap.set(r.formId, Number(r.totalVisits || 0));
+    });
+
+    return resultMap;
   }
 
   private mapToDomain(row: any): Form {
