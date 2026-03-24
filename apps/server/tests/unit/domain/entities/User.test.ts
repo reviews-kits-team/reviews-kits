@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it, beforeEach, afterEach, setSystemTime } from "bun:test";
 import { User, type UserProps } from "../../../../src/domain/entities/User";
 
 describe("User Entity", () => {
@@ -10,6 +10,14 @@ describe("User Entity", () => {
     isSystemAdmin: false,
     avatarUrl: "https://example.com/avatar.png",
   };
+
+  beforeEach(() => {
+    setSystemTime(new Date("2024-01-01T00:00:00Z"));
+  });
+
+  afterEach(() => {
+    setSystemTime(); // Reset to real time
+  });
 
   describe("Creation", () => {
     it("should create a user with all properties", () => {
@@ -61,12 +69,12 @@ describe("User Entity", () => {
   });
 
   describe("Updates", () => {
-    it("should update name and refresh updatedAt", async () => {
+    it("should update name and refresh updatedAt", () => {
       const user = new User(validProps);
       const initialUpdatedAt = user.getProps().updatedAt!;
       
-      // Wait a bit to ensure time difference
-      await new Promise(resolve => setTimeout(resolve, 10));
+      // Advance time manually
+      setSystemTime(new Date("2024-01-01T00:00:01Z"));
       
       user.updateName("New Name");
       
@@ -79,11 +87,12 @@ describe("User Entity", () => {
       expect(() => user.updateName("")).toThrow("User name cannot be empty");
     });
 
-    it("should update avatar and refresh updatedAt", async () => {
+    it("should update avatar and refresh updatedAt", () => {
       const user = new User(validProps);
       const initialUpdatedAt = user.getProps().updatedAt!;
       
-      await new Promise(resolve => setTimeout(resolve, 10));
+      // Advance time manually
+      setSystemTime(new Date("2024-01-01T00:00:01Z"));
       
       user.updateAvatar("https://new-avatar.com/img.png");
       

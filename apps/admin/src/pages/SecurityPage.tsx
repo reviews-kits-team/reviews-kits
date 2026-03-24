@@ -14,12 +14,12 @@ export default function SecurityPage() {
               <div className="w-9 h-9 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500">
                  <Lock size={18} />
               </div>
-              <h3 className="font-bold text-[var(--v3-text)]">Changer mon mot de passe</h3>
+              <h3 className="font-bold text-[var(--v3-text)]">Change my password</h3>
            </div>
 
            <div className="grid grid-cols-1 gap-5">
               <div className="space-y-2">
-                <label className="text-[11px] font-black uppercase tracking-wider text-[var(--v3-muted2)] ml-1">Mot de passe actuel</label>
+                <label className="text-[11px] font-black uppercase tracking-wider text-[var(--v3-muted2)] ml-1">Current password</label>
                 <input 
                   type="password" 
                   className="w-full bg-[var(--v3-bg2)] border border-[var(--v3-border)] focus:border-rose-500/50 rounded-xl py-3 px-4 text-sm text-[var(--v3-text)] outline-none transition-all"
@@ -28,7 +28,7 @@ export default function SecurityPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[11px] font-black uppercase tracking-wider text-[var(--v3-muted2)] ml-1">Nouveau mot de passe</label>
+                <label className="text-[11px] font-black uppercase tracking-wider text-[var(--v3-muted2)] ml-1">New password</label>
                 <input 
                   type="password" 
                   className="w-full bg-[var(--v3-bg2)] border border-[var(--v3-border)] focus:border-[var(--v3-teal)]/50 rounded-xl py-3 px-4 text-sm text-[var(--v3-text)] outline-none transition-all"
@@ -37,7 +37,7 @@ export default function SecurityPage() {
               </div>
               
               <div className="space-y-2">
-                <label className="text-[11px] font-black uppercase tracking-wider text-[var(--v3-muted2)] ml-1">Confirmer le nouveau mot de passe</label>
+                <label className="text-[11px] font-black uppercase tracking-wider text-[var(--v3-muted2)] ml-1">Confirm new password</label>
                 <input 
                   type="password" 
                   className="w-full bg-[var(--v3-bg2)] border border-[var(--v3-border)] focus:border-[var(--v3-teal)]/50 rounded-xl py-3 px-4 text-sm text-[var(--v3-text)] outline-none transition-all"
@@ -86,8 +86,8 @@ export default function SecurityPage() {
               <div className="flex items-center gap-4">
                  <div className="font-mono text-[10px] bg-sky-500/10 text-sky-500 px-2 py-1 rounded">LINUX</div>
                  <div>
-                    <div className="text-sm font-bold text-[var(--v3-text)]">Chrome sur Ubuntu</div>
-                    <div className="text-[10px] text-[var(--v3-muted2)] uppercase tracking-wider font-bold mt-0.5">Session actuelle • Paris, FR</div>
+                    <div className="text-sm font-bold text-[var(--v3-text)]">Chrome on Ubuntu</div>
+                    <div className="text-[10px] text-[var(--v3-muted2)] uppercase tracking-wider font-bold mt-0.5">Current session • Paris, FR</div>
                  </div>
               </div>
               <span className="w-2 h-2 rounded-full bg-[var(--v3-teal)] shadow-[0_0_10px_var(--v3-teal)]" />

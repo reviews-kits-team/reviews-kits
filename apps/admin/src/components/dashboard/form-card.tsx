@@ -42,8 +42,8 @@ export const FormCard = ({ form, onClick }: { form: DashboardForm, onClick: () =
         { val: form.responses ?? 0, lbl: "Responses", icon: <MessageSquare size={10} className="text-[var(--v3-teal)] opacity-60" /> },
         { val: form.rating || "—", lbl: "Avg. Rating", icon: <Star size={10} className="text-[var(--v3-teal)] opacity-60" /> },
         { val: `${form.completion ?? 0}%`, lbl: "Completion", icon: <Percent size={10} className="text-[var(--v3-teal)] opacity-60" /> },
-      ].map((s, i) => (
-        <div key={i} className="bg-white/[0.02] border border-white/5 rounded-lg py-2 px-2.5 transition-all group-hover:bg-white/[0.04] group-hover:border-white/10">
+      ].map((s) => (
+        <div key={s.lbl} className="bg-white/[0.02] border border-white/5 rounded-lg py-2 px-2.5 transition-all group-hover:bg-white/[0.04] group-hover:border-white/10">
           <div className="flex items-center gap-1.5 mb-1 opacity-50">
             {s.icon}
             <span className="text-[8px] font-black uppercase tracking-widest text-[var(--v3-muted2)] truncate">{s.lbl}</span>
