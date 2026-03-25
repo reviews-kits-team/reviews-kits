@@ -3,7 +3,7 @@ FROM oven/bun:1-alpine AS builder
 WORKDIR /app
 
 # Copier les package.json du workspace
-COPY package.json bun.lockb turbo.json ./
+COPY package.json bun.lock turbo.json ./
 COPY apps/admin/package.json ./apps/admin/
 COPY packages/types/package.json ./packages/types/
 

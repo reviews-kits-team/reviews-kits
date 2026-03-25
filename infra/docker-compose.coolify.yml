@@ -1,0 +1,54 @@
+services:
+  # ─── Admin (frontend React) ───────────────────────────────────
+  admin:
+    image: ghcr.io/reviews-kits-team/reviewskits-admin:latest
+    restart: unless-stopped
+    networks:
+      - reviewskits
+
+  # ─── Server (API Hono) ────────────────────────────────────────
+  server:
+    image: ghcr.io/reviews-kits-team/reviewskits-server:latest
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: https://${DOMAIN}/api/auth
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
+      STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY}
+      STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY}
+      STORAGE_BUCKET: ${STORAGE_BUCKET}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - reviewskits
+
+  # ─── Base de données ──────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-reviewskits}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - reviewskits
+
+
+networks:
+  reviewskits:
+    driver: bridge
+
+volumes:
+  db-data:

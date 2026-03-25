@@ -3,7 +3,7 @@ WORKDIR /app
 
 # ─── Dependencies ────────────────────────────────────────────
 FROM base AS deps
-COPY package.json bun.lockb turbo.json ./
+COPY package.json bun.lock turbo.json ./
 COPY apps/server/package.json ./apps/server/
 COPY packages/types/package.json ./packages/types/
 
