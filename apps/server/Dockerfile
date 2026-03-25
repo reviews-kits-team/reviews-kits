@@ -13,13 +13,9 @@ COPY packages/sdk-vue/package.json ./packages/sdk-vue/
 
 RUN bun install --frozen-lockfile
 
-# ─── Build types ─────────────────────────────────────────────
-FROM deps AS build-types
-COPY packages/types ./packages/types
-RUN cd packages/types && bun run build
-
 # ─── Build server ─────────────────────────────────────────────
-FROM build-types AS build-server
+FROM deps AS build-server
+COPY packages/types ./packages/types
 COPY apps/server ./apps/server
 RUN cd apps/server && bun run build
 
@@ -29,9 +25,7 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Uniquement ce qui est nécessaire en prod
 COPY --from=build-server /app/apps/server/dist ./dist
-COPY --from=build-types  /app/packages/types/dist ./packages/types/dist
 COPY --from=deps         /app/node_modules ./node_modules
 
 EXPOSE 3000
