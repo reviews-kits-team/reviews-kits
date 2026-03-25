@@ -25,6 +25,12 @@ You can use the provided production Docker Compose file:
 docker compose -f infra/docker-compose.yml up -d
 ```
 
+Once the database container is running, remember to initialize the database schema:
+
+```bash
+cd apps/server && bunx drizzle-kit push && cd ../..
+```
+
 ## Security Best Practices
 
 1. **Better Auth Secret**: Generate a strong random string for `BETTER_AUTH_SECRET`.

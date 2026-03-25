@@ -9,10 +9,11 @@
     "allowJs": true,
 
     // Bundler mode
+    "allowImportingTsExtensions": false,
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
-    "noEmit": true,
+    "outDir": "./dist",
+    "declaration": true,
+    "emitDeclarationOnly": false,
 
     // Best practices
     "strict": true,

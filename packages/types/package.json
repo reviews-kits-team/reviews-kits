@@ -1,7 +1,10 @@
 {
   "name": "@reviewskits/types",
   "version": "0.0.1",
-  "module": "index.ts",
+  "files": [
+    "dist"
+  ],
+  "module": "./dist/index.js",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {

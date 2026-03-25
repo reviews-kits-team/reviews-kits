@@ -29,4 +29,7 @@ features:
   - title: Zero UI lock-in
     details: Build your own design. We provide the data, you provide the style.
     icon: 🎨
+  - title: Modern Backend Stack
+    details: Powered by Hono, Drizzle ORM, and Better-Auth for extreme performance and security.
+    icon: ⚡
 ---
