@@ -5,7 +5,8 @@
   "private": true,
   "devDependencies": {
     "@types/bun": "latest",
-    "drizzle-kit": "^0.31.9"
+    "drizzle-kit": "^0.31.9",
+    "postgres": "^3.4.8"
   },
   "scripts": {
     "dev": "bun --env-file=../../.env run --hot src/index.ts",
