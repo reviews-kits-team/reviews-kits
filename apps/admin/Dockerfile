@@ -4,8 +4,12 @@ WORKDIR /app
 
 # Copier les package.json du workspace
 COPY package.json bun.lock turbo.json ./
+COPY apps/server/package.json ./apps/server/
 COPY apps/admin/package.json ./apps/admin/
+COPY apps/docs/package.json ./apps/docs/
 COPY packages/types/package.json ./packages/types/
+COPY packages/sdk-react/package.json ./packages/sdk-react/
+COPY packages/sdk-vue/package.json ./packages/sdk-vue/
 
 RUN bun install --frozen-lockfile
 
