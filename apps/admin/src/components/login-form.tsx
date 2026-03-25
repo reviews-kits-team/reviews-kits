@@ -1,20 +1,7 @@
 import { useState } from "react"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
 import { authClient } from "@/lib/auth-client"
+import { Mail, Lock, LogIn } from "lucide-react"
 
 export function LoginForm({
   className,
@@ -23,103 +10,119 @@ export function LoginForm({
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    try {
-      await authClient.signIn.email({
-        email,
-        password,
-        callbackURL: "/",
-      })
-    } catch (error) {
-      console.error("Login failed", error)
-    } finally {
+    setError(null)
+
+    const { error } = await authClient.signIn.email({
+      email,
+      password,
+      callbackURL: "/",
+    })
+
+    if (error) {
+      setError(error.message ?? "Authentication failed.")
       setLoading(false)
     }
   }
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="border-zinc-800/50 bg-zinc-900/40 shadow-2xl backdrop-blur-xl">
-        <CardHeader className="space-y-1 pt-8">
-          <CardTitle className="bg-gradient-to-b from-white to-zinc-400 bg-clip-text text-center text-2xl font-bold tracking-tight text-transparent">
-            Reviewskits Admin
-          </CardTitle>
-          <CardDescription className="text-center text-zinc-500">
-            Enter your credentials to access the bridge
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="px-8 pb-8 pt-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <FieldGroup className="space-y-4">
-              <Field className="space-y-2">
-                <FieldLabel htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                  Email Address
-                </FieldLabel>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="name@company.com"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="h-11 border-zinc-800 bg-zinc-950/50 transition-all focus:border-indigo-500/50 focus:ring-indigo-500/20"
-                />
-              </Field>
-              <Field className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <FieldLabel htmlFor="password" className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                    Password
-                  </FieldLabel>
-                  <a
-                    href="#"
-                    className="text-xs text-zinc-500 transition-colors hover:text-indigo-400"
-                  >
-                    Forgot access?
-                  </a>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="h-11 border-zinc-800 bg-zinc-950/50 transition-all focus:border-indigo-500/50 focus:ring-indigo-500/20"
-                />
-              </Field>
-            </FieldGroup>
+    <div className={cn("flex flex-col gap-8", className)} {...props}>
+      {/* Header */}
+      <div className="text-center space-y-2">
+        <span className="text-[11px] font-black uppercase tracking-[0.14em] text-[var(--v3-teal)]">
+          // admin
+        </span>
+        <h1 className="text-3xl font-black tracking-tight text-[var(--v3-text)]">
+          Reviewskits
+        </h1>
+        <p className="text-sm text-[var(--v3-muted2)]">
+          Sign in to access your dashboard
+        </p>
+      </div>
 
-            <div className="space-y-4">
-              <Button
-                type="submit"
-                className="h-11 w-full bg-white font-semibold text-black transition-all hover:bg-zinc-200 active:scale-[0.98] disabled:opacity-50"
-                disabled={loading}
-              >
-                {loading ? "Authorizing..." : "Sign In to Dashboard"}
-              </Button>
-
-              <div className="relative py-2">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-zinc-800/50" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-transparent px-2 text-zinc-600">Enterprise Access</span>
-                </div>
-              </div>
-
-              <Button variant="outline" type="button" className="h-11 w-full border-zinc-800 bg-transparent text-zinc-400 hover:bg-zinc-900 hover:text-white">
-                Register Command
-              </Button>
+      {/* Card */}
+      <div className="bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-2xl p-8 shadow-[0_0_40px_rgba(0,0,0,0.4)]">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Error */}
+          {error && (
+            <div className="p-3 bg-[var(--v3-red-dim)] border border-[var(--v3-red)]/20 rounded-xl flex items-center gap-3 animate-in slide-in-from-top-2 duration-300">
+              <div className="w-1.5 h-1.5 rounded-full bg-[var(--v3-red)] shrink-0" />
+              <p className="text-xs text-[var(--v3-red)]">{error}</p>
             </div>
-          </form>
-        </CardContent>
-      </Card>
+          )}
 
-      <p className="px-8 text-center text-xs text-zinc-600">
-        By continuing, you agree to our strictly governed data protocols.
-      </p>
+          {/* Email */}
+          <div className="space-y-2">
+            <label
+              htmlFor="email"
+              className="text-[11px] font-black uppercase tracking-wider text-[var(--v3-teal)]"
+            >
+              Email Address
+            </label>
+            <div className="relative group">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--v3-muted)] group-focus-within:text-[var(--v3-teal)] transition-colors duration-200">
+                <Mail size={15} />
+              </div>
+              <input
+                id="email"
+                type="email"
+                placeholder="admin@example.com"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-[var(--v3-bg)] border border-[var(--v3-border)] focus:border-[var(--v3-teal)]/50 focus:ring-2 focus:ring-[var(--v3-teal)]/10 rounded-xl py-3 pl-11 pr-4 text-sm text-[var(--v3-text)] placeholder:text-[var(--v3-muted)] outline-none transition-all duration-200"
+              />
+            </div>
+          </div>
+
+          {/* Password */}
+          <div className="space-y-2">
+            <label
+              htmlFor="password"
+              className="text-[11px] font-black uppercase tracking-wider text-[var(--v3-teal)]"
+            >
+              Password
+            </label>
+            <div className="relative group">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--v3-muted)] group-focus-within:text-[var(--v3-teal)] transition-colors duration-200">
+                <Lock size={15} />
+              </div>
+              <input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-[var(--v3-bg)] border border-[var(--v3-border)] focus:border-[var(--v3-teal)]/50 focus:ring-2 focus:ring-[var(--v3-teal)]/10 rounded-xl py-3 pl-11 pr-4 text-sm text-[var(--v3-text)] placeholder:text-[var(--v3-muted)] outline-none transition-all duration-200"
+              />
+            </div>
+          </div>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="mt-2 w-full h-11 flex items-center justify-center gap-2 bg-[var(--v3-teal)] hover:bg-[var(--v3-teal)]/90 active:scale-[0.98] text-white font-bold text-sm rounded-xl transition-all duration-200 shadow-[0_8px_20px_rgba(13,158,117,0.25)] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <>
+                <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                Signing in...
+              </>
+            ) : (
+              <>
+                <LogIn size={15} />
+                Sign In
+              </>
+            )}
+          </button>
+        </form>
+      </div>
     </div>
   )
 }
