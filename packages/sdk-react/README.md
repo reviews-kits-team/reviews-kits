@@ -6,6 +6,10 @@ React SDK for Reviewskits. Zero-dependency, lightweight, and type-safe.
 
 ```bash
 bun add @reviewskits/react
+# or
+npm install @reviewskits/react
+# or
+pnpm add @reviewskits/react
 ```
 
 ## Setup
