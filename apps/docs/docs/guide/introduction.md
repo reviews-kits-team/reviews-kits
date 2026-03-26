@@ -9,6 +9,7 @@
 - **API-First**: Everything is accessible via a REST API. Integrate with any tool or language.
 - **Official SDKs**: Ready-to-use, zero-dependency packages for Vue, Nuxt, React, and Next.js.
 - **Customizable Forms**: Create beautiful, branded forms to collect testimonials effortlessly.
+- **Modern Stack**: Built with Hono (Edge-ready API), Drizzle ORM (Type-safe database), and Better-Auth (Secure authentication).
 
 ## The Core Concept
 

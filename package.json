@@ -12,7 +12,10 @@
     "dev": "turbo dev",
     "lint": "turbo lint",
     "test": "turbo test",
-    "prepare": "husky"
+    "prepare": "husky",
+    "db:start": "docker compose --env-file .env -f infra/docker-compose.dev.yml up -d",
+    "db:stop": "docker compose -f infra/docker-compose.dev.yml down",
+    "db:reset": "docker compose -f infra/docker-compose.dev.yml down -v && bun run db:start && sleep 3 && cd apps/server && bun run db:push && bun run db:seed:admin"
   },
   "devDependencies": {
     "@types/bun": "latest",

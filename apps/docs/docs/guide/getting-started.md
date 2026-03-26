@@ -14,8 +14,14 @@ cd reviews-kits
 # Copy example environment
 cp .env.example .env
 
+# Install dependencies (Monorepo)
+bun install
+
 # Start the infrastructure
-docker compose -f infra/docker-compose.yml up -d
+docker compose -f infra/docker-compose.dev.yml up -d
+
+# Initialize the Database Schema (Required)
+cd apps/server && bunx drizzle-kit push && cd ../..
 ```
 
 ## Initial Setup
