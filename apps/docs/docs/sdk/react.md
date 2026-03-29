@@ -1,81 +1,78 @@
-# React / Next.js SDK
+# React SDK
 
-The React SDK is optimized for modern web applications and fully compatible with Next.js App Router.
+Integrate Reviewskits into your React or Next.js application with our official, zero-dependency SDK.
+
+---
 
 ## Installation
 
-::: code-group
-```bash [bun]
+```bash
+# bun
 bun add @reviewskits/react
-```
-
-```bash [npm]
+# npm
 npm install @reviewskits/react
 ```
 
-```bash [pnpm]
-pnpm add @reviewskits/react
-```
-:::
+---
 
-## Setup
+## Quick Start
 
-### Basic React
+### 1. Setup the Provider
+Wrap your application with the `ReviewProvider` to enable Reviewskits context.
 
 ```tsx
-import { ReviewsKitProvider } from '@reviewskits/react'
+import { ReviewProvider } from '@reviewskits/react';
 
-export function Layout({ children }) {
+function App({ children }) {
   return (
-    <ReviewsKitProvider pk="your_pk" host="your_host">
+    <ReviewProvider 
+      apiKey="pk_your_public_key" 
+      baseUrl="https://reviews.yourdomain.com"
+    >
       {children}
-    </ReviewsKitProvider>
-  )
+    </ReviewProvider>
+  );
 }
 ```
 
-### Next.js (App Router)
+### 2. Fetch Reviews
+Use the `useReviews` hook to fetch and display approved testimonials.
 
-Since `ReviewsKitProvider` uses React Context, it must be used in a **Client Component**.
-
-1. Create a wrapper:
 ```tsx
-'use client'
-import { ReviewsKitProvider } from '@reviewskits/react'
+import { useReviews } from '@reviewskits/react';
 
-export function ReviewsKitWrapper({ children }) {
-  return <ReviewsKitProvider pk="..." host="...">{children}</ReviewsKitProvider>
-}
-```
+function Testimonials() {
+  const { reviews, isLoading, error } = useReviews();
 
-2. Wrap your `app/layout.tsx`:
-```tsx
-export default function Layout({ children }) {
+  if (isLoading) return <p>Loading testimonials...</p>;
+  if (error) return <p>Error loading testimonials: {error.message}</p>;
+
   return (
-    <html>
-      <body>
-        <ReviewsKitWrapper>{children}</ReviewsKitWrapper>
-      </body>
-    </html>
-  )
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {reviews.map((review) => (
+        <div key={review.id} className="p-4 border rounded shadow">
+          <p className="italic text-gray-700">"{review.content}"</p>
+          <p className="mt-2 font-bold">— {review.authorName}</p>
+        </div>
+      ))}
+    </div>
+  );
 }
 ```
 
-## Hooks
+---
 
-### `useReviews`
+## Advanced Usage
 
-```tsx
-const { data, isLoading, error } = useReviews({ 
-  formId: 'your_form_id',
-  limit: 10 
-})
-```
-
-### `useInfiniteReviews`
+### Pagination
+The `useReviews` hook supports pagination and filtering out of the box.
 
 ```tsx
-const { data, fetchNextPage, hasNextPage } = useInfiniteReviews({ 
-  formId: 'your_form_id' 
-})
+const { reviews, loadMore, hasMore } = useReviews({ 
+  limit: 10,
+  page: 1 
+});
 ```
+
+### Custom Formatting
+Since Reviewskits is **headless**, you have total control over the UI. You can use any styling library (Tailwind, CSS Modules, Styled Components) to render the data.

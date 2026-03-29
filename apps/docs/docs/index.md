@@ -1,57 +1,71 @@
-# Overview
+---
+layout: doc
 
-**Reviewskits** is an open-source, self-hosted, and headless testimonial engine. It is designed for developers and companies who want to collect customer social proof without giving up control over their data or being forced into pre-built, unstyled widgets.
+title: Overview
+titleTemplate: Reviewskits — The Open-Source Testimonial Engine
+---
 
-## Why Reviewskits?
+# What is Reviewskits?
 
-Most testimonial platforms follow a "SaaS-only" model: they own your data, charge monthly fees, and force you to use their iframes or scripts. **Reviewskits flips the script.**
+Reviewskits is the **Open-Source, Self-Hosted alternative to Senja**. It's an API-first, headless testimonial engine designed for developers who want total control over their data and their design.
 
-- **Own Your Data**: Host it on your own infrastructure (Docker). Your reviews stay in your database.
-- **Total UI Freedom**: We provide the data via a clean API or SDKs. You build the "Wall of Love" exactly as you want it.
-- **API-First**: Built for the modern web. Every feature is accessible via REST endpoints.
-- **Zero Lock-in**: No proprietary widgets. If you want to move, your data is yours to take.
+Collect customer testimonials via customizable forms, moderate them from a clean dashboard, and display them anywhere using our SDKs — with zero imposed UI.
 
 ---
 
 ## How it Works
 
-Reviewskits streamlines the entire testimonial lifecycle into three simple stages:
+The Reviewskits workflow is designed to be simple, efficient, and fully under your control.
 
-### 1. Collect
-Create beautiful, branded public forms in seconds. Share the link with your customers or embed the collection flow directly in your app.
+```mermaid
+graph LR
+    A[Collect - Custom Forms] --> B[Moderate - Admin Dashboard]
+    B --> C[Display - Headless SDKs]
+    
+    classDef collect fill:#6d28d9,stroke:#9333ea,color:#fff,stroke-width:2px;
+    classDef moderate fill:#1d4ed8,stroke:#3b82f6,color:#fff,stroke-width:2px;
+    classDef display fill:#059669,stroke:#10b981,color:#fff,stroke-width:2px;
+    
+    class A collect;
+    class B moderate;
+    class C display;
+```
 
-### 2. Moderate
-Reviews arrive in your private **Admin Dashboard**. Approve the best ones, reject the spam, and manage your collection forms from a clean, unified interface.
-
-### 3. Display
-This is where Reviewskits shines. Use our official **React** or **Vue** SDKs (or the raw **REST API**) to fetch your approved reviews and render them using your own components, animations, and styles.
+1.  **Collect**: Create a form, share the link, and let your customers leave reviews.
+2.  **Moderate**: Review, approve, or reject submissions from your private dashboard.
+3.  **Display**: Fetch approved reviews via our React/Vue SDKs and style them your way.
 
 ---
 
 ## Core Features
 
-- **🛡️ Secure by Design**: Powered by **Better-Auth** for robust administrative security.
-- **🚀 High Performance**: Built with **Hono** and **Bun** for extreme speed and edge-compatibility.
-- **📦 Multi-Framework**: First-class, zero-dependency SDKs for Vue, Nuxt, React, and Next.js.
-- **🔌 Extensible**: Outgoing **Webhooks** support (coming soon) to trigger actions in Slack, Discord, or Zapier when a new review arrives.
-- **🔑 Granular Access**: Manage **API Keys** (Public vs. Secret) to keep your backend safe while serving the frontend.
+::: info 🚀 Built for Speed and Privacy
+Reviewskits is powered by **Hono** and **Bun** for extreme performance and is designed to be **Self-Hosted** from day one.
+:::
 
----
-
-## Tech Stack
-
-Reviewskits is built with a modern, type-safe stack:
-
-| Component | Technology |
+| Feature | Description |
 |---|---|
-| **API Backend** | Hono + Bun |
-| **Database** | PostgreSQL + Drizzle ORM |
-| **Authentication** | Better-Auth |
-| **Admin UI** | React + Tailwind + Shadcn/UI |
-| **Documentation** | VitePress |
+| **Headless Architecture** | No forced widgets or iframes. You get raw data (JSON), you provide the CSS. |
+| **API-First** | Everything is accessible via a secure REST API with Public/Secret key protection. |
+| **Smart Forms** | Conversion-optimized, customizable collection forms with zero lock-in. |
+| **Moderation Panel** | A clean, minimalist dashboard to manage your "Wall of Love" in seconds. |
+| **Zero-Dep SDKs** | Official, lightweight packages for React, Next.js, Vue, and Nuxt 3. |
+| **GDPR Ready** | Your data stays on your server. No third-party tracking or data selling. |
 
 ---
 
-## Ready to Start?
+## Why Choose Reviewskits?
 
-Jump into the **Get Started** guide to get Reviewskits running on your machine in less than 5 minutes.
+*   **Own Your Data**: Stop paying monthly fees to store your own testimonials.
+*   **Total Design Freedom**: Build a wall of love that actually matches your site's brand.
+*   **Developer First**: Type-safe, high-performance, and easy to integrate into any stack.
+
+---
+
+## Ready to start?
+
+If you're ready to take control of your social proof, follow the guides below:
+
+👉 [**Install Reviewskits (Get Started)**](/guide/getting-started)
+👉 [**Explore the React SDK**](/sdk/react)
+👉 [**Explore the Vue SDK**](/sdk/vue)

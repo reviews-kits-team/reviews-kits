@@ -3,6 +3,7 @@ services:
   admin:
     image: ghcr.io/reviews-kits-team/reviewskits-admin:latest
     restart: unless-stopped
+    # Coolify will handle the domain and SSL for this service
     networks:
       - reviewskits
 
@@ -27,7 +28,7 @@ services:
     networks:
       - reviewskits
 
-  # ─── Base de données ──────────────────────────────────────────
+  # ─── Database ──────────────────────────────────────────
   db:
     image: postgres:16-alpine
     restart: unless-stopped
@@ -44,7 +45,6 @@ services:
       retries: 5
     networks:
       - reviewskits
-
 
 networks:
   reviewskits:

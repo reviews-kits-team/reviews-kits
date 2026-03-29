@@ -1,90 +1,76 @@
-# Vue.js / Nuxt 3 SDK
+# Vue SDK
 
-The official Vue 3 SDK for Reviewskits is a lightweight, zero-dependency package designed for performance.
+Integrate Reviewskits into your Vue 3 or Nuxt 3 application with our official, zero-dependency SDK.
+
+---
 
 ## Installation
 
-::: code-group
-```bash [bun]
+```bash
+# bun
 bun add @reviewskits/vue
-```
-
-```bash [npm]
+# npm
 npm install @reviewskits/vue
 ```
 
-```bash [pnpm]
-pnpm add @reviewskits/vue
-```
-:::
+---
 
-## Setup
+## Quick Start (Vue 3)
 
-### Vue 3 (Vite)
+### 1. Register the Plugin
+In your `main.ts` or `main.js`, add the Reviewskits plugin.
 
 ```typescript
-import { createApp } from 'vue'
-import { createReviewsKit } from '@reviewskits/vue'
+import { createApp } from 'vue';
+import { createReviewskits } from '@reviewskits/vue';
+import App from './App.vue';
 
-const app = createApp(App)
+const app = createApp(App);
 
-app.use(createReviewsKit({
-  pk: 'your_public_key',
-  host: 'https://api.reviewskits.com'
-}))
+app.use(createReviewskits({
+  apiKey: 'pk_your_public_key',
+  baseUrl: 'https://reviews.yourdomain.com'
+}));
+
+app.mount('#app');
 ```
 
-### Nuxt 3 (Plugin)
+### 2. Use the Composable
+In your components, use `useReviews` to fetch data.
 
-Create a file `plugins/reviewskits.ts`:
+```vue
+<script setup>
+import { useReviews } from '@reviewskits/vue';
+
+const { reviews, isLoading } = useReviews();
+</script>
+
+<template>
+  <div v-if="isLoading">Loading...</div>
+  <div v-else class="testimonials-grid">
+    <div v-for="review in reviews" :key="review.id" class="card">
+      <p>"{{ review.content }}"</p>
+      <span>— {{ review.authorName }}</span>
+    </div>
+  </div>
+</template>
+```
+
+---
+
+## Nuxt 3 Integration
+
+Create a plugin in `plugins/reviewskits.client.ts`:
 
 ```typescript
-import { createReviewsKit } from '@reviewskits/vue'
+import { createReviewskits } from '@reviewskits/vue';
 
 export default defineNuxtPlugin((nuxtApp) => {
-  const reviewsKit = createReviewsKit({
-    pk: useRuntimeConfig().public.reviewsKitPk,
-    host: useRuntimeConfig().public.reviewsKitHost
-  })
-  nuxtApp.vueApp.use(reviewsKit)
-})
+  const config = useRuntimeConfig();
+  
+  nuxtApp.vueApp.use(createReviewskits({
+    apiKey: config.public.REVIEWSKITS_API_KEY,
+    baseUrl: config.public.REVIEWSKITS_BASE_URL
+  }));
+});
 ```
-
-## Usage
-
-### `useReviews`
-
-Basic fetching with manual pagination.
-
-```vue
-<script setup>
-const { data, isLoading } = useReviews({ 
-  formId: 'your_form_id',
-  limit: 10,
-  page: 1
-})
-</script>
-```
-
-### `useInfiniteReviews`
-
-Infinite scrolling pattern.
-
-```vue
-<script setup>
-const { data, fetchNextPage, hasNextPage } = useInfiniteReviews({ 
-  formId: 'your_form_id',
-  limit: 5 
-})
-</script>
-```
-
-## Available Attributes
-
-Each review object contains:
-- `id`: Unique identifier
-- `content`: Testimonial text
-- `rating`: 1 to 5
-- `createdAt`: ISO date
-- `source`: Origin (google, direct, etc.)
-- `author`: { name, email, title, url }
