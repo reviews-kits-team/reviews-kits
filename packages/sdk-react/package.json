@@ -1,7 +1,23 @@
 {
   "name": "@reviewskits/react",
   "version": "0.0.1",
-  "description": "React SDK for Reviewskits",
+  "description": "The official React SDK for ReviewsKits",
+  "keywords": [
+    "reviewskits",
+    "testimonials",
+    "react",
+    "sdk",
+    "reviews"
+  ],
+  "homepage": "https://reviewskits.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/reviews-kits-team/reviews-kits.git",
+    "directory": "packages/sdk-react"
+  },
+  "bugs": {
+    "url": "https://github.com/reviews-kits-team/reviews-kits/issues"
+  },
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -21,13 +37,6 @@
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
     "lint": "tsc --noEmit"
   },
-  "keywords": [
-    "reviewskits",
-    "testimonials",
-    "react",
-    "sdk"
-  ],
-  "author": "Reviewskits Team",
   "license": "MIT",
   "peerDependencies": {
     "react": ">=18"

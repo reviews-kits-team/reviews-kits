@@ -1,8 +1,40 @@
 # @reviewskits/vue
 
-The official Vue 3 SDK for **Reviewskits**.
+<div align="center">
+  <img src="https://raw.githubusercontent.com/reviews-kits-team/reviews-kits/main/apps/docs/docs/public/logo.svg" alt="ReviewsKits Logo" width="120" />
+  <h3>The official Vue 3 SDK for ReviewsKits</h3>
+  <p>Lightweight, type-safe integration for testimonials and reviews in Vue 3 and Nuxt applications.</p>
+</div>
 
-## Installation
+<p align="center">
+  <a href="https://docs.reviewskits.com/sdk/vue"><strong>Explore the docs »</strong></a>
+  <br />
+  <br />
+  <a href="https://reviewskits.com">Website</a>
+  ·
+  <a href="https://docs.reviewskits.com">Documentation</a>
+</p>
+
+## 📖 Quick Links
+
+- [Installation](#-installation)
+- [Setup](#-setup)
+- [Usage](#-usage)
+  - [Fetching Reviews](#fetching-reviews)
+  - [Infinite Scrolling](#infinite-scrolling)
+- [Nuxt Support](#nuxt-support)
+- [Full Documentation](https://docs.reviewskits.com/sdk/vue)
+
+## ✨ Features
+
+- **Vue 3 Optimized**: Built with the Composition API in mind.
+- **Nuxt Friendly**: Ready-to-use plugin for Nuxt 3 projects.
+- **Type-safe**: Built with TypeScript for a better developer experience.
+- **Composable API**: Simple and powerful composables for data fetching.
+
+## 🚀 Installation
+
+Install the package using your preferred package manager:
 
 ```bash
 bun add @reviewskits/vue
@@ -12,7 +44,7 @@ npm install @reviewskits/vue
 pnpm add @reviewskits/vue
 ```
 
-## Setup
+## 🛠️ Setup
 
 ### 1. Initialize the Plugin
 
@@ -27,32 +59,43 @@ const app = createApp(App)
 
 // Initialize Reviewskits
 app.use(createReviewsKit({
-  host: 'https://reviews.your-domain.com',
-  pk: 'pk_your_public_key'
+  pk: 'pk_your_public_key',
+  host: 'https://api.reviewskits.com'
 }))
 
 app.mount('#app')
 ```
 
-### Nuxt 3 Support
+### 2. Nuxt 3 Support
 
-If you are using Nuxt 3, please refer to our [Nuxt Integration Guide](./docs/nuxt-guide.md) for instructions on setting up the plugin and using runtime configuration.
+For Nuxt 3, create a plugin in `plugins/reviewskits.ts`:
 
-## Usage
+```typescript
+import { createReviewsKit } from '@reviewskits/vue'
+
+export default defineNuxtPlugin((nuxtApp) => {
+  const config = useRuntimeConfig()
+  
+  nuxtApp.vueApp.use(createReviewsKit({
+    pk: config.public.reviewsKitPk,
+    host: 'https://api.reviewskits.com'
+  }))
+})
+```
+
+## 💻 Usage
 
 ### Fetching Reviews
 
-Use the `useReviews` composable for standard pagination.
+Use the `useReviews` composable for standard pagination:
 
 ```vue
 <script setup>
 import { useReviews } from '@reviewskits/vue'
 
 const { data, isLoading, error } = useReviews({
-  formId: 'your_form_id', // Now required here
-  limit: 10,
-  minRating: 4,
-  page: 1
+  formId: 'your_form_id',
+  limit: 10
 })
 </script>
 
@@ -63,11 +106,7 @@ const { data, isLoading, error } = useReviews({
     <div v-for="review in data.reviews" :key="review.id">
       <h3>{{ review.author.name }}</h3>
       <p>{{ review.content }}</p>
-      <span>Rating: {{ review.rating }}</span>
-      <div class="metadata">
-        <span>Date: {{ new Date(review.createdAt).toLocaleDateString() }}</span>
-        <span>Source: {{ review.source }}</span>
-      </div>
+      <span>Rating: {{ review.rating }}/5</span>
     </div>
   </div>
 </template>
@@ -75,18 +114,13 @@ const { data, isLoading, error } = useReviews({
 
 ### Infinite Scrolling
 
-Use `useInfiniteReviews` for "Load More" patterns.
+Use `useInfiniteReviews` for "Load More" patterns:
 
 ```vue
 <script setup>
 import { useInfiniteReviews } from '@reviewskits/vue'
 
-const { 
-  data, 
-  fetchNextPage, 
-  hasNextPage, 
-  isLoading 
-} = useInfiniteReviews({ 
+const { data, fetchNextPage, hasNextPage, isLoading } = useInfiniteReviews({ 
   formId: 'your_form_id',
   limit: 5 
 })
@@ -101,32 +135,15 @@ const {
       </div>
     </div>
     
-    <button 
-      v-if="hasNextPage" 
-      @click="fetchNextPage"
-    >
-      Load More
-    </button>
+    <button v-if="hasNextPage" @click="fetchNextPage">Load More</button>
   </div>
 </template>
 ```
 
-### Advanced: Multi-form Support
+## 📄 Documentation
 
-If your application needs to display reviews from different forms, you can override the global `formId` by passing it directly to the composable.
+For detailed API reference and advanced guides, please visit our [Full Documentation](https://docs.reviewskits.com/sdk/vue).
 
-```vue
-<script setup>
-import { useReviews } from '@reviewskits/vue'
+## ⚖️ License
 
-// This will use the 'form-a-id' instead of the global default
-const { data, isLoading } = useReviews({ 
-  formId: 'form-a-id',
-  limit: 5 
-})
-</script>
-```
-
-## License
-
-MIT
+MIT © [ReviewsKits](https://reviewskits.com)
