@@ -20,45 +20,59 @@ export function useInfiniteReviews(params: Omit<ReviewApiParams, 'page'>) {
   const [hasNextPage, setHasNextPage] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const fetchPage = useCallback(async (page: number, isInitial = false) => {
-    if (!config) return;
-
-    if (isInitial) {
-      setIsLoading(true);
-    } else {
-      setIsFetchingNextPage(true);
-    }
-    
-    setError(null);
-
-    try {
-      const response = await reviewsApi.getReviews({
-        ...params,
-        page,
-      }, config);
-
-      const newPage = {
-        reviews: mapReviews(response.data),
-        meta: response.meta,
-      };
+  const fetchPage = useCallback(
+    async (page: number, isInitial = false, signal?: AbortSignal) => {
+      if (!config) return;
 
       if (isInitial) {
-        setData({ pages: [newPage] });
+        setIsLoading(true);
       } else {
-        setData((prev: InfiniteData) => ({
-          pages: [...prev.pages, newPage]
-        }));
+        setIsFetchingNextPage(true);
       }
 
-      setHasNextPage(response.meta.page < response.meta.totalPages);
-      setCurrentPage(response.meta.page);
-    } catch (err: any) {
-      setError(err);
-    } finally {
-      setIsLoading(false);
-      setIsFetchingNextPage(false);
-    }
-  }, [config, JSON.stringify(params)]);
+      setError(null);
+
+      try {
+        const response = await reviewsApi.getReviews(
+          {
+            ...params,
+            page,
+          },
+          { signal },
+          config
+        );
+
+        if (signal?.aborted) return;
+
+        const newPage = {
+          reviews: mapReviews(response.data),
+          meta: response.meta,
+        };
+
+        if (isInitial) {
+          setData({ pages: [newPage] });
+        } else {
+          setData((prev: InfiniteData) => ({
+            pages: [...prev.pages, newPage],
+          }));
+        }
+
+        setHasNextPage(response.meta.page < response.meta.totalPages);
+        setCurrentPage(response.meta.page);
+      } catch (err: any) {
+        if (err.name === 'AbortError' || (err instanceof Error && err.name === 'AbortError')) {
+          return;
+        }
+        setError(err);
+      } finally {
+        if (!signal?.aborted) {
+          setIsLoading(false);
+          setIsFetchingNextPage(false);
+        }
+      }
+    },
+    [config, JSON.stringify(params)]
+  );
 
   const fetchNextPage = useCallback(async () => {
     if (hasNextPage && !isFetchingNextPage) {
@@ -69,7 +83,9 @@ export function useInfiniteReviews(params: Omit<ReviewApiParams, 'page'>) {
   const refetch = useCallback(() => fetchPage(1, true), [fetchPage]);
 
   useEffect(() => {
-    fetchPage(1, true);
+    const controller = new AbortController();
+    fetchPage(1, true, controller.signal);
+    return () => controller.abort();
   }, [fetchPage]);
 
   return {

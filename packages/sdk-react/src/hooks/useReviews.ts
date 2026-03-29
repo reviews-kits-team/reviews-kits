@@ -10,25 +10,36 @@ export function useReviews(params: ReviewApiParams) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<any>(null);
 
-  const fetchReviews = useCallback(async () => {
-    if (!config) return;
+  const fetchReviews = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!config) return;
 
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await reviewsApi.getReviews(params, config);
-      setData({
-        reviews: mapReviews(response.data),
-      });
-    } catch (err: any) {
-      setError(err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [config, JSON.stringify(params)]);
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await reviewsApi.getReviews(params, { signal }, config);
+        if (signal?.aborted) return;
+        setData({
+          reviews: mapReviews(response.data),
+        });
+      } catch (err: any) {
+        if (err.name === 'AbortError' || (err instanceof Error && err.name === 'AbortError')) {
+          return;
+        }
+        setError(err);
+      } finally {
+        if (!signal?.aborted) {
+          setIsLoading(false);
+        }
+      }
+    },
+    [config, JSON.stringify(params)]
+  );
 
   useEffect(() => {
-    fetchReviews();
+    const controller = new AbortController();
+    fetchReviews(controller.signal);
+    return () => controller.abort();
   }, [fetchReviews]);
 
   return {

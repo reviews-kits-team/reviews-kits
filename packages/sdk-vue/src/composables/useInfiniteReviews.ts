@@ -1,4 +1,4 @@
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { reviewsApi } from '../api/reviews';
 import { mapReviews } from '../api/mappers/review.mapper';
 import { ReviewApiParams, Review, ReviewApiResponseMeta } from '../types';
@@ -17,21 +17,27 @@ export const useInfiniteReviews = (params: Omit<ReviewApiParams, 'page'>) => {
   const error = ref<any>(null);
   const hasNextPage = ref(false);
   const currentPage = ref(1);
+  let controller: AbortController | null = null;
 
   const fetchPage = async (page: number, isInitial = false) => {
     if (isInitial) {
+      if (controller) controller.abort();
+      controller = new AbortController();
       isLoading.value = true;
     } else {
       isFetchingNextPage.value = true;
     }
     
+    const signal = controller?.signal;
     error.value = null;
 
     try {
       const response = await reviewsApi.getReviews({
         ...params,
         page,
-      });
+      }, { signal });
+
+      if (signal?.aborted) return;
 
       const newPage = {
         reviews: mapReviews(response.data),
@@ -47,10 +53,16 @@ export const useInfiniteReviews = (params: Omit<ReviewApiParams, 'page'>) => {
       hasNextPage.value = response.meta.page < response.meta.totalPages;
       currentPage.value = response.meta.page;
     } catch (err: any) {
+      if (err.name === 'AbortError') return;
       error.value = err;
     } finally {
-      isLoading.value = false;
-      isFetchingNextPage.value = false;
+      if (!signal?.aborted) {
+        if (isInitial) {
+          isLoading.value = false;
+        } else {
+          isFetchingNextPage.value = false;
+        }
+      }
     }
   };
 
@@ -64,6 +76,10 @@ export const useInfiniteReviews = (params: Omit<ReviewApiParams, 'page'>) => {
 
   onMounted(() => {
     fetchPage(1, true);
+  });
+
+  onUnmounted(() => {
+    if (controller) controller.abort();
   });
 
   // Re-fetch everything if params change
