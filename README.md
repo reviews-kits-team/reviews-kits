@@ -1,43 +1,106 @@
-# REVIEWSKITS
+<p align="center">
+  <a href="https://github.com/reviews-kits-team/reviews-kits">
+    <img src="apps/docs/docs/public/logo.svg" alt="Reviewskits Logo" width="120" height="120">
+  </a>
+</p>
 
-> The open-source, self-hosted alternative to Senja. API-first, headless, developer-owned.
+<h1 align="center">Reviewskits</h1>
 
-Collect customer testimonials via customizable forms, moderate them from a clean dashboard, and display them anywhere using our SDK — in your own design, with zero imposed UI.
+<p align="center">
+  <strong>The Open Source, Self-Hosted Alternative to Senja.</strong><br />
+  Collect, moderate, and display customer reviews with a professional headless API.
+</p>
 
-**Your data stays on your server. Always.**
+<p align="center">
+  <a href="https://docs.reviewskits.com"><strong>Documentation</strong></a> ·
+  <a href="https://reviewskits.com"><strong>Website</strong></a> ·
+  <a href="https://github.com/reviews-kits-team/reviews-kits/issues"><strong>Report Bug</strong></a> ·
+  <a href="https://github.com/reviews-kits-team/reviews-kits/stargazers"><strong>Star us on GitHub</strong></a>
+</p>
 
----
-
-## Why Reviewskits ?
-
-| | Senja / Testimonial.to | Reviewskits |
-|---|---|---|
-| Self-hosted | ❌ | ✅ |
-| Your data on your server | ❌ | ✅ |
-| Headless / API-first | ❌ | ✅ |
-| Custom design freedom | ❌ | ✅ |
-| Open-source | ❌ | ✅ |
-| GDPR-friendly by architecture | ❌ | ✅ |
-
----
-
-## How it works
-
-```
-Admin creates a form        →   Shares the public link
-        ↓
-Client submits a review     →   Stored as "pending"
-        ↓
-Admin approves / rejects    →   From the dashboard
-        ↓
-Developer fetches reviews   →   Via SDK or REST API
-        ↓
-Displays in their own design  — No widget, no imposed style
-```
+<p align="center">
+  <a href="https://github.com/reviews-kits-team/reviews-kits/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/license-AGPLv3-blue.svg" alt="License">
+  </a>
+  <a href="https://github.com/reviews-kits-team/reviews-kits/stargazers">
+    <img src="https://img.shields.io/github/stars/reviews-kits-team/reviews-kits?style=social" alt="GitHub stars">
+  </a>
+  <a href="https://twitter.com/reviewskits">
+    <img src="https://img.shields.io/twitter/follow/reviewskits?style=social" alt="Twitter follow">
+  </a>
+</p>
 
 ---
 
-## Quick Start
+## ✨ About Reviewskits
+
+Reviewskits provides a free and open-source testimonial engine. Gather social proof at every point in the user journey with beautiful collection forms, moderate them from a clean dashboard, and display them anywhere using our headless SDKs.
+
+### 🛡️ Your data belongs to you
+Unlike cloud-only platforms, Reviewskits is designed to be self-hosted. Your reviews stay in your own infrastructure, giving you total control over privacy and security.
+
+### 🎨 Zero UI lock-in
+We don't force you into unstyled widgets or iframes. We provide the data, and you provide the style. Build your "Wall of Love" exactly how you want it with our official React and Vue SDKs.
+
+---
+
+## 💪 Mission: Empower your project with authentic social proof.
+
+Documentation and social proof shouldn't be a black box. Reviewskits is built for developers who care about performance, privacy, and complete design freedom.
+
+---
+
+## 📋 Table of Contents
+
+- [Features](#-features)
+- [Built on Open Source](#-built-on-open-source)
+- [Getting Started](#-getting-started)
+- [Self-hosting](#-self-hosting-reviewskits)
+- [Development](#-development)
+- [Contribution](#-contribution)
+- [Contact](#-contact-us)
+- [Security](#-security)
+- [License](#-license)
+
+---
+
+## 🚀 Features
+
+- **📲 Customizable Forms**: Create conversion-optimized collection forms with custom fields and branding.
+- **⚖️ Clean Moderation**: Approve or reject reviews in seconds from a unified admin dashboard.
+- **📦 Headless SDKs**: First-class support for Vue, Nuxt, React, and Next.js with zero-dependency packages.
+- **🔑 API-First**: Every feature is accessible via a secure REST API (Public & Admin keys).
+- **🔒 Self-Hostable**: Simple Docker deployment. No external dependencies or mandatory cloud accounts.
+- **⚡ Performance**: Powered by Hono and Bun for extreme speed and low resource usage.
+
+---
+
+## 🛠️ Built on Open Source
+
+Reviewskits is built on a modern, type-safe stack:
+
+- **💻 Language**: [TypeScript](https://www.typescriptlang.org/)
+- **🚀 Runtime**: [Bun](https://bun.sh/)
+- **⚛️ Frontend (Admin)**: [React](https://reactjs.org/) + [TailwindCSS](https://tailwindcss.com/) + [Shadcn/UI](https://ui.shadcn.com/)
+- **🔌 Backend API**: [Hono](https://hono.dev/)
+- **📚 Database**: [PostgreSQL](https://www.postgresql.org/) + [Drizzle ORM](https://orm.drizzle.team/)
+- **🔒 Authentication**: [Better-Auth](https://better-auth.com/)
+- **📖 Docs**: [VitePress](https://vitepress.dev/)
+
+---
+
+## 🏁 Getting started
+
+We've got several options to help you quickly get started with Reviewskits.
+
+### ☁️ Cloud Version (Coming Soon)
+We are currently working on a hosted cloud offering for those who want to get started without managing infrastructure. Stay tuned!
+
+### 🐳 Self-hosting Reviewskits
+Reviewskits is available Open-Source under the AGPLv3 license. You can host it on your own servers using Docker.
+
+#### Docker Compose (Recommended)
+The easiest way to get started is using our Docker Compose setup:
 
 ```bash
 # 1. Clone the repo
@@ -49,150 +112,70 @@ cp .env.example .env
 # → Fill in ADMIN_EMAIL, ADMIN_PASSWORD, DATABASE_URL
 
 # 3. Launch
-# For production (single command)
 docker compose -f infra/docker-compose.yml up -d
+```
 
-# For development (infrastructure only: DB, Redis, Minio)
+---
+
+## 👨‍💻 Development
+
+### Prerequisites
+- [Bun](https://bun.sh/) (Recommended) or Node.js
+- [Docker](https://www.docker.com/) (for infrastructure: Postgres, Redis, Minio)
+
+### Local Setup
+```bash
+# Install dependencies
+bun install
+
+# Start development infrastructure
 docker compose -f infra/docker-compose.dev.yml up -d
+
+# Run dev server
 bun run dev
-
-# Dashboard → http://localhost:3000/admin
-# API       → http://localhost:3000/api/v1
-```
-
-That's it. No external dependencies, no cloud account required.
-
-> **Tip:** During local development (`bun run dev`), the Vite frontend may hide the initial API backend startup logs. To view the backend logs, simply save `apps/server/src/index.ts` to trigger a hot-reload.
-
----
-
-## SDKs
-
-We provide official, zero-dependency SDKs to easily integrate Reviewskits into your frontend.
-
-### [React / Next.js](./packages/sdk-react/README.md)
-Lightweight hooks and context for React applications. Optimized for Next.js App Router.
-- [Next.js Integration Guide](./packages/sdk-react/docs/nextjs-guide.md)
-
-```bash
-# bun
-bun add @reviewskits/react
-# npm
-npm install @reviewskits/react
-# pnpm
-pnpm add @reviewskits/react
-```
-
-### [Vue / Nuxt 3](./packages/sdk-vue/README.md)
-Lightweight composables and plugin for Vue 3 applications.
-- [Nuxt 3 Integration Guide](./packages/sdk-vue/docs/nuxt-guide.md)
-
-```bash
-# bun
-bun add @reviewskits/vue
-# npm
-npm install @reviewskits/vue
-# pnpm
-pnpm add @reviewskits/vue
 ```
 
 ---
 
-## API Reference
+## ✍️ Contribution
 
-### Public endpoints (read)
+We are very happy if you are interested in contributing to Reviewskits! 🤗
 
-Authentication via public key `pk_xxx` as query param or `Authorization` header.
+- **Star this repo**: It helps us grow and reach more developers.
+- **Create issues**: If you find a bug or have a feature request, please open an issue.
+- **Join the discussion**: Share your ideas on how to improve the platform.
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/v1/testimonials` | Paginated list of approved reviews |
-| `GET` | `/api/v1/testimonials/:id` | Single review detail |
-| `GET` | `/api/v1/testimonials/stats` | Average rating, total count, distribution |
-| `POST` | `/api/v1/forms/:slug/submit` | Submit a review via form |
-
-### Admin endpoints (write)
-
-Authentication via secret key `sk_xxx`. **Never expose server-side keys to the client.**
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/v1/admin/testimonials` | List all reviews (including pending) |
-| `PATCH` | `/api/v1/admin/testimonials/:id` | Approve or reject a review |
-| `DELETE` | `/api/v1/admin/testimonials/:id` | Delete a review |
-| `GET` | `/api/v1/admin/forms` | List all forms |
-| `POST` | `/api/v1/admin/forms` | Create a new form |
-| `PATCH` | `/api/v1/admin/forms/:id` | Update a form |
-| `DELETE` | `/api/v1/admin/forms/:id` | Delete a form |
-
-Full OpenAPI documentation available at `/api/docs` once deployed.
+All contributors are welcome. Please read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request.
 
 ---
 
-## Stack
+## 📆 Contact us
 
-| Layer | Technology |
-|---|---|
-| Backend API | Hono + Bun |
-| Database | PostgreSQL + Drizzle ORM |
-| Auth | Better-Auth |
-| Dashboard | React + Shadcn UI |
-| SDKs | React & Vue (Zero-dependency) |
-| Media storage | S3-compatible (Minio for self-host) |
-| Deployment | Docker Compose |
+Let's have a chat about your social proof needs and get you started.
+
+[Book us with Cal.com](https://cal.com/reviewskits)
 
 ---
 
-## Project structure
+## 🔒 Security
 
-```
-reviews-kits/
-├── apps/
-│   ├── server/        ← API + Dashboard (Hono)
-│   ├── admin/         ← Admin dashboard (React + Vite)
-│   └── docs/          ← Public documentation
-├── packages/
-│   ├── types/         ← @reviewskits/types — shared TypeScript types
-│   ├── sdk-react/     ← @reviewskits/react — React hooks & Provider
-│   └── sdk-vue/       ← @reviewskits/vue — Vue composables & Plugin
-├── infra/
-│   ├── docker-compose.yml
-│   └── docker-compose.dev.yml
-└── turbo.json
-```
+We take security very seriously. If you come across any security vulnerabilities, please disclose them by sending an email to `security@reviewskits.com`. See [SECURITY.md](./SECURITY.md) for more information.
 
 ---
 
-## Roadmap
+## 👩‍⚖️ License
 
-**v0.1.0 — MVP (current)**
-- [x] Public form with customizable slug
-- [x] Admin dashboard — approve, reject, manage
-- [x] REST API with public and admin keys
-- [x] Docker Compose one-command deploy
-- [x] React SDK — `useReviews`, `useInfiniteReviews`
-- [x] Vue.js SDK — `useReviews`, `useInfiniteReviews`
-- [ ] CSV import (migrate from Senja / Testimonial.to)
+### The AGPL Reviewskits Core
+The Reviewskits core application is licensed under the **AGPLv3 Open Source License**. You can use the software for free for personal and commercial use, provided you follow the AGPL terms.
 
-**v0.2.0**
-- [ ] Webhooks
-- [ ] Advanced analytics
-- [ ] Video testimonials
-- [ ] AI-assisted moderation
-- [ ] Zapier / Slack integrations
+### The Enterprise Edition
+Additional functionality designed for larger teams and enterprises is available under a commercial license. See [COMMERCIAL_LICENSE.md](./COMMERCIAL_LICENSE.md) or the [License page](https://docs.reviewskits.com/guide/license) in our docs.
+
+### White-Labeling
+We currently do not offer Reviewskits white-labeled. Any other licensing needs? Send us an email at `hello@reviewskits.com`.
 
 ---
 
-## Contributing
-
-Contributions are welcome. Please read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request.
-
-For bugs and feature requests, open an [issue](https://github.com/reviews-kits-team/reviews-kits.git/issues).
-
----
-
-## License
-
-[MIT](./LICENSE) — free to use, modify, and distribute.
-
-Enterprise features (white-label, SSO, advanced analytics) are available under a separate commercial license. See [COMMERCIAL_LICENSE.md](./COMMERCIAL_LICENSE.md).
+<p align="center">
+  <a href="#-table-of-contents">🔼 Back to top</a>
+</p>

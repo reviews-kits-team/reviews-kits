@@ -5,40 +5,63 @@ const currentYear = new Date().getFullYear()
 export default defineConfig({
   title: "Reviewskits",
   description: "The Open-Source, Headless Testimonial API",
-  
+
+  head: [
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }]
+  ],
+
+  appearance: 'dark', // Force dark mode to match the theme
+
   themeConfig: {
-    logo: '/logo.png', // Assuming we might add one
-    
+    logo: '/logo.svg',
+    siteTitle: false,
+
     nav: [
-      { text: 'Home', link: '/' },
-      { text: 'Guide', link: '/guide/introduction' },
-      { text: 'SDKs', items: [
-        { text: 'Vue SDK', link: '/sdk/vue' },
-        { text: 'React SDK', link: '/sdk/react' }
-      ]}
+      { text: 'Guide', link: '/' },
+      {
+        text: 'SDKs', items: [
+          { text: 'Vue SDK', link: '/sdk/vue' },
+          { text: 'React SDK', link: '/sdk/react' }
+        ]
+      }
     ],
 
-    sidebar: {
-      '/guide/': [
-        {
-          text: 'Introduction',
-          items: [
-            { text: 'What is Reviewskits?', link: '/guide/introduction' },
-            { text: 'Getting Started', link: '/guide/getting-started' },
-            { text: 'Deployment', link: '/guide/deployment' },
-          ]
-        }
-      ],
-      '/sdk/': [
-        {
-          text: 'Official SDKs',
-          items: [
-            { text: 'Vue.js / Nuxt', link: '/sdk/vue' },
-            { text: 'React / Next.js', link: '/sdk/react' }
-          ]
-        }
-      ]
-    },
+    sidebar: [
+      {
+        text: 'Getting Started',
+        items: [
+          { text: 'Overview', link: '/' },
+          { text: 'Get Started', link: '/guide/getting-started' },
+          { text: 'Deployment', link: '/guide/deployment' },
+        ]
+      },
+      {
+        text: 'Core Concepts',
+        items: [
+          { text: 'Forms & Collection', link: '/guide/forms' },
+          { text: 'Reviews & Moderation', link: '/guide/moderation' },
+          { text: 'Webhooks & Events', link: '/guide/webhooks' },
+          { text: 'API Keys & Security', link: '/guide/security' },
+        ]
+      },
+      {
+        text: 'Official SDKs',
+        items: [
+          { text: 'Vue.js / Nuxt', link: '/sdk/vue' },
+          { text: 'React / Next.js', link: '/sdk/react' },
+          { text: 'REST API Reference', link: '/sdk/rest' },
+        ]
+      },
+      {
+        text: 'Advanced',
+        items: [
+          { text: 'Authentication', link: '/guide/auth' },
+          { text: 'Environment Variables', link: '/guide/env' },
+          { text: 'Security', link: '/guide/security' },
+          { text: 'License', link: '/guide/license' },
+        ]
+      }
+    ],
 
     socialLinks: [
       { icon: 'github', link: 'https://github.com/reviews-kits-team/reviews-kits' }
