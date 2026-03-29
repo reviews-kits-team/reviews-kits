@@ -1,7 +1,24 @@
 {
   "name": "@reviewskits/vue",
   "version": "0.0.1",
-  "description": "Official Vue 3 SDK for Reviewskits",
+  "description": "The official Vue 3 SDK for ReviewsKits",
+  "keywords": [
+    "reviewskits",
+    "testimonials",
+    "vue",
+    "nuxt",
+    "sdk",
+    "reviews"
+  ],
+  "homepage": "https://reviewskits.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/reviews-kits-team/reviews-kits.git",
+    "directory": "packages/sdk-vue"
+  },
+  "bugs": {
+    "url": "https://github.com/reviews-kits-team/reviews-kits/issues"
+  },
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
