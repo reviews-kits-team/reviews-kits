@@ -140,6 +140,25 @@ const { data, fetchNextPage, hasNextPage, isLoading } = useInfiniteReviews({
 </template>
 ```
 
+## 💡 Best Practices
+
+### Reactive Parameters
+Always pass reactive objects (like `ref` or `reactive`) to our composables. This allows the SDK to automatically track changes and refresh data efficiently.
+
+```vue
+<script setup>
+const params = reactive({ limit: 10 });
+const { data } = useReviews(params);
+
+// Changing this will automatically trigger a new fetch
+// and cancel any pending stale requests.
+const updateLimit = () => params.limit = 20;
+</script>
+```
+
+### Request Cancellation
+The SDK internally manages `AbortController`. If you switch filters rapidly, the SDK will automatically cancel previous pending requests, ensuring your UI stays in sync with the latest selection without race conditions.
+
 ## 📄 Documentation
 
 For detailed API reference and advanced guides, please visit our [Full Documentation](https://docs.reviewskits.com/sdk/vue).

@@ -136,6 +136,23 @@ function MyComponent() {
 }
 ```
 
+## 💡 Best Practices
+
+### Handling Async States
+Our hooks internally use `AbortController` to cancel stale requests when parameters change. This ensures that you always see the data corresponding to your latest filters.
+
+### Dependency Management
+If you are using our hooks inside your own `useEffect` or `useCallback`, make sure to include the hook's returned values (like `data` or `refetch`) in your dependency arrays to avoid stale closures.
+
+```tsx
+const { data, refetch } = useReviews({ formId });
+
+useEffect(() => {
+  // Always use the latest data
+  console.log('Latest reviews:', data?.reviews);
+}, [data]);
+```
+
 ## 📄 Documentation
 
 For detailed API reference and advanced guides, please visit our [Full Documentation](https://docs.reviewskits.com/sdk/react).

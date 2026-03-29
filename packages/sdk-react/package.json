@@ -35,7 +35,9 @@
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --clean",
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "test": "vitest --run",
+    "test:watch": "vitest"
   },
   "license": "MIT",
   "peerDependencies": {
@@ -43,9 +45,15 @@
   },
   "devDependencies": {
     "@reviewskits/types": "workspace:*",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/react": "^19.0.0",
+    "@vitejs/plugin-react": "^6.0.1",
+    "jsdom": "^29.0.1",
     "react": "^19.0.0",
     "tsup": "^8.3.5",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.2"
   }
 }
