@@ -1,42 +1,67 @@
-# Getting Started
+# Get Started
 
-Get Reviewskits up and running in minutes on your local machine or server.
+Reviewskits is designed to be versatile. Whether you want to contribute to the core or deploy your own instance, this guide will help you get started quickly.
 
-## Installation
+---
 
-The easiest way to start is using Docker.
+## 👨‍💻 For Developers (Contributing)
 
+If you want to run Reviewskits locally to build features or fix bugs, follow these steps.
+
+### Prerequisites
+- [Bun](https://bun.sh/) (Version >= 1.0)
+- [Docker](https://www.docker.com/) (to run database and cache)
+
+### Local Environment Setup
+
+1. **Clone and Install**:
 ```bash
-# Clone the repository
 git clone https://github.com/reviews-kits-team/reviews-kits.git
 cd reviews-kits
-
-# Copy example environment
-cp .env.example .env
-
-# Install dependencies (Monorepo)
 bun install
-
-# Start the infrastructure
-docker compose -f infra/docker-compose.dev.yml up -d
-
-# Initialize the Database Schema (Required)
-cd apps/server && bunx drizzle-kit push && cd ../..
 ```
 
-## Initial Setup
+2. **Environment**:
+```bash
+cp .env.example .env
+# Open .env and set your ADMIN_EMAIL and ADMIN_PASSWORD
+```
 
-Once the containers are running, you can access the admin dashboard at:
-`http://localhost:3000/admin` (Default development URL)
+3. **Infrastucture**:
+```bash
+# Start Postgres, Redis, and Minio
+docker compose -f infra/docker-compose.dev.yml up -d
+```
 
-1. **Login**: Use the credentials defined in your `.env`.
-2. **Create a Form**: Go to the "Forms" section and create your first collection form.
-3. **Collect Reviews**: Share the public form link with your customers.
-4. **Moderate**: Approve or reject reviews from your dashboard.
+4. **Run**:
+```bash
+bun run dev
+```
 
-## Next Steps
+Visit `http://localhost:3000/admin` to access the dashboard.
 
-Now that you have your first reviews, it's time to display them on your website!
+---
 
-- [Install Vue SDK](/sdk/vue)
-- [Install React SDK](/sdk/react)
+## 🐳 Self-hosting (Production)
+
+Reviewskits is fully containerized and easy to deploy on any server.
+
+### Quick Deploy
+The fastest way to deploy is using **Docker Compose** or a PaaS like **Coolify**.
+
+- **DNS**: Point your domain (A Record) to your server IP.
+- **Config**: Prepare your `.env` with a secure password and auth secret.
+- **Database**: Schemas are automatically initialized on startup.
+
+Ready to go live? Follow our detailed guide:
+
+👉 [**Go to Deployment Guide**](/guide/deployment)
+
+---
+
+## 🔐 Next Steps
+
+Once your instance is running, you can:
+- [Create your first collection form](/guide/forms)
+- [Moderate your first reviews](/guide/moderation)
+- [Integrate our SDKs](/sdk/react)

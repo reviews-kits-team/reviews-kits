@@ -1,6 +1,8 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
 import { cors } from 'hono/cors';
+import { migrate } from 'drizzle-orm/bun-sql/migrator';
+import { db } from './infrastructure/database/db';
 import { authRouter } from './interface/routes/auth';
 import { adminRouter } from './interface/routes/admin';
 
@@ -11,6 +13,18 @@ import { publicRouter } from './interface/routes/public';
 import { dashboardRouter } from './interface/routes/dashboard';
 import { testimonialsRouter } from './interface/routes/testimonials';
 import webhooksRouter from './interface/routes/webhooks';
+
+// Self-migration for production
+if (process.env.NODE_ENV === 'production') {
+  console.log('⏳ Running database migrations...');
+  try {
+    await migrate(db, { migrationsFolder: './drizzle' });
+    console.log('✅ Migrations completed');
+  } catch (error) {
+    console.error('❌ Migration failed:', error);
+    process.exit(1);
+  }
+}
 
 const app = new OpenAPIHono();
 

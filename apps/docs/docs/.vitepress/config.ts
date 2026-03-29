@@ -1,8 +1,9 @@
 import { defineConfig } from 'vitepress'
+import { withMermaid } from 'vitepress-plugin-mermaid'
 
 const currentYear = new Date().getFullYear()
 
-export default defineConfig({
+export default withMermaid(defineConfig({
   title: "Reviewskits",
   description: "The Open-Source, Headless Testimonial API",
 
@@ -11,6 +12,12 @@ export default defineConfig({
   ],
 
   appearance: 'dark', // Force dark mode to match the theme
+  
+  vite: {
+    optimizeDeps: {
+      include: ['dayjs', 'mermaid']
+    }
+  },
 
   themeConfig: {
     logo: '/logo.svg',
@@ -68,8 +75,8 @@ export default defineConfig({
     ],
 
     footer: {
-      message: 'Released under the MIT License.',
+      message: 'Released under the AGPL-3.0 License.',
       copyright: `Copyright © ${currentYear}-present Reviewskits Team`
     }
   }
-})
+}))
