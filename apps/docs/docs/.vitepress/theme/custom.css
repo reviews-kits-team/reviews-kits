@@ -1,0 +1,72 @@
+/**
+ * Reviewskits Documentation Theme
+ * Based on the landing page palette
+ */
+
+:root {
+  /* Brand Colors */
+  --brand-bg: #0A0A0F;
+  --brand-teal: #0D9E75;
+  --brand-text: #F2F0EB;
+  --brand-muted: #6E6C7A;
+  --brand-border: rgba(255, 255, 255, 0.07);
+
+  /* VitePress Theme Variables Override */
+  --vp-c-brand-1: var(--brand-teal);
+  --vp-c-brand-2: #0b8a66;
+  --vp-c-brand-3: #097556;
+  --vp-c-brand-soft: rgba(13, 158, 117, 0.14);
+
+  --vp-c-bg: var(--brand-bg);
+  --vp-c-bg-alt: #111118;
+  --vp-c-bg-soft: #16161F;
+
+  --vp-c-text-1: var(--brand-text);
+  --vp-c-text-2: var(--brand-muted);
+  
+  --vp-c-border: var(--brand-border);
+  --vp-c-divider: var(--brand-border);
+  
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(135deg, #0D9E75 0%, #0db889 100%);
+  
+  --vp-font-family-base: "Plus Jakarta Sans", "Inter", sans-serif;
+  --vp-font-family-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Custom Overrides */
+.VPNavBar {
+  background-color: rgba(10, 10, 15, 0.8) !important;
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--brand-border) !important;
+}
+
+.VPLocalNav {
+  background-color: var(--brand-bg) !important;
+  border-bottom: 1px solid var(--brand-border) !important;
+}
+
+.VPSidebar {
+  background-color: var(--brand-bg) !important;
+  border-right: 1px solid var(--brand-border) !important;
+}
+
+.VPHero.has-image .container {
+  max-width: 1152px;
+}
+
+/* Code blocks */
+.vp-doc div[class*='language-'] {
+  background-color: #0D0D14 !important;
+  border: 1px solid var(--brand-border);
+}
+
+/* Callouts / Custom Blocks */
+.custom-block.tip {
+  border-color: var(--brand-teal);
+  background-color: rgba(13, 158, 117, 0.05);
+}
+
+.custom-block.info {
+  border-color: #3eaf7c; /* Keeping default for info or change to blue-ish if needed */
+}
