@@ -1,6 +1,22 @@
 {
   "name": "@reviewskits/types",
-  "version": "0.0.1",
+  "description": "Shared TypeScript definitions for ReviewsKits",
+  "keywords": [
+    "reviewskits",
+    "testimonials",
+    "types",
+    "typescript",
+    "sdk"
+  ],
+  "homepage": "https://reviewskits.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/reviews-kits-team/reviews-kits.git",
+    "directory": "packages/types"
+  },
+  "bugs": {
+    "url": "https://github.com/reviews-kits-team/reviews-kits/issues"
+  },
   "files": [
     "dist"
   ],
@@ -14,6 +30,8 @@
     "test": "echo 'No tests yet'"
   },
   "private": false,
+  "author": "ReviewsKits Team",
+  "license": "MIT",
   "devDependencies": {
     "@types/bun": "latest"
   },
