@@ -1,6 +1,6 @@
 {
   "name": "@reviewskits/vue",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "The official Vue 3 SDK for ReviewsKits",
   "keywords": [
     "reviewskits",
@@ -44,7 +44,7 @@
     "vue": "^3.3.0"
   },
   "devDependencies": {
-    "@reviewskits/types": "workspace:*",
+    "@reviewskits/types": "^0.0.4",
     "@vue/test-utils": "^2.4.3",
     "happy-dom": "^20.0.0",
     "msw": "^2.0.11",

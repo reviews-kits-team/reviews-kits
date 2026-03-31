@@ -1,5 +1,6 @@
 {
   "name": "@reviewskits/types",
+  "version": "0.0.4",
   "description": "Shared TypeScript definitions for ReviewsKits",
   "keywords": [
     "reviewskits",
