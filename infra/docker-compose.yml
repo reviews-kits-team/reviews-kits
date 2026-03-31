@@ -20,6 +20,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - letsencrypt:/letsencrypt
+    environment:
+      - DOCKER_API_VERSION=1.40
     networks:
       - reviewskits
 
