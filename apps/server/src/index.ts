@@ -1,6 +1,7 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
 import { cors } from 'hono/cors';
+import path from 'node:path';
 import { migrate } from 'drizzle-orm/bun-sql/migrator';
 import { eq } from 'drizzle-orm';
 import { db } from './infrastructure/database/db';
@@ -17,41 +18,63 @@ import { dashboardRouter } from './interface/routes/dashboard';
 import { testimonialsRouter } from './interface/routes/testimonials';
 import webhooksRouter from './interface/routes/webhooks';
 
-// Self-migration for production
-if (process.env.NODE_ENV === 'production') {
-  console.log('⏳ Running database migrations...');
+// Database preparation (Migrations and Seeding)
+const runMigrations = async () => {
+  console.log('--- 🛢️ Database Preparation ---');
+  console.log(`Environment: ${process.env.NODE_ENV}`);
+  
   try {
-    await migrate(db, { migrationsFolder: './drizzle' });
-    console.log('✅ Migrations completed');
+    const migrationsPath = path.resolve(process.cwd(), 'drizzle');
+    console.log(`⏳ Running database migrations from: ${migrationsPath}`);
+    
+    await migrate(db, { migrationsFolder: migrationsPath });
+    console.log('✅ Migrations completed successfully');
 
     // Auto-seed admin user
     const adminEmail = process.env.ADMIN_EMAIL;
     const adminPassword = process.env.ADMIN_PASSWORD;
+    
     if (adminEmail && adminPassword) {
       console.log(`⏳ Checking admin user: ${adminEmail}...`);
       const existingUser = await db.select().from(users).where(eq(users.email, adminEmail)).limit(1);
       const user = existingUser[0];
+      
       if (user) {
         if (!user.isSystemAdmin) {
           await db.update(users).set({ isSystemAdmin: true }).where(eq(users.email, adminEmail));
           console.log(`✅ Granted admin privileges to existing user.`);
+        } else {
+          console.log(`ℹ️ Admin user already exists and has privileges.`);
         }
       } else {
+        console.log(`⏳ Admin user not found. Creating...`);
         const res = await auth.api.signUpEmail({
           body: { email: adminEmail, password: adminPassword, name: "System Administrator" },
           headers: new Headers()
         });
+        
         if (res?.user) {
           await db.update(users).set({ isSystemAdmin: true, emailVerified: true }).where(eq(users.email, adminEmail));
           console.log(`✅ Admin user created automatically.`);
+        } else {
+          console.error(`❌ Failed to create admin user:`, res);
         }
       }
+    } else {
+      console.log('⚠️ ADMIN_EMAIL or ADMIN_PASSWORD not set. Skipping admin auto-seed.');
     }
   } catch (error) {
-    console.error('❌ Boot prep failed:', error);
-    process.exit(1);
+    console.error('❌ Database preparation failed:', error);
+    // Only exit in production to prevent partial boot in unstable state
+    if (process.env.NODE_ENV === 'production') {
+      process.exit(1);
+    }
   }
-}
+  console.log('--- 🏁 Database Preparation Finished ---\n');
+};
+
+// Start migrations immediately
+await runMigrations();
 
 const app = new OpenAPIHono();
 
@@ -69,7 +92,7 @@ app.use('*', cors({
 }));
 
 // Global Error Handler
-app.onError((err, c) => {
+app.onError((err: Error, c) => {
   // Handle Better-Auth APIError (which has statusCode and body)
   if (err && typeof err === 'object' && 'statusCode' in err && 'body' in err) {
     const apiErr = err as any;
