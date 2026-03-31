@@ -50,16 +50,7 @@ ALTER TABLE "organizations" DISABLE ROW LEVEL SECURITY;--> statement-breakpoint
 ALTER TABLE "projects" DISABLE ROW LEVEL SECURITY;--> statement-breakpoint
 DROP TABLE "members" CASCADE;--> statement-breakpoint
 DROP TABLE "organizations" CASCADE;--> statement-breakpoint
-DROP TABLE "projects" CASCADE;--> statement-breakpoint
-ALTER TABLE "api_keys" DROP CONSTRAINT "api_keys_project_id_projects_id_fk";
---> statement-breakpoint
-ALTER TABLE "forms" DROP CONSTRAINT "forms_project_id_projects_id_fk";
---> statement-breakpoint
-ALTER TABLE "media" DROP CONSTRAINT "media_project_id_projects_id_fk";
---> statement-breakpoint
-ALTER TABLE "testimonials" DROP CONSTRAINT "testimonials_project_id_projects_id_fk";
---> statement-breakpoint
-ALTER TABLE "webhooks" DROP CONSTRAINT "webhooks_project_id_projects_id_fk";
+DROP TABLE "projects" CASCADE;
 --> statement-breakpoint
 DROP INDEX "idx_forms_project";--> statement-breakpoint
 DROP INDEX "idx_testimonials_project";--> statement-breakpoint
