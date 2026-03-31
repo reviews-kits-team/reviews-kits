@@ -26,6 +26,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 COPY --from=build-server /app/apps/server/dist ./dist
+COPY --from=build-server /app/apps/server/drizzle ./drizzle
 COPY --from=deps         /app/node_modules ./node_modules
 
 EXPOSE 3000
