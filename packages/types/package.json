@@ -1,5 +1,6 @@
 {
   "name": "@reviewskits/types",
+  "version": "0.0.4",
   "description": "Shared TypeScript definitions for ReviewsKits",
   "keywords": [
     "reviewskits",
@@ -20,6 +21,7 @@
   "files": [
     "dist"
   ],
+  "sideEffects": false,
   "module": "./dist/index.js",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
