@@ -2,7 +2,10 @@ import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
 import { cors } from 'hono/cors';
 import { migrate } from 'drizzle-orm/bun-sql/migrator';
+import { eq } from 'drizzle-orm';
 import { db } from './infrastructure/database/db';
+import { auth } from './infrastructure/auth/auth';
+import { users } from './infrastructure/database/schema';
 import { authRouter } from './interface/routes/auth';
 import { adminRouter } from './interface/routes/admin';
 
@@ -20,8 +23,32 @@ if (process.env.NODE_ENV === 'production') {
   try {
     await migrate(db, { migrationsFolder: './drizzle' });
     console.log('✅ Migrations completed');
+
+    // Auto-seed admin user
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    if (adminEmail && adminPassword) {
+      console.log(`⏳ Checking admin user: ${adminEmail}...`);
+      const existingUser = await db.select().from(users).where(eq(users.email, adminEmail)).limit(1);
+      const user = existingUser[0];
+      if (user) {
+        if (!user.isSystemAdmin) {
+          await db.update(users).set({ isSystemAdmin: true }).where(eq(users.email, adminEmail));
+          console.log(`✅ Granted admin privileges to existing user.`);
+        }
+      } else {
+        const res = await auth.api.signUpEmail({
+          body: { email: adminEmail, password: adminPassword, name: "System Administrator" },
+          headers: new Headers()
+        });
+        if (res?.user) {
+          await db.update(users).set({ isSystemAdmin: true, emailVerified: true }).where(eq(users.email, adminEmail));
+          console.log(`✅ Admin user created automatically.`);
+        }
+      }
+    }
   } catch (error) {
-    console.error('❌ Migration failed:', error);
+    console.error('❌ Boot prep failed:', error);
     process.exit(1);
   }
 }
