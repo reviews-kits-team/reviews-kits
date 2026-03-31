@@ -1,7 +1,7 @@
 services:
   # ─── Reverse Proxy ────────────────────────────────────────────
   traefik:
-    image: traefik:v3.0
+    image: traefik:latest
     restart: unless-stopped
     command:
       - "--providers.docker=true"
@@ -20,8 +20,6 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - letsencrypt:/letsencrypt
-    environment:
-      - DOCKER_API_VERSION=1.40
     networks:
       - reviewskits
 
