@@ -81,7 +81,7 @@ const app = new OpenAPIHono();
 // Enable CORS
 const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS 
   ? process.env.CORS_ALLOWED_ORIGINS.split(',').map(o => o.trim())
-  : ['http://localhost:5174', 'http://localhost:5180', 'http://localhost:3000'];
+  : ['http://localhost:5174', 'http://localhost:5180', 'http://localhost:3000', 'http://localhost:4000'];
 
 app.use('*', cors({
   origin: allowedOrigins,
