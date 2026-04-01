@@ -27,7 +27,7 @@ cp .env.example .env
 # Open .env and set your ADMIN_EMAIL and ADMIN_PASSWORD
 ```
 
-3. **Infrastucture**:
+3. **Infrastructure**:
 ```bash
 # Start Postgres, Redis, and Minio
 docker compose -f infra/docker-compose.dev.yml up -d
@@ -38,7 +38,12 @@ docker compose -f infra/docker-compose.dev.yml up -d
 bun run dev
 ```
 
-Visit `http://localhost:3000/admin` to access the dashboard.
+| Service | URL |
+|---------|-----|
+| Admin dashboard | `http://localhost:5180` |
+| API server | `http://localhost:3000` |
+| API Swagger UI | `http://localhost:3000/ui` |
+| Documentation | `http://localhost:5174` |
 
 ---
 
