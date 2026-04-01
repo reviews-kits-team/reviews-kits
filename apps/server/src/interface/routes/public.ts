@@ -1,13 +1,9 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
-import { cors } from 'hono/cors';
 import { pkCheck } from '../../shared/middlewares/pk-check';
 import { publicReviewController } from '../controllers/publicReviewController';
 import { rateLimiter } from '../middlewares/rateLimiter';
 
 export const publicRouter = new OpenAPIHono();
-
-// Enable CORS for all origins on the public API
-publicRouter.use('*', cors());
 
 // Authentication is handled specifically per route
 
