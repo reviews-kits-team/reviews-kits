@@ -1,0 +1,46 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 64 72"
+  fill="none"
+  role="img"
+  aria-label="Reviewskits"
+  width="64"
+  height="72"
+>
+  <title>Reviewskits</title>
+  <desc>Logo Reviewskits — monogramme RK géométrique avec bulle de citation</desc>
+
+  <defs>
+    <!-- Overlay lumineux subtil pour la profondeur du badge -->
+    <linearGradient id="rk-shine" x1="0" y1="0" x2="0.65" y2="1">
+      <stop offset="0%"   stop-color="white" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ── Badge : bulle de texte ─────────────────────────────────── -->
+  <!-- Corps principal -->
+  <rect x="1" y="1" width="62" height="59" rx="14" fill="#0D9E75"/>
+  <!-- Overlay de profondeur -->
+  <rect x="1" y="1" width="62" height="59" rx="14" fill="url(#rk-shine)"/>
+  <!-- Queue de la bulle (bas-gauche) -->
+  <path d="M 9 58 L 3 72 L 21 58 Z" fill="#0D9E75"/>
+
+  <!-- ── Monogramme RK ───────────────────────────────────────────── -->
+  <g stroke="white" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke-width="5.5">
+    <!-- Fût vertical partagé R + K -->
+    <line x1="13" y1="13" x2="13" y2="49"/>
+    <!-- Panse du R (courbe cubique, bowl) -->
+    <path d="M 13 13 C 24 13 37 17 37 24 C 37 31 24 33 13 31"/>
+    <!-- Bras supérieur du K -->
+    <line x1="13" y1="31" x2="37" y2="13"/>
+    <!-- Bras inférieur du K -->
+    <line x1="13" y1="31" x2="37" y2="49"/>
+  </g>
+
+  <!-- ── Accent guillemet / citation ───────────────────────────── -->
+  <!-- Deux points empilés (haut-droit) — évoquent des guillemets ou des points d'une bulle -->
+  <circle cx="50" cy="18" r="3" fill="white" opacity="0.65"/>
+  <circle cx="50" cy="27" r="3" fill="white" opacity="0.65"/>
+
+</svg>

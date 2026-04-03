@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Bell, ChevronDown } from 'lucide-react'
 import { ProfileMenu } from './profile-menu'
 import { authClient } from '../../lib/auth-client'
+import logo from '../../assets/logo.svg'
 
 export const TopBar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -12,7 +13,7 @@ export const TopBar = () => {
       <div className="flex items-center justify-between w-full max-w-[1140px] mx-auto px-6">
         <a href="/" className="flex items-center gap-2 text-[17px] font-bold tracking-tight">
           <div className="w-7 h-7 rounded-lg bg-[var(--v3-teal)] flex items-center justify-center text-sm shadow-[0_0_16px_var(--v3-teal-glow)] text-white">
-            ★
+            <img src={logo} alt="reviewkits logo" />
           </div>
           Reviewskits
         </a>
