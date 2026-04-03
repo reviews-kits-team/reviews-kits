@@ -17,7 +17,7 @@ RUN bun install --frozen-lockfile
 FROM deps AS build-server
 COPY packages/types ./packages/types
 COPY apps/server ./apps/server
-RUN cd apps/server && bun run build
+RUN cd apps/server && bun build src/index.ts scripts/migrate.ts scripts/seed-admin.ts --outdir dist --target bun
 
 # ─── Production image ─────────────────────────────────────────
 FROM oven/bun:1-alpine AS runner
@@ -28,7 +28,10 @@ ENV NODE_ENV=production
 COPY --from=build-server /app/apps/server/dist ./dist
 COPY --from=build-server /app/apps/server/drizzle ./drizzle
 COPY --from=deps         /app/node_modules ./node_modules
+COPY --from=build-server /app/apps/server/docker-entrypoint.sh ./docker-entrypoint.sh
+
+RUN chmod +x docker-entrypoint.sh
 
 EXPOSE 3000
 
-CMD ["bun", "run", "dist/index.js"]
+CMD ["./docker-entrypoint.sh"]
