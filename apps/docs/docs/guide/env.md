@@ -6,6 +6,9 @@ Configure your Reviewskits instance using environment variables. Copy `.env.exam
 cp .env.example .env
 ```
 
+You can use the generator below or `openssl` to create a secure random string for `BETTER_AUTH_SECRET`. Passwords (`POSTGRES_PASSWORD`, `ADMIN_PASSWORD`) should be chosen securely and stored safely; avoiding long random strings here can make them easier to remember.
+
+<GenerateSecret varName="BETTER_AUTH_SECRET" />
 ---
 
 ## Development Mode
@@ -18,7 +21,7 @@ POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_DB=reviewskits
 
-# Prisma / Drizzle Database URL (Localhost for local dev)
+# Drizzle Database URL (Localhost for local dev)
 DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5433/${POSTGRES_DB}
 
 # Auth
@@ -29,11 +32,6 @@ ADMIN_EMAIL=admin@reviewskits.com
 ADMIN_PASSWORD=admin_secure_password
 BETTER_AUTH_URL=http://localhost:3000/api/auth
 
-# Object Storage / Minio (Localhost for local dev)
-STORAGE_ACCESS_KEY=minioadmin
-STORAGE_SECRET_KEY=minioadmin
-STORAGE_ENDPOINT=http://localhost:9000
-STORAGE_BUCKET=reviewskits-media
 ```
 
 ## Production Mode
