@@ -31,7 +31,7 @@ Webhooks are sent as a **POST** request with a JSON body.
 ```json
 {
   "event": "testimonial.created",
-  "createdAt": "2024-03-29T12:00:00Z",
+  "timestamp": "2024-03-29T12:00:00.000Z",
   "data": {
     "id": "test_123",
     "content": "Reviewskits is amazing!",
@@ -48,7 +48,7 @@ Webhooks are sent as a **POST** request with a JSON body.
 
 All Reviewskits webhooks are signed with a secret key specific to your organization. This allows you to verify that the request truly came from our server.
 
-The signature is sent in the `X-Reviewskits-Signature` header.
+The signature is sent in the `X-ReviewKits-Signature` header.
 
 ```javascript
 // Node.js example for verification
@@ -58,7 +58,7 @@ const signature = crypto
   .update(JSON.stringify(payload))
   .digest('hex');
 
-if (signature === request.headers['x-reviewskits-signature']) {
+if (signature === request.headers['x-reviewkits-signature']) {
   // Integrity verified
 }
 ```

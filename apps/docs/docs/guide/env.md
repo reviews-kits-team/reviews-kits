@@ -1,6 +1,12 @@
 # Environment Variables
 
-Configure your Reviewskits instance using environment variables.
+Configure your Reviewskits instance using environment variables. Copy `.env.example` to `.env` and fill in the required values before starting the server.
+
+```bash
+cp .env.example .env
+```
+
+---
 
 ## Development Mode
 
