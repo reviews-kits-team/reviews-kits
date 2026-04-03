@@ -1,5 +1,7 @@
 # React SDK
 
+[![NPM Package](https://img.shields.io/npm/v/@reviewskits/react.svg)](https://www.npmjs.com/package/@reviewskits/react)
+
 Integrate Reviewskits into your React or Next.js application with our official, zero-dependency SDK.
 
 ---
@@ -25,10 +27,10 @@ import { ReviewsKitProvider } from '@reviewskits/react';
 
 function App({ children }) {
   return (
-    <ReviewsKitProvider
+    <ReviewsKitProvider 
       config={{
         pk: 'pk_your_public_key',
-        host: 'https://reviews.yourdomain.com',
+        host: 'https://reviews.yourdomain.com'
       }}
     >
       {children}
@@ -36,6 +38,17 @@ function App({ children }) {
   );
 }
 ```
+
+> [!TIP]
+> **Locating your Credentials**
+> 
+> You will need your Public API Key to initialize the SDK. You can find this key by navigating to the **API Keys** section in your dashboard settings.
+> 
+> ![Where to find your API Key](/images/where_to_find_your_api_key.png)
+> 
+> When fetching reviews or submitting data for a specific form, you'll also need the Form Slug (or Form Key). This can be found directly on the form's management page.
+> 
+> ![Where to find your Form Slug](/images/where_to_find_your_form_key.png)
 
 ### 2. Fetch Reviews
 Use the `useReviews` hook to fetch and display approved testimonials. The `formId` parameter is **required** — it corresponds to the `publicId` of your collection form.
@@ -67,49 +80,52 @@ function Testimonials() {
 
 ---
 
-## API Reference
+## Infinite Loading
 
-### `ReviewsKitProvider`
-
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `config` | `ReviewsKitConfig` | Yes | Global SDK configuration |
-| `config.pk` | `string` | Yes | Your public API key (`pk_...`) |
-| `config.host` | `string` | Yes | Base URL of your Reviewskits instance |
-| `children` | `ReactNode` | Yes | Your application tree |
-
----
-
-### `useReviews(params)`
-
-Fetches a single page of approved reviews. Supports AbortController for cleanup on unmount.
-
-**Parameters**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `formId` | `string` | Yes | The `publicId` of your collection form |
-| `page` | `number` | No | Page number (default: `1`) |
-| `limit` | `number` | No | Number of reviews per page (default: `10`) |
-| `minRating` | `number` | No | Minimum rating filter (1–5) |
-
-**Returns**
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `data` | `{ reviews: Review[] } \| null` | The fetched data, or `null` while loading |
-| `isLoading` | `boolean` | `true` during the initial fetch |
-| `error` | `any` | Error object if the request failed |
-| `refetch` | `() => void` | Manually trigger a refetch |
-
-**Example**
+For infinite scrolling testimonials, use the `useInfiniteReviews` hook.
 
 ```tsx
-const { data, isLoading, error, refetch } = useReviews({
-  formId: 'your_form_public_id',
-  limit: 6,
-  minRating: 4,
-});
+import { useInfiniteReviews } from '@reviewskits/react';
+
+function InfiniteTestimonials() {
+  const { 
+    data, 
+    isLoading, 
+    fetchNextPage, 
+    hasNextPage, 
+    isFetchingNextPage 
+  } = useInfiniteReviews({
+    limit: 10
+  });
+
+  if (isLoading && !data) return <p>Loading...</p>;
+
+  return (
+    <div>
+      <div className="grid gap-4">
+        {data?.pages.map((page) => (
+          <React.Fragment key={page.meta.page}>
+            {page.reviews.map((review) => (
+              <div key={review.id} className="p-4 border rounded">
+                <p>"{review.content}"</p>
+                <span>— {review.author.name}</span>
+              </div>
+            ))}
+          </React.Fragment>
+        ))}
+      </div>
+      
+      {hasNextPage && (
+        <button 
+          onClick={() => fetchNextPage()} 
+          disabled={isFetchingNextPage}
+        >
+          {isFetchingNextPage ? 'Loading more...' : 'Load More'}
+        </button>
+      )}
+    </div>
+  );
+}
 ```
 
 ---
