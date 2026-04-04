@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach } from "bun:test";
 import { testDb, clearDatabase } from "../IntegrationSetup";
 import { formsRouter } from "../../../src/interface/routes/forms";
-import { container } from "../../../src/infrastructure/container";
+import { testRepositories } from '../../testContainer';
 import { Form } from "../../../src/domain/entities/Form";
 import { Slug } from "../../../src/domain/value-objects/Slug";
 import crypto from "node:crypto";
@@ -48,7 +48,7 @@ describe("Form Controller Integration", () => {
     const data = await res.json() as any;
     expect(data.id).toBeDefined();
 
-    const forms = await container.formRepository.findByUser(userId);
+    const forms = await testRepositories.formRepository.findByUser(userId);
     expect(forms).toHaveLength(1);
     expect(forms[0]!.getName()).toBe("New Form");
   });
@@ -62,7 +62,7 @@ describe("Form Controller Integration", () => {
       publicId: "rk_frm_live_existing",
       config: {}
     });
-    await container.formRepository.save(form);
+    await testRepositories.formRepository.save(form);
 
     const res = await formsRouter.request("/", {
       method: "GET",
@@ -84,7 +84,7 @@ describe("Form Controller Integration", () => {
       publicId: "rk_frm_live_old",
       config: {}
     });
-    await container.formRepository.save(form);
+    await testRepositories.formRepository.save(form);
 
     const res = await formsRouter.request(`/${form.getId()}`, {
       method: "PATCH",
@@ -96,7 +96,7 @@ describe("Form Controller Integration", () => {
     });
 
     expect(res.status).toBe(200);
-    const updated = await container.formRepository.findById(form.getId());
+    const updated = await testRepositories.formRepository.findById(form.getId());
     expect(updated?.getName()).toBe("New Name");
     expect(updated?.getProps().description).toBe("Updated description");
   });
@@ -111,7 +111,7 @@ describe("Form Controller Integration", () => {
       isActive: true,
       config: {}
     });
-    await container.formRepository.save(form);
+    await testRepositories.formRepository.save(form);
 
     const res = await formsRouter.request(`/${form.getId()}/toggle`, {
       method: "PATCH",
@@ -119,7 +119,7 @@ describe("Form Controller Integration", () => {
     });
 
     expect(res.status).toBe(200);
-    const updated = await container.formRepository.findById(form.getId());
+    const updated = await testRepositories.formRepository.findById(form.getId());
     expect(updated?.getIsActive()).toBe(false);
   });
 });

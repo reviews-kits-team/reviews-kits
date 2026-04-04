@@ -1,3 +1,4 @@
+import { NotFoundError } from '../../../domain/errors/NotFoundError';
 import { randomUUID } from 'node:crypto';
 import type { IFormRepository } from '../../../domain/repositories/IFormRepository';
 import { Form } from '../../../domain/entities/Form';
@@ -17,7 +18,7 @@ export class DuplicateFormUseCase {
 
     const originalForm = await this.formRepository.findById(id);
     if (!originalForm || originalForm.getUserId() !== userId) {
-      throw new Error('Form not found');
+      throw new NotFoundError('Form not found');
     }
 
     const originalProps = originalForm.getProps();

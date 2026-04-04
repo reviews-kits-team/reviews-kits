@@ -4,12 +4,22 @@ import { Star, ArrowRight, ArrowLeft, Plus, CheckCircle, Loader2 } from 'lucide-
 import confetti from 'canvas-confetti'
 
 // Types (Must match backend)
+interface StepField {
+  id: string
+  type: 'text' | 'nps' | 'choice' | 'grid'
+  label: string
+  placeholder?: string
+  options?: string[]
+  rows?: string[]
+}
+
 interface FormStep {
   id: string
-  type: 'welcome' | 'rating' | 'textarea' | 'attribution' | 'success' | 'informative'
+  type: 'welcome' | 'core' | 'identity' | 'success' | 'custom' | 'rating' | 'textarea' | 'attribution' | 'informative'
   title: string
   description?: string
   isEnabled: boolean
+  locked?: boolean
   config?: Record<string, unknown>
 }
 
@@ -47,6 +57,8 @@ export default function PublicFormPage() {
   const [authorTitle, setAuthorTitle] = useState('')
   const [authorUrl, setAuthorUrl] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  // Selection state for custom step fields (fieldId → selected value)
+  const [customFieldValues, setCustomFieldValues] = useState<Record<string, unknown>>({})
 
   useEffect(() => {
     const fetchForm = async () => {
@@ -140,7 +152,7 @@ export default function PublicFormPage() {
   const appliedBodyFont = fontsReady ? bodyFont : 'system-ui, sans-serif'
 
   const handleNext = async () => {
-    if (currentStep?.type === 'attribution') {
+    if (currentStep?.type === 'identity' || currentStep?.type === 'attribution') {
       await handleSubmit()
     } else {
       setCurrentStepIndex(prev => prev + 1)
@@ -151,6 +163,29 @@ export default function PublicFormPage() {
     if (!form) return
     setSubmitting(true)
     try {
+      // Build metadata from custom step field answers
+      const metadata: Record<string, unknown> = {}
+      steps.forEach(step => {
+        if (step.type === 'custom') {
+          const fields = ((step.config as Record<string, unknown>)?.fields || []) as StepField[]
+          fields.forEach(field => {
+            const val = customFieldValues[field.id]
+            if (val === undefined) return
+            if (field.type === 'grid') {
+              // Map row indices to row labels
+              const rowMap = val as Record<number, string>
+              const labeled: Record<string, string> = {}
+              ;(field.rows || []).forEach((row, ri) => {
+                if (rowMap[ri] !== undefined) labeled[row] = rowMap[ri]
+              })
+              metadata[field.label] = labeled
+            } else {
+              metadata[field.label] = val
+            }
+          })
+        }
+      })
+
       const res = await fetch('/api/v1/public/reviews', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -161,7 +196,8 @@ export default function PublicFormPage() {
           authorEmail,
           authorTitle,
           authorUrl,
-          rating
+          rating,
+          metadata: Object.keys(metadata).length > 0 ? metadata : undefined
         })
       })
       if (res.ok) {
@@ -175,7 +211,7 @@ export default function PublicFormPage() {
         }
       } else {
         const data = await res.json()
-        alert(data.error || "An error occurred while sending.")
+        alert(typeof data.error === 'string' ? data.error : "An error occurred while sending.")
       }
     } catch (error) {
       console.error("Submission failed", error)
@@ -408,6 +444,241 @@ export default function PublicFormPage() {
                   className="flex-1 py-5 rounded-2xl text-white font-bold text-lg shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
                 >
                   {submitting ? <Loader2 size={28} className="animate-spin" /> : (currentStep.config as Record<string, string | boolean>)?.buttonText || 'Finish'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Core Step (rating + testimonial textarea) */}
+          {currentStep?.type === 'core' && (
+            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 w-full flex flex-col items-center">
+              <h1 className="text-4xl font-black tracking-tighter text-black mb-6" style={{ fontFamily: appliedHeadingFont, color: '#000000' }}>
+                {currentStep.title}
+              </h1>
+              <p className="text-gray-600 mb-8 text-xl leading-relaxed">{currentStep.description}</p>
+
+              <div className="flex gap-4 justify-center mb-8">
+                {(currentStep.config as Record<string, string | boolean>)?.ratingType === 'emojis' ? (
+                  ['😠', '🙁', '😐', '🙂', '😍'].map((emoji, i) => (
+                    <button key={i} onClick={() => setRating(i + 1)}
+                      className={`text-5xl transition-all hover:scale-125 ${rating === i + 1 ? 'scale-125 grayscale-0' : 'grayscale opacity-40 hover:opacity-100 hover:grayscale-0'}`}
+                    >{emoji}</button>
+                  ))
+                ) : (
+                  [1, 2, 3, 4, 5].map((val) => (
+                    <button key={val} onClick={() => setRating(val)} className="p-1 transition-all hover:scale-110 group focus:outline-none">
+                      <Star size={52} className={`transition-all ${rating >= val ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 group-hover:text-gray-400 fill-gray-200'}`} />
+                    </button>
+                  ))
+                )}
+              </div>
+
+              <textarea
+                autoFocus
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder={((currentStep.config as Record<string, string | boolean>)?.placeholder as string) || 'Tell us more about your experience...'}
+                className="w-full h-40 p-8 rounded-[2rem] border-2 border-gray-100 bg-gray-50 mb-8 focus:ring-4 focus:ring-gray-100 focus:border-gray-200 outline-none transition-all text-black text-lg resize-none placeholder:text-gray-400"
+              />
+
+              <button
+                disabled={rating === 0 || content.length < 5}
+                onClick={handleNext}
+                style={{ backgroundColor: (rating > 0 && content.length >= 5) ? primaryColor : '#E5E7EB' }}
+                className="w-full py-5 rounded-2xl text-white font-bold text-lg shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all disabled:cursor-not-allowed flex items-center justify-center gap-3"
+              >
+                {(currentStep.config as Record<string, string | boolean>)?.buttonText || 'Continue'} <ArrowRight size={22} />
+              </button>
+            </div>
+          )}
+
+          {/* Identity Step (name / email / photo / social links) */}
+          {currentStep?.type === 'identity' && (
+            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 w-full flex flex-col items-center">
+              <h1 className="text-4xl font-black tracking-tighter text-black mb-6" style={{ fontFamily: appliedHeadingFont, color: '#000000' }}>
+                {currentStep.title}
+              </h1>
+              <p className="text-gray-600 mb-10 text-xl leading-relaxed">{currentStep.description}</p>
+
+              <div className="w-full space-y-4 mb-10">
+                <div className="w-full h-28 rounded-[2rem] bg-gray-50 border-2 border-dashed border-gray-100 flex flex-col items-center justify-center gap-2 text-gray-500 hover:bg-gray-100 transition-all cursor-pointer group">
+                  <Plus size={28} className="group-hover:scale-110 transition-transform" />
+                  <span className="text-xs font-black uppercase tracking-widest">Add a photo</span>
+                </div>
+                <input
+                  required
+                  type="text"
+                  placeholder="Your full name"
+                  value={authorName}
+                  onChange={(e) => setAuthorName(e.target.value)}
+                  className="w-full px-8 py-5 rounded-2xl border-2 border-gray-50 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-gray-100 focus:border-gray-100 outline-none transition-all text-lg text-black placeholder:text-gray-400"
+                />
+                {(currentStep.config as Record<string, boolean>)?.collectEmail !== false && (
+                  <input
+                    type="email"
+                    placeholder="votre@email.com"
+                    value={authorEmail}
+                    onChange={(e) => setAuthorEmail(e.target.value)}
+                    className="w-full px-8 py-5 rounded-2xl border-2 border-gray-50 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-gray-100 focus:border-gray-100 outline-none transition-all text-lg text-black placeholder:text-gray-400"
+                  />
+                )}
+                {(currentStep.config as Record<string, boolean>)?.collectCompany && (
+                  <div className="flex gap-4">
+                    <input
+                      type="text"
+                      placeholder="Your company"
+                      value={authorTitle}
+                      onChange={(e) => setAuthorTitle(e.target.value)}
+                      className="w-full px-8 py-5 rounded-2xl border-2 border-gray-50 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-gray-100 outline-none transition-all text-lg text-black placeholder:text-gray-400"
+                    />
+                    <input
+                      type="url"
+                      placeholder="Website"
+                      value={authorUrl}
+                      onChange={(e) => setAuthorUrl(e.target.value)}
+                      className="w-full px-8 py-5 rounded-2xl border-2 border-gray-50 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-gray-100 outline-none transition-all text-lg text-black placeholder:text-gray-400"
+                    />
+                  </div>
+                )}
+                {(currentStep.config as Record<string, boolean>)?.collectSocialLinks && (
+                  <input
+                    type="url"
+                    placeholder="linkedin.com/in/yourprofile"
+                    value={authorUrl}
+                    onChange={(e) => setAuthorUrl(e.target.value)}
+                    className="w-full px-8 py-5 rounded-2xl border-2 border-gray-50 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-gray-100 outline-none transition-all text-lg text-black placeholder:text-gray-400"
+                  />
+                )}
+              </div>
+
+              <div className="flex gap-4 w-full">
+                <button onClick={() => setCurrentStepIndex(prev => prev - 1)}
+                  className="px-6 py-5 rounded-2xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all font-bold"
+                >
+                  <ArrowLeft size={22} />
+                </button>
+                <button
+                  disabled={!authorName || submitting}
+                  onClick={handleNext}
+                  style={{ backgroundColor: authorName ? primaryColor : '#E5E7EB' }}
+                  className="flex-1 py-5 rounded-2xl text-white font-bold text-lg shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+                >
+                  {submitting ? <Loader2 size={28} className="animate-spin" /> : ((currentStep.config as Record<string, string>)?.buttonText || 'Submit')}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Custom Step (flexible fields) */}
+          {currentStep?.type === 'custom' && (
+            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 w-full flex flex-col items-center">
+              <h1 className="text-4xl font-black tracking-tighter text-black mb-6" style={{ fontFamily: appliedHeadingFont, color: '#000000' }}>
+                {currentStep.title}
+              </h1>
+              <p className="text-gray-600 mb-8 text-xl leading-relaxed">{currentStep.description}</p>
+
+              <div className="w-full space-y-6 mb-10 text-left">
+                {(((currentStep.config as Record<string, unknown>)?.fields || []) as StepField[]).map(field => (
+                  <div key={field.id}>
+                    <p className="text-sm font-bold text-gray-800 mb-2">{field.label}</p>
+                    {field.type === 'text' && (
+                      <input
+                        type="text"
+                        placeholder={field.placeholder || 'Your answer...'}
+                        value={(customFieldValues[field.id] as string) || ''}
+                        onChange={e => setCustomFieldValues(prev => ({ ...prev, [field.id]: e.target.value }))}
+                        className="w-full px-6 py-4 rounded-2xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:ring-4 focus:ring-gray-100 outline-none transition-all text-black placeholder:text-gray-400"
+                      />
+                    )}
+                    {field.type === 'nps' && (
+                      <div className="flex gap-1">
+                        {Array.from({ length: 11 }, (_, i) => {
+                          const selected = customFieldValues[field.id] === i
+                          return (
+                            <button key={i}
+                              onClick={() => setCustomFieldValues(prev => ({ ...prev, [field.id]: i }))}
+                              style={selected ? { backgroundColor: primaryColor, borderColor: primaryColor, color: '#fff' } : {}}
+                              className={`flex-1 py-3 rounded-xl border-2 text-sm font-bold transition-all ${selected ? '' : 'border-gray-100 bg-gray-50 hover:border-gray-300 text-gray-600'}`}
+                            >{i}</button>
+                          )
+                        })}
+                      </div>
+                    )}
+                    {field.type === 'choice' && (
+                      <div className="space-y-2">
+                        {(field.options || []).map((opt, i) => {
+                          const selected = customFieldValues[field.id] === opt
+                          return (
+                            <button key={i}
+                              onClick={() => setCustomFieldValues(prev => ({ ...prev, [field.id]: opt }))}
+                              style={selected ? { borderColor: primaryColor } : {}}
+                              className={`w-full px-6 py-4 rounded-2xl border-2 text-left font-medium transition-all flex items-center gap-3 ${selected ? 'bg-gray-50 text-gray-900' : 'border-gray-100 bg-gray-50 hover:border-gray-300 text-gray-700'}`}
+                            >
+                              <div
+                                style={selected ? { backgroundColor: primaryColor, borderColor: primaryColor } : {}}
+                                className={`w-4 h-4 rounded-full border-2 shrink-0 ${selected ? '' : 'border-gray-300'}`}
+                              />
+                              {opt}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    )}
+                    {field.type === 'grid' && (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm border-collapse">
+                          <thead>
+                            <tr>
+                              <th className="p-2 text-gray-400 font-normal text-left w-1/3" />
+                              {(field.options || ['1','2','3','4','5']).map(col => (
+                                <th key={col} className="p-2 text-gray-500 font-bold text-center">{col}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(field.rows || []).map((row, ri) => {
+                              const rowSelections = (customFieldValues[field.id] as Record<number, string>) || {}
+                              return (
+                                <tr key={ri} className="border-t border-gray-100">
+                                  <td className="p-2 text-gray-600 text-sm">{row}</td>
+                                  {(field.options || ['1','2','3','4','5']).map(col => {
+                                    const selected = rowSelections[ri] === col
+                                    return (
+                                      <td key={col} className="p-2 text-center">
+                                        <button
+                                          onClick={() => setCustomFieldValues(prev => ({
+                                            ...prev,
+                                            [field.id]: { ...((prev[field.id] as Record<number, string>) || {}), [ri]: col }
+                                          }))}
+                                          style={selected ? { backgroundColor: primaryColor, borderColor: primaryColor } : {}}
+                                          className={`w-5 h-5 rounded-full border-2 mx-auto transition-all block ${selected ? '' : 'border-gray-200 hover:border-gray-400'}`}
+                                        />
+                                      </td>
+                                    )
+                                  })}
+                                </tr>
+                              )
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-4 w-full">
+                <button onClick={() => setCurrentStepIndex(prev => prev - 1)}
+                  className="px-6 py-5 rounded-2xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all font-bold"
+                >
+                  <ArrowLeft size={22} />
+                </button>
+                <button
+                  onClick={handleNext}
+                  style={{ backgroundColor: primaryColor }}
+                  className="flex-1 py-5 rounded-2xl text-white font-bold text-lg shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+                >
+                  {(currentStep.config as Record<string, string>)?.buttonText || 'Continue'} <ArrowRight size={22} />
                 </button>
               </div>
             </div>

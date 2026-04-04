@@ -23,12 +23,22 @@ import { TopBar } from '../components/dashboard/top-bar'
 import { ColorPicker } from '../components/ui/color-picker'
 
 // Types
+interface StepField {
+  id: string
+  type: 'text' | 'nps' | 'choice' | 'grid'
+  label: string
+  placeholder?: string
+  options?: string[]
+  rows?: string[]
+}
+
 interface FormStep {
   id: string
-  type: 'welcome' | 'rating' | 'textarea' | 'attribution' | 'success' | 'informative'
+  type: 'welcome' | 'core' | 'identity' | 'success' | 'custom' | 'rating' | 'textarea' | 'attribution' | 'informative'
   title: string
   description?: string
   isEnabled: boolean
+  locked?: boolean
   config?: Record<string, unknown>
 }
 
@@ -51,6 +61,23 @@ interface FormData {
   }
 }
 
+// Ensures custom steps are always before identity/success (fixes steps saved in wrong position)
+const normalizeStepOrder = (steps: FormStep[]): FormStep[] => {
+  const firstGateIndex = steps.findIndex(s =>
+    s.type === 'identity' || s.type === 'attribution' || s.type === 'success'
+  )
+  if (firstGateIndex === -1) return steps
+
+  const misplaced = steps.filter((s, i) => s.type === 'custom' && i >= firstGateIndex)
+  if (misplaced.length === 0) return steps
+
+  const rest = steps.filter((s, i) => !(s.type === 'custom' && i >= firstGateIndex))
+  const insertAt = rest.findIndex(s =>
+    s.type === 'identity' || s.type === 'attribution' || s.type === 'success'
+  )
+  return [...rest.slice(0, insertAt), ...misplaced, ...rest.slice(insertAt)]
+}
+
 export default function FormEditorPage() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -63,6 +90,7 @@ export default function FormEditorPage() {
   const [showSharePopover, setShowSharePopover] = useState(false)
   const [copied, setCopied] = useState(false)
   const [showSaveSuccess, setShowSaveSuccess] = useState(false)
+  const [showSaveError, setShowSaveError] = useState(false)
 
   const canvasRef = useRef<HTMLDivElement>(null)
   const stepRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
@@ -89,6 +117,9 @@ export default function FormEditorPage() {
         const res = await fetch(`/api/v1/forms/${id}`)
         if (res.ok) {
           const data = await res.json()
+          if (data.config?.steps) {
+            data.config.steps = normalizeStepOrder(data.config.steps)
+          }
           setForm(data)
           if (data.config?.steps?.length > 0) {
             setActiveStepId(data.config.steps[0].id)
@@ -145,19 +176,79 @@ export default function FormEditorPage() {
     if (!form) return
     const newSteps = [...form.config.steps]
     const targetIndex = direction === 'up' ? index - 1 : index + 1
-
     if (targetIndex < 0 || targetIndex >= newSteps.length) return
-
-    // Swap
+    if (newSteps[targetIndex].locked) return
     const temp = newSteps[index]
     newSteps[index] = newSteps[targetIndex]
     newSteps[targetIndex] = temp
-
     setForm({ ...form, config: { ...form.config, steps: newSteps } })
-
-    // Scroll to the moved step
     setTimeout(() => scrollToStep(temp.id), 100)
   }
+
+  const deleteStep = (stepId: string) => {
+    if (!form) return
+    const step = form.config.steps.find(s => s.id === stepId)
+    if (step?.locked) return
+    const newSteps = form.config.steps.filter(s => s.id !== stepId)
+    const fallback = newSteps[0]?.id || null
+    setForm({ ...form, config: { ...form.config, steps: newSteps } })
+    setActiveStepId(fallback)
+  }
+
+  const addStep = () => {
+    if (!form) return
+    const newId = `step_${Date.now()}`
+    const newStep: FormStep = {
+      id: newId,
+      type: 'custom',
+      title: 'New question',
+      description: 'Add a description for this step',
+      isEnabled: true,
+      locked: false,
+      config: {
+        fields: [{ id: `field_${Date.now()}`, type: 'text', label: 'Your question?', placeholder: 'Type your answer...' }],
+        buttonText: 'Continue'
+      }
+    }
+    const identityIndex = form.config.steps.findIndex(s => s.type === 'identity' || s.type === 'attribution')
+    const insertIndex = identityIndex >= 0 ? identityIndex : form.config.steps.length
+    const newSteps = [...form.config.steps.slice(0, insertIndex), newStep, ...form.config.steps.slice(insertIndex)]
+    setForm({ ...form, config: { ...form.config, steps: newSteps } })
+    setTimeout(() => scrollToStep(newId), 100)
+  }
+
+  const addField = (stepId: string, fieldType: 'text' | 'nps' | 'choice' | 'grid') => {
+    if (!form) return
+    const step = form.config.steps.find(s => s.id === stepId)
+    if (!step) return
+    const fieldDefaults: Record<string, Partial<StepField>> = {
+      text: { label: 'Short answer', placeholder: 'Type your answer...' },
+      nps: { label: 'How likely are you to recommend us? (0–10)' },
+      choice: { label: 'Choose an option', options: ['Option A', 'Option B', 'Option C'] },
+      grid: { label: 'Rate these aspects', rows: ['Quality', 'Speed', 'Support'], options: ['1', '2', '3', '4', '5'] }
+    }
+    const newField: StepField = { id: `field_${Date.now()}`, type: fieldType, label: '', ...fieldDefaults[fieldType] }
+    const currentFields = ((step.config as Record<string, unknown>)?.fields || []) as StepField[]
+    updateStep(stepId, { config: { ...step.config, fields: [...currentFields, newField] } })
+  }
+
+  const removeField = (stepId: string, fieldId: string) => {
+    if (!form) return
+    const step = form.config.steps.find(s => s.id === stepId)
+    if (!step) return
+    const currentFields = ((step.config as Record<string, unknown>)?.fields || []) as StepField[]
+    updateStep(stepId, { config: { ...step.config, fields: currentFields.filter(f => f.id !== fieldId) } })
+  }
+
+  const updateField = (stepId: string, fieldId: string, updates: Partial<StepField>) => {
+    if (!form) return
+    const step = form.config.steps.find(s => s.id === stepId)
+    if (!step) return
+    const currentFields = ((step.config as Record<string, unknown>)?.fields || []) as StepField[]
+    const newFields = currentFields.map(f => f.id === fieldId ? { ...f, ...updates } : f)
+    updateStep(stepId, { config: { ...step.config, fields: newFields } })
+  }
+
   const updateStep = (stepId: string, updates: Partial<FormStep>) => {
     if (!form) return
     const newSteps = [...form.config.steps]
@@ -218,9 +309,14 @@ export default function FormEditorPage() {
       if (res.ok) {
         setShowSaveSuccess(true)
         setTimeout(() => setShowSaveSuccess(false), 3000)
+      } else {
+        setShowSaveError(true)
+        setTimeout(() => setShowSaveError(false), 3000)
       }
     } catch (error) {
       console.error("Failed to save form", error)
+      setShowSaveError(true)
+      setTimeout(() => setShowSaveError(false), 3000)
     }
   }
 
@@ -342,27 +438,43 @@ export default function FormEditorPage() {
               `}
             </style>
 
-            {/* Fixed Minimalist Reorder Buttons (Top-Right of Canvas) */}
-            <div className="sticky top-0 right-0 z-50 flex justify-end p-0 pointer-events-none">
-              <div className="flex gap-1 bg-[#0A0A0A]/60 backdrop-blur-md p-1 rounded-bl-xl border-l border-b border-white/10 pointer-events-auto shadow-2xl overflow-hidden">
-                <button
-                  disabled={form.config.steps.findIndex(s => s.id === activeStepId) <= 0}
-                  onClick={() => moveStep(form.config.steps.findIndex(s => s.id === activeStepId), 'up')}
-                  className="p-2 text-[#0D9E75] hover:bg-[#0D9E75]/10 rounded-lg transition-all disabled:opacity-20"
-                  title="Move current step up"
-                >
-                  <ChevronUp size={16} strokeWidth={3} />
-                </button>
-                <button
-                  disabled={form.config.steps.findIndex(s => s.id === activeStepId) >= form.config.steps.length - 1}
-                  onClick={() => moveStep(form.config.steps.findIndex(s => s.id === activeStepId), 'down')}
-                  className="p-2 text-[#0D9E75] hover:bg-[#0D9E75]/10 rounded-lg transition-all disabled:opacity-20"
-                  title="Move current step down"
-                >
-                  <ChevronDown size={16} strokeWidth={3} />
-                </button>
+            {/* Fixed Minimalist Reorder Buttons (Top-Right of Canvas) — hidden for locked steps */}
+            {!activeStep?.locked && (
+              <div className="sticky top-0 right-0 z-50 flex justify-end p-0 pointer-events-none">
+                <div className="flex gap-1 bg-[#0A0A0A]/60 backdrop-blur-md p-1 rounded-bl-xl border-l border-b border-white/10 pointer-events-auto shadow-2xl overflow-hidden">
+                  <button
+                    disabled={(() => {
+                      const idx = form.config.steps.findIndex(s => s.id === activeStepId)
+                      return idx <= 0 || !!form.config.steps[idx - 1]?.locked
+                    })()}
+                    onClick={() => moveStep(form.config.steps.findIndex(s => s.id === activeStepId), 'up')}
+                    className="p-2 text-[#0D9E75] hover:bg-[#0D9E75]/10 rounded-lg transition-all disabled:opacity-20"
+                    title="Move current step up"
+                  >
+                    <ChevronUp size={16} strokeWidth={3} />
+                  </button>
+                  <button
+                    disabled={(() => {
+                      const idx = form.config.steps.findIndex(s => s.id === activeStepId)
+                      return idx >= form.config.steps.length - 1 || !!form.config.steps[idx + 1]?.locked
+                    })()}
+                    onClick={() => moveStep(form.config.steps.findIndex(s => s.id === activeStepId), 'down')}
+                    className="p-2 text-[#0D9E75] hover:bg-[#0D9E75]/10 rounded-lg transition-all disabled:opacity-20"
+                    title="Move current step down"
+                  >
+                    <ChevronDown size={16} strokeWidth={3} />
+                  </button>
+                  <div className="w-px bg-white/10 mx-0.5" />
+                  <button
+                    onClick={() => activeStepId && deleteStep(activeStepId)}
+                    className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                    title="Delete this step"
+                  >
+                    <Trash2 size={16} strokeWidth={2} />
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="flex flex-col items-center">
               {form.config.steps.map((step, index) => (
@@ -385,7 +497,14 @@ export default function FormEditorPage() {
                     {/* Step Badge */}
                     <div className="absolute top-4 left-4 z-20">
                       <div className="bg-[#0A0A0A]/80 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white border border-white/10">
-                        Step {index + 1}: {step.type}
+                        Step {index + 1}: {
+                          step.type === 'welcome' ? 'Welcome' :
+                          step.type === 'core' ? 'Core' :
+                          step.type === 'identity' ? 'Identity' :
+                          step.type === 'success' ? 'Success' :
+                          step.type === 'custom' ? 'Custom' :
+                          step.type
+                        }{step.locked ? ' 🔒' : ''}
                       </div>
                     </div>
 
@@ -596,44 +715,207 @@ export default function FormEditorPage() {
                               </p>
                             </div>
                           )}
+
+                          {/* ── NEW: Core step (rating + testimonial textarea) ── */}
+                          {step.type === 'core' && (
+                            <div className="flex flex-col items-center gap-y-6 text-center w-full">
+                              <h2
+                                onClick={() => handleElementClick('title', step.id)}
+                                style={{ borderColor: selectedElement === 'title' && activeStepId === step.id ? '#000000' : 'transparent', fontFamily: headingFont, color: '#000000' }}
+                                className={`text-black text-2xl md:text-3xl font-black tracking-tighter text-balance cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                              >
+                                {step.title}
+                              </h2>
+                              <p
+                                onClick={() => handleElementClick('description', step.id)}
+                                style={{ borderColor: selectedElement === 'description' && activeStepId === step.id ? '#000000' : 'transparent' }}
+                                className={`text-gray-600 cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'description' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                              >
+                                {step.description}
+                              </p>
+                              <div className="flex gap-8 justify-center">
+                                {(step.config as Record<string, string | boolean>)?.ratingType === 'emojis' ? (
+                                  ['😠', '🙁', '😐', '🙂', '😍'].map((emoji) => (
+                                    <div key={emoji} className="text-4xl filter grayscale hover:grayscale-0 transition-all cursor-default">{emoji}</div>
+                                  ))
+                                ) : (
+                                  [1, 2, 3, 4, 5].map(v => (
+                                    <div key={v} className="p-2">
+                                      <Star size={previewMode === 'mobile' ? 30 : 40} className="text-gray-300 fill-gray-200" />
+                                    </div>
+                                  ))
+                                )}
+                              </div>
+                              <textarea
+                                disabled
+                                onClick={() => handleElementClick('placeholder', step.id)}
+                                className={`w-full h-32 p-6 rounded-2xl border-2 bg-gray-50 outline-none transition-all placeholder:text-gray-400 italic cursor-pointer ${selectedElement === 'placeholder' && activeStepId === step.id ? 'border-dashed border-gray-400' : 'border-gray-100 hover:border-black/5'}`}
+                                placeholder={((step.config as Record<string, string | boolean>)?.placeholder as string) || 'Tell us more about your experience...'}
+                              />
+                              <button
+                                onClick={() => handleElementClick('buttonText', step.id)}
+                                style={{ backgroundColor: primaryColor, fontFamily: bodyFont }}
+                                className={`text-white w-full py-4 rounded-xl text-xs font-bold shadow-xl transition-all border-2 ${selectedElement === 'buttonText' && activeStepId === step.id ? 'border-dashed border-white ring-4 ring-black/10' : 'border-transparent'}`}
+                              >
+                                {(step.config as Record<string, string | boolean>)?.buttonText || 'Continue'}
+                              </button>
+                            </div>
+                          )}
+
+                          {/* ── NEW: Identity step (name / email / photo / social) ── */}
+                          {step.type === 'identity' && (
+                            <div className="w-full max-w-md flex flex-col items-center gap-y-6 text-center">
+                              <h2
+                                onClick={() => handleElementClick('title', step.id)}
+                                style={{ borderColor: selectedElement === 'title' && activeStepId === step.id ? '#000000' : 'transparent', fontFamily: headingFont, color: '#000000' }}
+                                className={`text-2xl md:text-3xl font-black tracking-tighter cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                              >
+                                {step.title}
+                              </h2>
+                              <p
+                                onClick={() => handleElementClick('description', step.id)}
+                                style={{ borderColor: selectedElement === 'description' && activeStepId === step.id ? '#000000' : 'transparent' }}
+                                className={`text-gray-600 cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'description' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                              >
+                                {step.description}
+                              </p>
+                              <div className="w-full space-y-4">
+                                <div className="flex flex-col gap-4">
+                                  <div className="w-full h-24 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-500 border-2 border-dashed border-gray-100">
+                                    <Plus size={20} />
+                                    <span className="ml-2 text-[10px] font-bold uppercase tracking-wider">Add a photo</span>
+                                  </div>
+                                  <div className="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 text-gray-600 text-xs text-left italic">Your name</div>
+                                </div>
+                                {(step.config as Record<string, boolean>)?.collectEmail !== false && (
+                                  <div className="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 text-gray-600 text-xs text-left italic">votre@email.com</div>
+                                )}
+                                {(step.config as Record<string, boolean>)?.collectCompany && (
+                                  <div className="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 text-gray-600 text-xs text-left italic">Your company / website</div>
+                                )}
+                                {(step.config as Record<string, boolean>)?.collectSocialLinks && (
+                                  <div className="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 text-gray-600 text-xs text-left italic">linkedin.com/in/yourprofile</div>
+                                )}
+                              </div>
+                              <button
+                                onClick={() => handleElementClick('buttonText', step.id)}
+                                style={{ backgroundColor: primaryColor, fontFamily: bodyFont }}
+                                className={`text-white w-full py-4 rounded-xl text-xs font-bold shadow-xl transition-all border-2 ${selectedElement === 'buttonText' && activeStepId === step.id ? 'border-dashed border-white ring-4 ring-black/10' : 'border-transparent'}`}
+                              >
+                                {(step.config as Record<string, string | boolean>)?.buttonText || 'Submit'}
+                              </button>
+                            </div>
+                          )}
+
+                          {/* ── NEW: Custom step (flexible fields) ── */}
+                          {step.type === 'custom' && (
+                            <div className="w-full max-w-md flex flex-col items-center gap-y-6 text-center">
+                              <h2
+                                onClick={() => handleElementClick('title', step.id)}
+                                style={{ borderColor: selectedElement === 'title' && activeStepId === step.id ? '#000000' : 'transparent', fontFamily: headingFont, color: '#000000' }}
+                                className={`text-2xl md:text-3xl font-black tracking-tighter cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'title' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                              >
+                                {step.title}
+                              </h2>
+                              <p
+                                onClick={() => handleElementClick('description', step.id)}
+                                style={{ borderColor: selectedElement === 'description' && activeStepId === step.id ? '#000000' : 'transparent' }}
+                                className={`text-gray-600 cursor-pointer transition-all rounded-lg p-1 border-2 ${selectedElement === 'description' && activeStepId === step.id ? 'border-dashed' : 'border-transparent hover:border-black/5'}`}
+                              >
+                                {step.description}
+                              </p>
+                              <div className="w-full space-y-4 text-left">
+                                {(((step.config as Record<string, unknown>)?.fields || []) as StepField[]).map(field => (
+                                  <div key={field.id} className="space-y-2">
+                                    <p className="text-xs font-bold text-gray-700">{field.label || 'Question'}</p>
+                                    {field.type === 'text' && (
+                                      <div className="w-full px-4 py-3 rounded-xl border border-gray-100 bg-gray-50 text-gray-400 text-xs italic">
+                                        {field.placeholder || 'Your answer...'}
+                                      </div>
+                                    )}
+                                    {field.type === 'nps' && (
+                                      <div className="flex gap-1">
+                                        {Array.from({ length: 11 }, (_, i) => (
+                                          <div key={i} className="flex-1 py-2 rounded-lg bg-gray-50 border border-gray-100 text-gray-500 text-[10px] font-bold text-center">{i}</div>
+                                        ))}
+                                      </div>
+                                    )}
+                                    {field.type === 'choice' && (
+                                      <div className="space-y-2">
+                                        {(field.options || []).map((opt, i) => (
+                                          <div key={i} className="w-full px-4 py-3 rounded-xl border border-gray-100 bg-gray-50 text-gray-500 text-xs text-left flex items-center gap-2">
+                                            <div className="w-3 h-3 rounded-full border-2 border-gray-300 flex-shrink-0" />
+                                            {opt}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                    {field.type === 'grid' && (
+                                      <div className="w-full overflow-x-auto">
+                                        <table className="w-full text-xs border-collapse">
+                                          <thead>
+                                            <tr>
+                                              <th className="p-1 text-gray-400 font-normal text-left" />
+                                              {(field.options || ['1', '2', '3', '4', '5']).map(col => (
+                                                <th key={col} className="p-1 text-gray-400 font-bold text-center">{col}</th>
+                                              ))}
+                                            </tr>
+                                          </thead>
+                                          <tbody>
+                                            {(field.rows || []).map((row, i) => (
+                                              <tr key={i} className="border-t border-gray-100">
+                                                <td className="p-2 text-gray-600 text-left text-[10px]">{row}</td>
+                                                {(field.options || ['1', '2', '3', '4', '5']).map(col => (
+                                                  <td key={col} className="p-2 text-center">
+                                                    <div className="w-3 h-3 rounded-full border-2 border-gray-200 mx-auto" />
+                                                  </td>
+                                                ))}
+                                              </tr>
+                                            ))}
+                                          </tbody>
+                                        </table>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                              <button
+                                onClick={() => handleElementClick('buttonText', step.id)}
+                                style={{ backgroundColor: primaryColor, fontFamily: bodyFont }}
+                                className={`text-white w-full py-4 rounded-xl text-xs font-bold shadow-xl transition-all border-2 ${selectedElement === 'buttonText' && activeStepId === step.id ? 'border-dashed border-white ring-4 ring-black/10' : 'border-transparent'}`}
+                              >
+                                {(step.config as Record<string, string | boolean>)?.buttonText || 'Continue'}
+                              </button>
+                            </div>
+                          )}
                         </div>
                       );
                     })()}
                   </div>
 
-                  {/* Flow Arrow - Adjusted for snap spacing */}
+                  {/* Flow Arrow */}
                   {index < form.config.steps.length - 1 && (
                     <div className="h-20 flex items-center justify-center text-white/20 animate-bounce mt-6">
                       <ChevronDown size={32} strokeWidth={3} />
                     </div>
                   )}
+
+                  {/* Add Step Button — appears before the Identity step */}
+                  {(form.config.steps[index + 1]?.type === 'identity' || form.config.steps[index + 1]?.type === 'attribution') && (
+                    <div className="flex items-center justify-center py-2 w-full">
+                      <button
+                        className="flex flex-col items-center gap-4 group"
+                        onClick={addStep}
+                      >
+                        <div className="w-16 h-16 rounded-full bg-white/5 border border-dashed border-white/20 flex items-center justify-center group-hover:bg-[#0D9E75]/10 group-hover:border-[#0D9E75] transition-all">
+                          <Plus size={24} className="text-white/40 group-hover:text-[#0D9E75]" />
+                        </div>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-white/20 group-hover:text-white/60">Add a step</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
-
-              {/* Add Step Button */}
-              <div className="h-[400px] flex items-center justify-center snap-center w-full">
-                <button
-                  className="flex flex-col items-center gap-4 group"
-                  onClick={() => {
-                    const newId = `step_${Date.now()}`
-                    const newStep: FormStep = {
-                      id: newId,
-                      type: 'textarea',
-                      title: 'New step',
-                      description: 'Description of the new step',
-                      isEnabled: true
-                    }
-                    setForm({ ...form, config: { ...form.config, steps: [...form.config.steps, newStep] } })
-                    // Wait for render then scroll
-                    setTimeout(() => scrollToStep(newId), 100)
-                  }}
-                >
-                  <div className="w-16 h-16 rounded-full bg-white/5 border border-dashed border-white/20 flex items-center justify-center group-hover:bg-[#0D9E75]/10 group-hover:border-[#0D9E75] transition-all">
-                    <Plus size={24} className="text-white/40 group-hover:text-[#0D9E75]" />
-                  </div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-white/20 group-hover:text-white/60">Add a step</span>
-                </button>
-              </div>
             </div>
           </section>
 
@@ -699,27 +981,108 @@ export default function FormEditorPage() {
                       <div className="pt-6 border-t border-white/5 space-y-6">
                         <span className="text-[10px] font-black uppercase tracking-widest text-[#0D9E75] block mb-4">Specific settings</span>
 
-                        {activeStep.type === 'rating' && (
-                          <div className="pt-6 border-t border-white/5 mt-6">
+                        {/* ── Core: rating style + placeholder ── */}
+                        {(activeStep.type === 'core' || activeStep.type === 'rating') && (
+                          <div>
                             <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block">Rating style</label>
                             <div className="flex gap-2 bg-[var(--v3-bg)] p-1 rounded-xl border border-[var(--v3-border)]">
                               <button
                                 onClick={() => updateStep(activeStep.id, { config: { ...activeStep.config, ratingType: 'stars' } })}
                                 className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${((activeStep.config as Record<string, string | boolean>)?.ratingType || 'stars') === 'stars' ? 'bg-[var(--v3-teal)] text-white shadow-lg' : 'text-[var(--v3-muted2)] hover:text-white hover:bg-white/5'}`}
-                              >
-                                Stars
-                              </button>
+                              >Stars</button>
                               <button
                                 onClick={() => updateStep(activeStep.id, { config: { ...activeStep.config, ratingType: 'emojis' } })}
-                                className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${((activeStep.config as Record<string, string | boolean>)?.ratingType) === 'emojis' ? 'bg-[var(--v3-teal)] text-white shadow-lg' : 'text-[var(--v3-muted2)] hover:text-white hover:bg-white/5'}`}
-                              >
-                                Emojis
-                              </button>
+                                className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${(activeStep.config as Record<string, string | boolean>)?.ratingType === 'emojis' ? 'bg-[var(--v3-teal)] text-white shadow-lg' : 'text-[var(--v3-muted2)] hover:text-white hover:bg-white/5'}`}
+                              >Emojis</button>
                             </div>
                           </div>
                         )}
 
-                        {(activeStep.type === 'welcome' || activeStep.type === 'success' || activeStep.type === 'informative' || activeStep.type === 'rating' || activeStep.type === 'textarea' || activeStep.type === 'attribution') && (
+                        {(activeStep.type === 'core' || activeStep.type === 'textarea') && (
+                          <div>
+                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block">Testimonial placeholder</label>
+                            <input
+                              ref={(el) => { sidebarRefs.current['placeholder'] = el }}
+                              type="text"
+                              value={((activeStep.config as Record<string, string | boolean>)?.placeholder as string) || ''}
+                              onChange={(e) => updateStep(activeStep.id, { config: { ...activeStep.config, placeholder: e.target.value } })}
+                              placeholder="Tell us more about your experience..."
+                              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs font-medium focus:border-[#0D9E75]/50 outline-none transition-all"
+                            />
+                          </div>
+                        )}
+
+                        {/* ── Identity: collect toggles ── */}
+                        {(activeStep.type === 'identity' || activeStep.type === 'attribution') && (
+                          <div className="space-y-4">
+                            {[
+                              { key: 'collectEmail', label: 'Collect email', defaultOn: true },
+                              { key: 'collectCompany', label: 'Collect company', defaultOn: false },
+                              { key: 'collectSocialLinks', label: 'Collect social links', defaultOn: false },
+                            ].map(({ key, label, defaultOn }) => (
+                              <div key={key} className="flex items-center justify-between">
+                                <span className="text-[10px] font-bold">{label}</span>
+                                <button
+                                  onClick={() => { const cur = (activeStep.config as Record<string, boolean>)?.[key]; updateStep(activeStep.id, { config: { ...activeStep.config, [key]: cur !== undefined ? !cur : !defaultOn } }) }}
+                                  className={`w-10 h-5 rounded-full transition-all relative ${((activeStep.config as Record<string, boolean>)?.[key] ?? defaultOn) ? 'bg-[#0D9E75]' : 'bg-white/10'}`}
+                                >
+                                  <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${((activeStep.config as Record<string, boolean>)?.[key] ?? defaultOn) ? 'left-6' : 'left-1'}`} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* ── Custom: fields management ── */}
+                        {activeStep.type === 'custom' && (
+                          <div className="space-y-4">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-[var(--v3-muted2)] block">Fields</span>
+                            {(((activeStep.config as Record<string, unknown>)?.fields || []) as StepField[]).map((field) => (
+                              <div key={field.id} className="bg-[var(--v3-bg)] border border-[var(--v3-border)] rounded-xl p-3 space-y-3">
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/40">{field.type}</span>
+                                  <button
+                                    onClick={() => removeField(activeStep.id, field.id)}
+                                    className="p-1 text-red-400/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                                  >
+                                    <Trash2 size={12} />
+                                  </button>
+                                </div>
+                                <input
+                                  type="text"
+                                  value={field.label}
+                                  onChange={(e) => updateField(activeStep.id, field.id, { label: e.target.value })}
+                                  placeholder="Question label..."
+                                  className="w-full bg-[var(--v3-bg)] border border-[var(--v3-border)] rounded-xl px-4 py-3 text-sm focus:border-[var(--v3-teal)]/50 transition-all outline-none"
+                                />
+                                {field.type === 'text' && (
+                                  <input
+                                    type="text"
+                                    value={field.placeholder || ''}
+                                    onChange={(e) => updateField(activeStep.id, field.id, { placeholder: e.target.value })}
+                                    placeholder="Placeholder text..."
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs font-medium focus:border-[#0D9E75]/50 outline-none transition-all"
+                                  />
+                                )}
+                              </div>
+                            ))}
+                            <div className="flex flex-wrap gap-2">
+                              {(['text', 'nps', 'choice', 'grid'] as const).map(fieldType => (
+                                <button
+                                  key={fieldType}
+                                  onClick={() => addField(activeStep.id, fieldType)}
+                                  className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider px-3 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-[#0D9E75]/10 hover:border-[#0D9E75]/30 text-white/40 hover:text-white/80 transition-all"
+                                >
+                                  <Plus size={10} />
+                                  {fieldType === 'text' ? 'Short text' : fieldType === 'nps' ? 'NPS' : fieldType === 'choice' ? 'Choice' : 'Grid'}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* ── Button text (all except success) ── */}
+                        {activeStep.type !== 'success' && (
                           <div className="pt-6 border-t border-white/5 mt-6">
                             <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block">Button text</label>
                             <input
@@ -733,55 +1096,22 @@ export default function FormEditorPage() {
                           </div>
                         )}
 
-                        {activeStep.type === 'textarea' && (
-                          <div className="pt-6 border-t border-white/5 mt-6">
-                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block">Help text (Placeholder)</label>
+                        {/* ── Success: redirect URL ── */}
+                        {activeStep.type === 'success' && (
+                          <div>
+                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] mb-3 block">Redirect URL (optional)</label>
                             <input
-                              ref={(el) => { sidebarRefs.current['placeholder'] = el }}
                               type="text"
-                              value={((activeStep.config as Record<string, string | boolean>)?.placeholder as string) || ''}
-                              onChange={(e) => updateStep(activeStep.id, { config: { ...activeStep.config, placeholder: e.target.value } })}
-                              placeholder="Type your testimonial here..."
-                              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs font-medium focus:border-[#0D9E75]/50 outline-none transition-all"
+                              value={((activeStep.config as Record<string, string>)?.redirectUrl) || ''}
+                              onChange={(e) => updateStep(activeStep.id, { config: { ...activeStep.config, redirectUrl: e.target.value } })}
+                              placeholder="https://yoursite.com"
+                              className="w-full bg-[var(--v3-bg)] border border-[var(--v3-border)] rounded-xl px-4 py-3 text-sm focus:border-[var(--v3-teal)]/50 transition-all outline-none"
                             />
-                          </div>
-                        )}
-
-                        {activeStep.type === 'attribution' && (
-                          <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-bold">Collect email</span>
-                              <button
-                                onClick={() => {
-                                  const newSteps = [...form.config.steps]
-                                  const stepIdx = newSteps.findIndex(s => s.id === activeStepId)
-                                  newSteps[stepIdx].config = { ...newSteps[stepIdx].config, collectEmail: !(newSteps[stepIdx].config as Record<string, string | boolean>)?.collectEmail }
-                                  setForm({ ...form, config: { ...form.config, steps: newSteps } })
-                                }}
-                                className={`w-10 h-5 rounded-full transition-all relative ${(activeStep.config as Record<string, string | boolean>)?.collectEmail !== false ? 'bg-[#0D9E75]' : 'bg-white/10'}`}
-                              >
-                                <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${(activeStep.config as Record<string, string | boolean>)?.collectEmail !== false ? 'left-6' : 'left-1'}`} />
-                              </button>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-bold">Collect company</span>
-                              <button
-                                onClick={() => {
-                                  const newSteps = [...form.config.steps]
-                                  const stepIdx = newSteps.findIndex(s => s.id === activeStepId)
-                                  newSteps[stepIdx].config = { ...newSteps[stepIdx].config, collectCompany: !(newSteps[stepIdx].config as Record<string, string | boolean>)?.collectCompany }
-                                  setForm({ ...form, config: { ...form.config, steps: newSteps } })
-                                }}
-                                className={`w-10 h-5 rounded-full transition-all relative ${(activeStep.config as Record<string, string | boolean>)?.collectCompany ? 'bg-[#0D9E75]' : 'bg-white/10'}`}
-                              >
-                                <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${(activeStep.config as Record<string, string | boolean>)?.collectCompany ? 'left-6' : 'left-1'}`} />
-                              </button>
-                            </div>
                           </div>
                         )}
                       </div>
 
-                      <div className="pt-6 border-t border-white/5">
+                      <div className="pt-6 border-t border-white/5 space-y-4">
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-bold">Enable this step</span>
                           <button
@@ -796,6 +1126,15 @@ export default function FormEditorPage() {
                             <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${activeStep.isEnabled ? 'left-6' : 'left-1'}`} />
                           </button>
                         </div>
+                        {!activeStep.locked && (
+                          <button
+                            onClick={() => deleteStep(activeStep.id)}
+                            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider text-red-400/60 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all"
+                          >
+                            <Trash2 size={12} />
+                            Delete this step
+                          </button>
+                        )}
                       </div>
                     </div>
                   )}
@@ -921,11 +1260,16 @@ export default function FormEditorPage() {
       </div>
     </main>
 
-      {/* Toast Notification */}
+      {/* Toast Notifications */}
       {showSaveSuccess && (
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-[#0D9E75] text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-bottom-8 duration-300 z-[9999]">
           <CheckCircle size={20} className="text-white" />
           <span className="font-bold text-sm">Changes saved!</span>
+        </div>
+      )}
+      {showSaveError && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-bottom-8 duration-300 z-9999">
+          <span className="font-bold text-sm">Failed to save. Please try again.</span>
         </div>
       )}
     </div>

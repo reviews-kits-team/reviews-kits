@@ -1,7 +1,8 @@
 import { describe, expect, it, beforeAll, afterAll, beforeEach, spyOn } from "bun:test";
 import { testDb, clearDatabase } from "../IntegrationSetup";
 import { apiKeysRouter } from "../../../src/interface/routes/api-keys";
-import { container } from "../../../src/infrastructure/container";
+import { container } from '@/infrastructure/container';
+import { testRepositories } from '../../testContainer';
 import { auth } from "../../../src/infrastructure/auth/auth";
 import { sql } from "drizzle-orm";
 
@@ -44,7 +45,7 @@ describe("API Keys Integration", () => {
     expect(data.secretKey).toStartWith("rk_sk_");
 
     // Verify in DB
-    const keys = await container.apiKeyRepository.findByUser(userId);
+    const keys = await testRepositories.apiKeyRepository.findByUser(userId);
     expect(keys).toHaveLength(2);
     expect(keys.every(k => k.getProps().isActive)).toBe(true);
   });
@@ -68,14 +69,14 @@ describe("API Keys Integration", () => {
   it("should deactivate old keys upon rotation", async () => {
     // 1. Generate first batch
     await apiKeysRouter.request("/rotate", { method: "POST" }, { session: { user: { id: userId } } } as any);
-    const firstKeys = await container.apiKeyRepository.findByUser(userId);
+    const firstKeys = await testRepositories.apiKeyRepository.findByUser(userId);
     expect(firstKeys.filter(k => k.getProps().isActive)).toHaveLength(2);
 
     // 2. Rotate
     await apiKeysRouter.request("/rotate", { method: "POST" }, { session: { user: { id: userId } } } as any);
     
     // 3. Verify
-    const allKeys = await container.apiKeyRepository.findByUser(userId);
+    const allKeys = await testRepositories.apiKeyRepository.findByUser(userId);
     expect(allKeys).toHaveLength(4);
     expect(allKeys.filter(k => k.getProps().isActive)).toHaveLength(2);
     

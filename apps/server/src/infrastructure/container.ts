@@ -8,13 +8,21 @@ import { DrizzleWebhookRepository } from './repositories/DrizzleWebhookRepositor
 import { WebhookService } from '../application/services/WebhookService';
 
 import { GenerateUserApiKeys } from '../application/use-cases/api-keys/GenerateUserApiKeys';
+import { RotateApiKeysUseCase } from '../application/use-cases/api-keys/RotateApiKeysUseCase';
+import { RecordApiKeyUsageUseCase } from '../application/use-cases/api-keys/RecordApiKeyUsageUseCase';
 import { VerifyApiKey } from '../application/use-cases/api-keys/VerifyApiKey';
+import { VerifyPublicApiKeyUseCase } from '../application/use-cases/api-keys/VerifyPublicApiKeyUseCase';
+import { CreateWebhookUseCase } from '../application/use-cases/webhooks/CreateWebhookUseCase';
+import { ListWebhooksUseCase } from '../application/use-cases/webhooks/ListWebhooksUseCase';
+import { DeleteWebhookUseCase } from '../application/use-cases/webhooks/DeleteWebhookUseCase';
+import { TestWebhookUseCase } from '../application/use-cases/webhooks/TestWebhookUseCase';
 import { GetDashboardStats } from '../application/use-cases/dashboard/GetDashboardStats';
 
 // User Use Cases
 import { UpdateUserUseCase } from '../application/use-cases/user/UpdateUserUseCase';
 
 // Testimonials Use Cases
+import { GetTestimonialByIdUseCase } from '../application/use-cases/testimonials/GetTestimonialByIdUseCase';
 import { UpdateTestimonialStatusUseCase } from '../application/use-cases/testimonials/UpdateTestimonialStatusUseCase';
 import { BatchUpdateTestimonialStatusUseCase } from '../application/use-cases/testimonials/BatchUpdateTestimonialStatusUseCase';
 import { ReorderTestimonialsUseCase } from '../application/use-cases/testimonials/ReorderTestimonialsUseCase';
@@ -51,11 +59,19 @@ const webhookService = new WebhookService(webhookRepository);
 
 // Use Case Instances
 const generateUserApiKeys = new GenerateUserApiKeys(apiKeyRepository);
+const rotateApiKeysUseCase = new RotateApiKeysUseCase(apiKeyRepository);
+const recordApiKeyUsageUseCase = new RecordApiKeyUsageUseCase(apiKeyRepository);
 const verifyApiKey = new VerifyApiKey(apiKeyRepository);
+const verifyPublicApiKeyUseCase = new VerifyPublicApiKeyUseCase(apiKeyRepository);
+const createWebhookUseCase = new CreateWebhookUseCase(webhookRepository);
+const listWebhooksUseCase = new ListWebhooksUseCase(webhookRepository);
+const deleteWebhookUseCase = new DeleteWebhookUseCase(webhookRepository);
+const testWebhookUseCase = new TestWebhookUseCase(webhookRepository, webhookService);
 const getDashboardStats = new GetDashboardStats(testimonialRepository);
 
 const updateUserUseCase = new UpdateUserUseCase(userRepository);
 
+const getTestimonialByIdUseCase = new GetTestimonialByIdUseCase(testimonialRepository);
 const updateTestimonialStatusUseCase = new UpdateTestimonialStatusUseCase(testimonialRepository);
 const batchUpdateTestimonialStatusUseCase = new BatchUpdateTestimonialStatusUseCase(testimonialRepository);
 const reorderTestimonialsUseCase = new ReorderTestimonialsUseCase(testimonialRepository);
@@ -79,22 +95,24 @@ const submitReviewUseCase = new SubmitReviewUseCase(testimonialRepository, formR
 const getPublicFormUseCase = new GetPublicFormUseCase(formRepository);
 
 export const container = {
-  formRepository,
-  testimonialRepository,
-  apiKeyRepository,
-  userRepository,
-  webhookRepository,
-  
   // Services
   webhookService,
   
   // Use Cases
   generateUserApiKeys,
+  rotateApiKeysUseCase,
+  recordApiKeyUsageUseCase,
   verifyApiKey,
+  verifyPublicApiKeyUseCase,
+  createWebhookUseCase,
+  listWebhooksUseCase,
+  deleteWebhookUseCase,
+  testWebhookUseCase,
   getDashboardStats,
   
   updateUserUseCase,
   
+  getTestimonialByIdUseCase,
   updateTestimonialStatusUseCase,
   batchUpdateTestimonialStatusUseCase,
   reorderTestimonialsUseCase,

@@ -83,6 +83,7 @@ const reorderTestimonialsRoute = createRoute({
   }
 });
 
+testimonialsRouter.get('/:id', testimonialController.getById as any);
 testimonialsRouter.openapi(updateStatusRoute, testimonialController.updateStatus as any);
 testimonialsRouter.openapi(batchUpdateStatusRoute, testimonialController.batchUpdateStatus as any);
 testimonialsRouter.openapi(reorderTestimonialsRoute, testimonialController.reorderTestimonials as any);

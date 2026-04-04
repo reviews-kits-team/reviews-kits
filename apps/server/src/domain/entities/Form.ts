@@ -3,10 +3,11 @@ import { deepMerge } from "../../shared/utils/deepMerge";
 
 export interface FormStep {
   id: string;
-  type: 'welcome' | 'rating' | 'textarea' | 'attribution' | 'success' | 'informative';
+  type: 'welcome' | 'core' | 'identity' | 'success' | 'custom' | 'rating' | 'textarea' | 'attribution' | 'informative';
   title: string;
   description?: string;
   isEnabled: boolean;
+  locked?: boolean;
   config?: Record<string, any>;
 }
 
@@ -68,15 +69,20 @@ export class Form {
     this.thankYouMessage = props.thankYouMessage;
     this.config = props.config ?? {};
 
-    // Ensure default steps and branding exist if not provided
-    if (!this.config.steps || this.config.steps.length === 0) {
-      this.config.steps = this.getDefaultSteps();
-    }
     if (!this.config.branding) {
       this.config.branding = {
         showPoweredBy: true,
         primaryColor: props.accentColor || '#0D9E75'
       };
+    }
+
+    if (!this.config.steps) {
+      this.config.steps = [
+        { id: 'welcome',  type: 'welcome',  title: 'Welcome',    isEnabled: true, locked: true },
+        { id: 'core',     type: 'core',     title: 'Your review', isEnabled: true, locked: true },
+        { id: 'identity', type: 'identity', title: 'About you',  isEnabled: true, locked: false },
+        { id: 'success',  type: 'success',  title: 'Thank you',  isEnabled: true, locked: true },
+      ];
     }
 
     this.accentColor = props.accentColor;
@@ -142,40 +148,6 @@ export class Form {
 
   public getBranding(): FormBranding | undefined {
     return this.config.branding;
-  }
-
-  private getDefaultSteps(): FormStep[] {
-    const { randomUUID } = require('node:crypto');
-    return [
-      {
-        id: randomUUID(),
-        type: 'rating',
-        title: 'How would you rate us?',
-        description: 'On a scale of 1 to 5, how would you rate our service?',
-        isEnabled: true
-      },
-      {
-        id: randomUUID(),
-        type: 'textarea',
-        title: 'Tell us more!',
-        description: 'Your feedback helps us improve.',
-        isEnabled: true
-      },
-      {
-        id: randomUUID(),
-        type: 'attribution',
-        title: 'About you',
-        description: 'This information will be displayed with your testimonial.',
-        isEnabled: true
-      },
-      {
-        id: randomUUID(),
-        type: 'success',
-        title: 'Thank you!',
-        description: 'Your testimonial has been submitted successfully.',
-        isEnabled: true
-      }
-    ];
   }
 
   public getName(): string {
