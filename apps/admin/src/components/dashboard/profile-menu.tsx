@@ -73,9 +73,7 @@ export const ProfileMenu = ({ isOpen, onClose }: ProfileMenuProps) => {
   if (!isOpen) return null
 
   return (
-    <>
-      <div className="fixed inset-0 z-[250]" onClick={(e) => { e.stopPropagation(); onClose(); }} />
-      <div className="absolute top-full right-0 mt-2 w-80 bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15),0_32px_80px_rgba(0,0,0,0.25)] overflow-hidden z-[300] animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+    <div className="absolute top-full right-0 mt-2 w-80 bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15),0_32px_80px_rgba(0,0,0,0.25)] overflow-hidden z-[300] animate-in fade-in zoom-in-95 duration-200 origin-top-right" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="p-5 border-b border-[var(--v3-border)] bg-[var(--v3-bg3)]/40">
            <div className="flex items-center gap-3 mb-1">
@@ -207,6 +205,5 @@ export const ProfileMenu = ({ isOpen, onClose }: ProfileMenuProps) => {
            </a>
         </div>
       </div>
-    </>
   )
 }
