@@ -53,7 +53,8 @@ import { ReviewsKitProvider } from '@reviewskits/react'
 function App() {
   const config = {
     pk: 'YOUR_PUBLIC_KEY',
-    host: 'https://api.reviewskits.com'
+    host: 'https://api.reviewskits.com',
+    cache: true // Enabled by default
   }
 
   return (

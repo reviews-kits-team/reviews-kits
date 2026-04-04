@@ -1,9 +1,10 @@
-import { ref, watch, onMounted, onUnmounted } from 'vue';
-import { reviewsApi } from '../api/reviews';
-import { mapReviews } from '../api/mappers/review.mapper';
-import { ReviewApiParams, Review } from '../types';
+import { ref, watch, onMounted, onUnmounted, inject } from 'vue';
+import { reviewsApi, mapReviews } from '@reviewskits/core';
+import type { ReviewApiParams, Review } from '@reviewskits/core';
+import { InjectionKey } from '../core/config';
 
 export const useReviews = (params: ReviewApiParams) => {
+  const config = inject(InjectionKey, undefined);
   const data = ref<{ reviews: Review[] } | null>(null);
   const isLoading = ref(true);
   const error = ref<any>(null);
@@ -14,7 +15,7 @@ export const useReviews = (params: ReviewApiParams) => {
     error.value = null;
 
     try {
-      const response = await reviewsApi.getReviews(params, { signal });
+      const response = await reviewsApi.getReviews(params, { signal }, config);
       if (signal?.aborted) return;
 
       data.value = {

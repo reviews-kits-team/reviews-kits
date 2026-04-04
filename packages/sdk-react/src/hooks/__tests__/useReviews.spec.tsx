@@ -4,15 +4,19 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useReviews } from '../useReviews';
-import { reviewsApi } from '../../api/reviews';
+import { reviewsApi } from '@reviewskits/core';
 import React from 'react';
 import { ReviewsKitProvider } from '../../context/ReviewsKitProvider';
 
-vi.mock('../../api/reviews', () => ({
-  reviewsApi: {
-    getReviews: vi.fn(),
-  },
-}));
+vi.mock('@reviewskits/core', async (importOriginal) => {
+  const actual = await importOriginal<any>();
+  return {
+    ...actual,
+    reviewsApi: {
+      getReviews: vi.fn(),
+    },
+  };
+});
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <ReviewsKitProvider config={{ pk: 'test', host: 'test' }}>

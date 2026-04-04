@@ -13,4 +13,4 @@ export {
   ReviewsKitError,
   ReviewsKitConfigError,
   ReviewsKitApiError,
-} from './core/errors';
+} from '@reviewskits/core';

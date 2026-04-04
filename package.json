@@ -5,7 +5,8 @@
   "packageManager": "bun@1.0.0",
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "packages/*",
+    "packages/*/playground"
   ],
   "scripts": {
     "build": "turbo build",

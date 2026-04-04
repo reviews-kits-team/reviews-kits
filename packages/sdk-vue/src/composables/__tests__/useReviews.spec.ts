@@ -3,15 +3,19 @@
  */
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { useReviews } from '../useReviews';
-import { reviewsApi } from '../../api/reviews';
+import { reviewsApi } from '@reviewskits/core';
 import { reactive, nextTick, defineComponent } from 'vue';
 import { mount } from '@vue/test-utils';
 
-vi.mock('../../api/reviews', () => ({
-  reviewsApi: {
-    getReviews: vi.fn(),
-  },
-}));
+vi.mock('@reviewskits/core', async () => {
+  const actual = (await vi.importActual('@reviewskits/core')) as any;
+  return {
+    ...actual,
+    reviewsApi: {
+      getReviews: vi.fn(),
+    },
+  };
+});
 
 const TestComponent = defineComponent({
   props: {

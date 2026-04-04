@@ -1,7 +1,7 @@
-import { ref, onMounted, onUnmounted, watch } from 'vue';
-import { reviewsApi } from '../api/reviews';
-import { mapReviews } from '../api/mappers/review.mapper';
-import { ReviewApiParams, Review, ReviewApiResponseMeta } from '../types';
+import { ref, onMounted, onUnmounted, watch, inject } from 'vue';
+import { reviewsApi, mapReviews } from '@reviewskits/core';
+import type { ReviewApiParams, Review, ReviewApiResponseMeta } from '@reviewskits/core';
+import { InjectionKey } from '../core/config';
 
 export interface InfiniteData {
   pages: {
@@ -11,6 +11,7 @@ export interface InfiniteData {
 }
 
 export const useInfiniteReviews = (params: Omit<ReviewApiParams, 'page'>) => {
+  const config = inject(InjectionKey, undefined);
   const data = ref<InfiniteData>({ pages: [] });
   const isLoading = ref(true);
   const isFetchingNextPage = ref(false);
@@ -35,7 +36,7 @@ export const useInfiniteReviews = (params: Omit<ReviewApiParams, 'page'>) => {
       const response = await reviewsApi.getReviews({
         ...params,
         page,
-      }, { signal });
+      }, { signal }, config);
 
       if (signal?.aborted) return;
 

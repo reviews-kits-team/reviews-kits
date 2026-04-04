@@ -7,8 +7,9 @@ import './index.css'
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ReviewsKitProvider config={{
-      pk: 'rk_pk_live_4f70bb4ac05c2188f9ae1977466812bb4f9cf44421f2ef91',
-      host: 'http://localhost:3000'
+      pk: 'rk_pk_live_c11d1990270d2aebdab91a7fe9acb744e0821499fba4c6d3',
+      host: 'http://localhost:3000',
+      cache: true
     }}>
       <App />
     </ReviewsKitProvider>

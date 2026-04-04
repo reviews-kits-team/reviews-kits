@@ -37,12 +37,15 @@
     "build": "tsup src/index.ts --format cjs,esm --dts --clean",
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
     "lint": "tsc --noEmit",
-    "test": "vitest --run",
-    "test:watch": "vitest"
+    "test": "vitest --run --passWithNoTests",
+    "test:watch": "vitest --passWithNoTests"
   },
   "license": "MIT",
   "peerDependencies": {
     "react": ">=18"
+  },
+  "dependencies": {
+    "@reviewskits/core": "0.0.1"
   },
   "devDependencies": {
     "@reviewskits/types": "^0.0.4",

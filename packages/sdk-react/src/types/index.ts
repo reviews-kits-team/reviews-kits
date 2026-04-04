@@ -8,4 +8,4 @@ export type {
   RawReview,
   ReviewApiResponse,
   ReviewApiResponseMeta,
-} from '@reviewskits/types';
+} from '@reviewskits/core';

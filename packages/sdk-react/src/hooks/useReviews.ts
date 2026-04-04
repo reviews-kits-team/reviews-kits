@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { reviewsApi } from '../api/reviews';
-import { mapReviews } from '../api/mappers/review.mapper';
-import type { ReviewApiParams, Review } from '../types';
+import { reviewsApi, mapReviews } from '@reviewskits/core';
+import type { ReviewApiParams, Review } from '@reviewskits/core';
 import { useReviewsKitConfig } from '../context/ReviewsKitProvider';
 
 export function useReviews(params: ReviewApiParams) {
