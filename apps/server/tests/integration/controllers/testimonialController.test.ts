@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach } from "bun:test";
 import { testDb, clearDatabase } from "../IntegrationSetup";
 import { testimonialsRouter } from "../../../src/interface/routes/testimonials";
-import { container } from "../../../src/infrastructure/container";
+import { testRepositories } from '../../testContainer';
 import { Testimonial } from "../../../src/domain/entities/Testimonial";
 import crypto from "node:crypto";
 import { sql } from "drizzle-orm";
@@ -41,7 +41,7 @@ describe("Testimonial Controller Integration", () => {
       status: "pending",
       source: "api"
     });
-    await container.testimonialRepository.save(testimonial);
+    await testRepositories.testimonialRepository.save(testimonial);
 
     const res = await testimonialsRouter.request(`/${testimonial.getId()}/status`, {
       method: "PATCH",
@@ -54,7 +54,7 @@ describe("Testimonial Controller Integration", () => {
     expect(data.success).toBe(true);
     expect(data.status).toBe("approved");
 
-    const updated = await container.testimonialRepository.findById(testimonial.getId());
+    const updated = await testRepositories.testimonialRepository.findById(testimonial.getId());
     expect(updated?.getStatus()).toBe("approved");
   });
 
@@ -62,8 +62,8 @@ describe("Testimonial Controller Integration", () => {
   it("should batch update status", async () => {
     const t1 = new Testimonial({ id: crypto.randomUUID(), userId, content: "T1", authorName: "A1", status: "pending", source: "api" });
     const t2 = new Testimonial({ id: crypto.randomUUID(), userId, content: "T2", authorName: "A2", status: "pending", source: "api" });
-    await container.testimonialRepository.save(t1);
-    await container.testimonialRepository.save(t2);
+    await testRepositories.testimonialRepository.save(t1);
+    await testRepositories.testimonialRepository.save(t2);
 
     const res = await testimonialsRouter.request("/batch-status", {
       method: "POST",
@@ -72,8 +72,8 @@ describe("Testimonial Controller Integration", () => {
     });
 
     expect(res.status).toBe(200);
-    const updated1 = await container.testimonialRepository.findById(t1.getId());
-    const updated2 = await container.testimonialRepository.findById(t2.getId());
+    const updated1 = await testRepositories.testimonialRepository.findById(t1.getId());
+    const updated2 = await testRepositories.testimonialRepository.findById(t2.getId());
     expect(updated1?.getStatus()).toBe("approved");
     expect(updated2?.getStatus()).toBe("approved");
   });
@@ -88,8 +88,8 @@ describe("Testimonial Controller Integration", () => {
 
     const t1 = new Testimonial({ id: crypto.randomUUID(), userId, content: "My Testimonial", authorName: "Me", status: "pending", source: "api" });
     const t2 = new Testimonial({ id: crypto.randomUUID(), userId: otherUserId, content: "Not Mine", authorName: "Other", status: "pending", source: "api" });
-    await container.testimonialRepository.save(t1);
-    await container.testimonialRepository.save(t2);
+    await testRepositories.testimonialRepository.save(t1);
+    await testRepositories.testimonialRepository.save(t2);
 
     const res = await testimonialsRouter.request("/batch-status", {
       method: "POST",
@@ -98,7 +98,7 @@ describe("Testimonial Controller Integration", () => {
     });
 
     expect(res.status).toBe(403);
-    const updated1 = await container.testimonialRepository.findById(t1.getId());
+    const updated1 = await testRepositories.testimonialRepository.findById(t1.getId());
     expect(updated1?.getStatus()).toBe("pending"); // Should NOT have changed
   });
 
@@ -110,7 +110,7 @@ describe("Testimonial Controller Integration", () => {
     `);
 
     const t1 = new Testimonial({ id: crypto.randomUUID(), userId: otherUserId, content: "Not Mine", authorName: "Other", status: "pending", source: "api" });
-    await container.testimonialRepository.save(t1);
+    await testRepositories.testimonialRepository.save(t1);
 
     const res = await testimonialsRouter.request("/reorder", {
       method: "POST",
@@ -124,8 +124,8 @@ describe("Testimonial Controller Integration", () => {
   it("should allow reordering if user owns all testimonials", async () => {
     const t1 = new Testimonial({ id: crypto.randomUUID(), userId, content: "Mine 1", authorName: "Me", status: "pending", source: "api" });
     const t2 = new Testimonial({ id: crypto.randomUUID(), userId, content: "Mine 2", authorName: "Me", status: "pending", source: "api" });
-    await container.testimonialRepository.save(t1);
-    await container.testimonialRepository.save(t2);
+    await testRepositories.testimonialRepository.save(t1);
+    await testRepositories.testimonialRepository.save(t2);
 
     const res = await testimonialsRouter.request("/reorder", {
       method: "POST",

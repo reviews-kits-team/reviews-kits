@@ -1,8 +1,26 @@
 import type { Context } from 'hono';
 import { getUserIdFromContext } from '@/shared/utils/auth';
 import { container } from '@/infrastructure/container';
+import { NotFoundError } from '@/domain/errors/NotFoundError';
 
 export const testimonialController = {
+  getById: async (c: Context) => {
+    const userId = getUserIdFromContext(c);
+    const id = c.req.param('id');
+
+    if (!userId || !id) {
+      return c.json({ error: 'Unauthorized or missing ID' }, 401);
+    }
+
+    try {
+      const testimonial = await container.getTestimonialByIdUseCase.execute({ id, userId });
+      return c.json(testimonial);
+    } catch (err: any) {
+      const status = err instanceof NotFoundError ? 404 : 500;
+      return c.json({ error: err.message }, status);
+    }
+  },
+
   updateStatus: async (c: Context) => {
     const userId = getUserIdFromContext(c);
     const id = c.req.param('id');

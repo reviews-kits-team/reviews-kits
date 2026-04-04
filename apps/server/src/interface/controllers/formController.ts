@@ -1,6 +1,8 @@
 import type { Context } from 'hono';
 import { getUserIdFromContext } from '@/shared/utils/auth';
 import { container } from '@/infrastructure/container';
+import { SlugAlreadyInUseError } from '@/domain/errors/SlugAlreadyInUseError';
+import { NotFoundError } from '@/domain/errors/NotFoundError';
 
 export const formController = {
   listForms: async (c: Context) => {
@@ -29,21 +31,12 @@ export const formController = {
     const { name, slug, description } = body;
 
     try {
-      const form = await container.createFormUseCase.execute({
-        userId,
-        name,
-        slug,
-        description
-      });
+      const form = await container.createFormUseCase.execute({ userId, name, slug, description });
       const props = form.getProps();
       return c.json({ ...props, slug: props.slug.getValue() }, 201);
     } catch (err: any) {
-      console.error("Failed to create form:", err);
-      const message = err.message;
-      if (message.includes('unique constraint') && message.includes('slug')) {
-        return c.json({ error: 'This slug is already in use by another form.' }, 409);
-      }
-      return c.json({ error: message || 'Error occurred while creating the form' }, 500);
+      if (err instanceof SlugAlreadyInUseError) return c.json({ error: err.message }, 409);
+      return c.json({ error: err.message || 'Error occurred while creating the form' }, 500);
     }
   },
 
@@ -59,7 +52,7 @@ export const formController = {
       const result = await container.getFormDetailsUseCase.execute({ id: formId, userId });
       return c.json(result);
     } catch (err: any) {
-      const status = err.message === 'Form not found' ? 404 : 500;
+      const status = err instanceof NotFoundError ? 404 : 500;
       return c.json({ error: err.message }, status);
     }
   },
@@ -76,7 +69,7 @@ export const formController = {
       await container.deleteFormUseCase.execute({ id: formId, userId });
       return c.json({ success: true });
     } catch (err: any) {
-      const status = err.message === 'Form not found' ? 404 : 500;
+      const status = err instanceof NotFoundError ? 404 : 500;
       return c.json({ error: err.message }, status);
     }
   },
@@ -103,7 +96,7 @@ export const formController = {
       const props = form.getProps();
       return c.json({ ...props, slug: props.slug.getValue() });
     } catch (err: any) {
-      const status = err.message === 'Form not found' ? 404 : 500;
+      const status = err instanceof NotFoundError ? 404 : 500;
       return c.json({ error: err.message }, status);
     }
   },
@@ -121,7 +114,7 @@ export const formController = {
       const props = form.getProps();
       return c.json({ ...props, slug: props.slug.getValue() });
     } catch (err: any) {
-      const status = err.message === 'Form not found' ? 404 : 500;
+      const status = err instanceof NotFoundError ? 404 : 500;
       return c.json({ error: err.message }, status);
     }
   },
@@ -139,7 +132,7 @@ export const formController = {
       const props = form.getProps();
       return c.json({ ...props, slug: props.slug.getValue() }, 201);
     } catch (err: any) {
-      const status = err.message === 'Form not found' ? 404 : 500;
+      const status = err instanceof NotFoundError ? 404 : 500;
       return c.json({ error: err.message }, status);
     }
   },
@@ -194,7 +187,7 @@ export const formController = {
       const stats = await container.getFormStatsUseCase.execute({ id: formId, userId });
       return c.json(stats);
     } catch (err: any) {
-      const status = err.message === 'Form not found' ? 404 : 500;
+      const status = err instanceof NotFoundError ? 404 : 500;
       return c.json({ error: err.message }, status);
     }
   },
@@ -223,7 +216,7 @@ export const formController = {
       });
       return c.json(testimonials);
     } catch (err: any) {
-      const status = err.message === 'Form not found' ? 404 : 500;
+      const status = err instanceof NotFoundError ? 404 : 500;
       return c.json({ error: err.message }, status);
     }
   },

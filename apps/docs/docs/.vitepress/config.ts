@@ -13,11 +13,6 @@ export default withMermaid(defineConfig({
 
   appearance: 'dark', // Force dark mode to match the theme
   
-  vite: {
-    optimizeDeps: {
-      include: ['dayjs', 'mermaid']
-    }
-  },
 
   themeConfig: {
     logo: '/logo.svg',

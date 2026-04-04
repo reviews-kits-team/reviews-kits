@@ -8,10 +8,10 @@ export const TopBar = () => {
   const { data: session } = authClient.useSession()
 
   return (
-    <header className="sticky top-0 z-[200] h-16 flex items-center border-b border-[var(--v3-border)] bg-[var(--v3-bg)]/90 backdrop-blur-xl">
+    <header className="sticky top-0 z-200 h-16 flex items-center border-b border-[var(--v3-border)] bg-[var(--v3-bg)]/90 backdrop-blur-xl">
       <div className="flex items-center justify-between w-full max-w-[1140px] mx-auto px-6">
         <a href="/" className="flex items-center gap-2 text-[17px] font-bold tracking-tight">
-          <div className="w-7 h-7 rounded-lg bg-[var(--v3-teal)] flex items-center justify-center text-sm shadow-[0_0_16px_var(--v3-teal-glow)] text-white">
+          <div className="w-7 h-7 rounded-lg bg-[--v3-teal] flex items-center justify-center text-sm shadow-[0_0_16px_var(--v3-teal-glow)] text-white">
             ★
           </div>
           Reviewskits

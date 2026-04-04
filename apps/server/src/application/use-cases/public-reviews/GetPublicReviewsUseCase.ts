@@ -1,3 +1,4 @@
+import { NotFoundError } from '../../../domain/errors/NotFoundError';
 import type { ITestimonialRepository } from '../../../domain/repositories/ITestimonialRepository';
 import type { IFormRepository } from '../../../domain/repositories/IFormRepository';
 
@@ -19,7 +20,7 @@ export class GetPublicReviewsUseCase {
 
     const form = await this.formRepository.findByPublicId(publicId);
     if (!form || form.getUserId() !== userId) {
-      throw new Error('Form not found or invalid public ID');
+      throw new NotFoundError('Form not found or invalid public ID');
     }
 
     const testimonials = await this.testimonialRepository.findApprovedByUser(userId, {

@@ -1,3 +1,4 @@
+import { NotFoundError } from '../../../domain/errors/NotFoundError';
 import type { ITestimonialRepository } from '../../../domain/repositories/ITestimonialRepository';
 import type { IFormRepository } from '../../../domain/repositories/IFormRepository';
 import type { Testimonial } from '../../../domain/entities/Testimonial';
@@ -19,7 +20,7 @@ export class ExportTestimonialsUseCase {
     // Verify form belongs to user
     const form = await this.formRepository.findById(formId);
     if (!form || form.getProps().userId !== userId) {
-      throw new Error('Form not found or unauthorized');
+      throw new NotFoundError('Form not found or unauthorized');
     }
 
     const testimonials = await this.testimonialRepository.findByFormId(formId);

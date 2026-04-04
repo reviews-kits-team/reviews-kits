@@ -1,3 +1,4 @@
+import { NotFoundError } from '../../../domain/errors/NotFoundError';
 import type { IUserRepository } from '../../../domain/repositories/IUserRepository';
 
 export interface UpdateUserRequest {
@@ -15,7 +16,7 @@ export class UpdateUserUseCase {
 
     const user = await this.userRepository.findById(id);
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundError('User not found');
     }
 
     if (name) {

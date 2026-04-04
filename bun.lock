@@ -56,6 +56,11 @@
     "apps/docs": {
       "name": "docs",
       "devDependencies": {
+        "@braintree/sanitize-url": "^7.1.1",
+        "cytoscape": "^3.31.0",
+        "cytoscape-cose-bilkent": "^4.1.0",
+        "dayjs": "^1.11.13",
+        "debug": "^4.4.0",
         "mermaid": "^11.13.0",
         "vitepress": "^1.6.4",
         "vitepress-plugin-mermaid": "^2.0.17",
@@ -85,7 +90,7 @@
     },
     "packages/sdk-react": {
       "name": "@reviewskits/react",
-      "version": "0.0.1",
+      "version": "0.0.2",
       "devDependencies": {
         "@reviewskits/types": "workspace:*",
         "@testing-library/jest-dom": "^6.9.1",
@@ -105,7 +110,7 @@
     },
     "packages/sdk-vue": {
       "name": "@reviewskits/vue",
-      "version": "0.0.1",
+      "version": "0.0.2",
       "devDependencies": {
         "@reviewskits/types": "workspace:*",
         "@vue/test-utils": "^2.4.3",
@@ -122,6 +127,7 @@
     },
     "packages/types": {
       "name": "@reviewskits/types",
+      "version": "0.0.4",
       "devDependencies": {
         "@types/bun": "latest",
       },

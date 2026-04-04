@@ -58,7 +58,7 @@ export class DrizzleTestimonialRepository implements ITestimonialRepository {
       authorUrl: props.authorUrl,
       mediaId: props.mediaId,
       position: props.position,
-      metadata: props.metadata,
+      metadata: props.metadata ?? {},
       createdAt: props.createdAt,
       updatedAt: props.updatedAt,
     });
@@ -66,7 +66,7 @@ export class DrizzleTestimonialRepository implements ITestimonialRepository {
 
   async batchSave(testimonialsList: Testimonial[]): Promise<void> {
     if (testimonialsList.length === 0) return;
-    
+
     const values = testimonialsList.map(t => {
       const props = t.getProps();
       return {
@@ -83,7 +83,7 @@ export class DrizzleTestimonialRepository implements ITestimonialRepository {
         authorUrl: props.authorUrl,
         mediaId: props.mediaId,
         position: props.position,
-        metadata: props.metadata,
+        metadata: props.metadata ?? {},
         createdAt: props.createdAt,
         updatedAt: props.updatedAt,
       };
@@ -105,7 +105,7 @@ export class DrizzleTestimonialRepository implements ITestimonialRepository {
         authorUrl: props.authorUrl,
         mediaId: props.mediaId,
         position: props.position,
-        metadata: props.metadata,
+        metadata: props.metadata ?? {},
         updatedAt: props.updatedAt,
       })
       .where(eq(testimonials.id, props.id));
@@ -457,6 +457,21 @@ export class DrizzleTestimonialRepository implements ITestimonialRepository {
     };
   }
 
+  private parseJsonb(value: unknown): Record<string, any> {
+    if (!value) return {};
+    // Drizzle bun-sql may double-serialize JSONB, returning a string instead of an object
+    if (typeof value === 'string') {
+      try {
+        const parsed = JSON.parse(value);
+        // Handle potential double-serialization: '"{}"' → '{}' → {}
+        return typeof parsed === 'string' ? JSON.parse(parsed) : parsed;
+      } catch {
+        return {};
+      }
+    }
+    return value as Record<string, any>;
+  }
+
   private mapToDomain(row: typeof testimonials.$inferSelect): Testimonial {
     return new Testimonial({
       id: row.id,
@@ -472,7 +487,7 @@ export class DrizzleTestimonialRepository implements ITestimonialRepository {
       formId: row.formId || undefined,
       mediaId: row.mediaId || undefined,
       position: row.position || 0,
-      metadata: row.metadata as any,
+      metadata: this.parseJsonb(row.metadata),
       createdAt: row.createdAt || undefined,
       updatedAt: row.updatedAt || undefined,
     });

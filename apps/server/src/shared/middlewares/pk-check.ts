@@ -1,7 +1,6 @@
 import type { Context } from 'hono';
 import { container } from '@/infrastructure/container';
 import { ApiKeyGenerator } from '@/shared/utils/ApiKeyGenerator';
-import { createHash } from 'node:crypto';
 
 /**
  * Middleware to check for a valid Public API Key (pk_...)
@@ -15,19 +14,16 @@ export const pkCheck = async (c: Context, next: () => Promise<any>) => {
   }
 
   try {
-    const keyHash = createHash('sha256').update(apiKey).digest('hex');
-    const keyRecord = await container.apiKeyRepository.findByHash(keyHash);
-    
-    if (!keyRecord || keyRecord.getProps().type !== 'public' || !keyRecord.getProps().isActive) {
+    const keyRecord = await container.verifyPublicApiKeyUseCase.execute(apiKey);
+
+    if (!keyRecord) {
       return c.json({ error: 'Invalid or inactive public API key' }, 401);
     }
 
-    // Set the userId in context so the controller knows whose reviews to fetch
     c.set('userId', keyRecord.getProps().userId);
-    
-    // Update last used timestamp (fire and forget)
-    keyRecord.updateLastUsed();
-    container.apiKeyRepository.update(keyRecord).catch(console.error);
+
+    // Fire-and-forget — recording usage is a side effect, not critical path
+    container.recordApiKeyUsageUseCase.execute(keyRecord).catch(console.error);
 
     return await next();
   } catch (error) {

@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach } from "bun:test";
 import { testDb, clearDatabase } from "../IntegrationSetup";
 import { publicRouter } from "../../../src/interface/routes/public";
-import { container } from "../../../src/infrastructure/container";
+import { testRepositories } from '../../testContainer';
 import { Form } from "../../../src/domain/entities/Form";
 import { Slug } from "../../../src/domain/value-objects/Slug";
 import { sql } from "drizzle-orm";
@@ -22,7 +22,7 @@ describe("Security Checks Integration", () => {
       publicId: publicFormId,
       config: {}
     });
-    await container.formRepository.save(form);
+    await testRepositories.formRepository.save(form);
   });
 
   it("should reject review content exceeding 5000 characters (P0-3)", async () => {

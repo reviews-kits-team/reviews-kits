@@ -1,3 +1,4 @@
+import { NotFoundError } from '../../../domain/errors/NotFoundError';
 import type { IFormRepository } from '../../../domain/repositories/IFormRepository';
 
 export interface GetPublicFormRequest {
@@ -18,7 +19,7 @@ export class GetPublicFormUseCase {
     }
 
     if (!form) {
-      throw new Error('Form not found');
+      throw new NotFoundError('Form not found');
     }
 
     if (!form.getIsActive()) {

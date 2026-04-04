@@ -39,7 +39,6 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { StatCard } from './stat-card'
 import { Stars, Badge, Checkbox } from './ui'
-import { ReviewModal } from './review-modal'
 import { MigrationModal } from './migration-modal'
 import type { DashboardForm } from './types'
 
@@ -199,8 +198,6 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
   const [copyingId, setCopyingId] = useState(false)
   const [showSharePopover, setShowSharePopover] = useState(false)
   const [copiedLink, setCopiedLink] = useState(false)
-  const [selectedReview, setSelectedReview] = useState<Testimonial | null>(null)
-  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
   const [isMigrationModalOpen, setIsMigrationModalOpen] = useState(false)
 
   const sensors = useSensors(
@@ -629,10 +626,7 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
                         formatDate={formatDate}
                         getRandomGradient={getRandomGradient}
                         getInitials={getInitials}
-                        onView={(t) => {
-                          setSelectedReview(t)
-                          setIsReviewModalOpen(true)
-                        }}
+                        onView={(t) => navigate(`/forms/${form.id}/testimonials/${t.id}`)}
                       />
                     ))
                   )}
@@ -699,16 +693,6 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
           </div>
         </div>
       </div>
-
-      <ReviewModal 
-        review={selectedReview}
-        isOpen={isReviewModalOpen}
-        onClose={() => setIsReviewModalOpen(false)}
-        onStatusUpdate={handleStatusUpdate}
-        formatDate={formatDate}
-        getRandomGradient={getRandomGradient}
-        getInitials={getInitials}
-      />
 
       <MigrationModal 
         isOpen={isMigrationModalOpen}

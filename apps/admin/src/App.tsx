@@ -1,12 +1,14 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { authClient } from './lib/auth-client'
 import { AuthGuard } from './components/auth-guard'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 import ProfilePage from './pages/ProfilePage'
 import SettingsPage from './pages/SettingsPage'
+import FormDetailPage from './pages/FormDetailPage'
 import FormEditorPage from './pages/FormEditorPage'
 import PublicFormPage from './pages/PublicFormPage'
+import TestimonialDetailPage from './pages/TestimonialDetailPage'
 import IntegrationsPage from './pages/IntegrationsPage'
 import './App.css'
 
@@ -18,28 +20,33 @@ if (savedTheme === 'light') {
 
 function App() {
   const { data: session } = authClient.useSession()
+  const location = useLocation()
 
   return (
-    <Routes>
-      <Route
-        path="/login"
-        element={session ? <Navigate to="/" replace /> : <LoginPage />}
-      />
+    <div key={location.key} className="animate-in fade-in slide-in-from-bottom-3 duration-200">
+      <Routes location={location}>
+        <Route
+          path="/login"
+          element={session ? <Navigate to="/" replace /> : <LoginPage />}
+        />
 
-      {/* Public Form Route */}
-      <Route path="/f/:slug" element={<PublicFormPage />} />
+        {/* Public Form Route */}
+        <Route path="/f/:slug" element={<PublicFormPage />} />
 
-      {/* Protected Routes */}
-      <Route element={<AuthGuard />}>
-        <Route path="/" element={<DashboardPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/integrations" element={<IntegrationsPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/forms/:id/edit" element={<FormEditorPage />} />
-      </Route>
+        {/* Protected Routes */}
+        <Route element={<AuthGuard />}>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/integrations" element={<IntegrationsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/forms/:id" element={<FormDetailPage />} />
+          <Route path="/forms/:id/edit" element={<FormEditorPage />} />
+          <Route path="/forms/:formId/testimonials/:id" element={<TestimonialDetailPage />} />
+        </Route>
 
-      <Route path="*" element={<Navigate to={session ? "/" : "/login"} replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate to={session ? "/" : "/login"} replace />} />
+      </Routes>
+    </div>
   )
 }
 
