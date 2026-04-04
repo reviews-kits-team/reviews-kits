@@ -17,11 +17,25 @@ Reviewskits follows a "Review First" philosophy. No testimonial is displayed pub
 
 ## Managing Testimonials
 
-From the dashboard, you can:
+The Moderation Dashboard provides a rapid interface to triage your reviews. The primary actions highlighted are:
+1. **CSV Export**: Instantly export your current dataset to CSV for external analysis or backups.
+2. **Status Triage**: Quickly approve or reject new customer feedback right from the main view.
+
+![Reviews Moderation Dashboard](/images/reviews_moderation.png)
+
+From the dashboard, you can also:
 - **Search**: Find specific reviews by author name or content.
 - **Edit**: Correct minor typos or clean up formatting.
 - **Feature**: (Enterprise) Pin specific reviews to the top of your feeds.
 - **Delete**: Permanently remove testimonials from your database.
+
+---
+
+## Importing Reviews
+
+You don't have to start from scratch. Reviewskits allows you to seamlessly migrate your existing social proof from other platforms. You can directly import your testimonials from **Senja**, **Trustpilot**, or by uploading a generic **CSV** or **JSON** file.
+
+![Import your reviews](/images/import_your_reviews_from_senja_trustpilot_jsonfile_csvfile.png)
 
 ---
 
