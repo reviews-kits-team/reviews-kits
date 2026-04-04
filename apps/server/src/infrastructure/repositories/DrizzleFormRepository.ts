@@ -5,6 +5,7 @@ import { forms, formVisits } from '../database/schema';
 import { Form } from '../../domain/entities/Form';
 import type { IFormRepository } from '../../domain/repositories/IFormRepository';
 import { Slug } from '../../domain/value-objects/Slug';
+import { SlugAlreadyInUseError } from '../../domain/errors/SlugAlreadyInUseError';
 
 export class DrizzleFormRepository implements IFormRepository {
   constructor(private readonly db: BunSQLDatabase<typeof schema>) {}
@@ -50,20 +51,28 @@ export class DrizzleFormRepository implements IFormRepository {
 
   async save(form: Form): Promise<void> {
     const props = form.getProps();
-    await this.db.insert(forms).values({
-      id: props.id,
-      userId: props.userId,
-      name: props.name,
-      slug: props.slug.getValue(),
-      publicId: props.publicId,
-      description: props.description,
-      thankYouMessage: props.thankYouMessage,
-      config: props.config,
-      accentColor: props.accentColor,
-      isActive: props.isActive,
-      createdAt: props.createdAt,
-      updatedAt: props.updatedAt,
-    });
+    try {
+      await this.db.insert(forms).values({
+        id: props.id,
+        userId: props.userId,
+        name: props.name,
+        slug: props.slug.getValue(),
+        publicId: props.publicId,
+        description: props.description,
+        thankYouMessage: props.thankYouMessage,
+        config: props.config,
+        accentColor: props.accentColor,
+        isActive: props.isActive,
+        createdAt: props.createdAt,
+        updatedAt: props.updatedAt,
+      });
+    } catch (err: any) {
+      const message = err?.message ?? '';
+      if (message.includes('unique constraint') && message.includes('slug')) {
+        throw new SlugAlreadyInUseError(props.slug.getValue());
+      }
+      throw err;
+    }
   }
 
   async update(form: Form): Promise<void> {

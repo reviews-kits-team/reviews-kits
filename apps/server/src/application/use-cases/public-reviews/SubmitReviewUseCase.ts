@@ -14,6 +14,7 @@ export interface SubmitReviewRequest {
   rating?: string | number;
   authorTitle?: string;
   authorUrl?: string;
+  metadata?: Record<string, unknown>;
 }
 
 export class SubmitReviewUseCase {
@@ -24,7 +25,7 @@ export class SubmitReviewUseCase {
   ) {}
 
   async execute(request: SubmitReviewRequest): Promise<string> {
-    const { formId, content, authorName, authorEmail, rating, authorTitle, authorUrl } = request;
+    const { formId, content, authorName, authorEmail, rating, authorTitle, authorUrl, metadata } = request;
 
     const form = await this.formRepository.findByPublicId(formId);
     if (!form) {
@@ -42,7 +43,8 @@ export class SubmitReviewUseCase {
       authorTitle,
       authorUrl: (authorUrl && authorUrl !== '') ? authorUrl : undefined,
       status: 'pending',
-      source: 'form'
+      source: 'form',
+      metadata: metadata && Object.keys(metadata).length > 0 ? metadata : undefined
     });
 
     await this.testimonialRepository.save(testimonial);

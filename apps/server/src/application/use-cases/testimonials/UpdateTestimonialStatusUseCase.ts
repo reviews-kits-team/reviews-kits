@@ -1,3 +1,4 @@
+import { NotFoundError } from '../../../domain/errors/NotFoundError';
 import type { ITestimonialRepository } from '../../../domain/repositories/ITestimonialRepository';
 
 export interface UpdateTestimonialStatusRequest {
@@ -14,7 +15,7 @@ export class UpdateTestimonialStatusUseCase {
 
     const testimonial = await this.testimonialRepository.findById(id);
     if (!testimonial || testimonial.getUserId() !== userId) {
-      throw new Error('Testimonial not found');
+      throw new NotFoundError('Testimonial not found');
     }
 
     if (status === 'approved') {

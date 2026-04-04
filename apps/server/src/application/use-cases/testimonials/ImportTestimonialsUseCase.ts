@@ -1,3 +1,4 @@
+import { NotFoundError } from '../../../domain/errors/NotFoundError';
 import { Testimonial } from '../../../domain/entities/Testimonial';
 import { Rating } from '../../../domain/value-objects/Rating';
 import { Email } from '../../../domain/value-objects/Email';
@@ -28,7 +29,7 @@ export class ImportTestimonialsUseCase {
     // Verify form belongs to user
     const form = await this.formRepository.findById(formId);
     if (!form || form.getProps().userId !== userId) {
-      throw new Error('Form not found or unauthorized');
+      throw new NotFoundError('Form not found or unauthorized');
     }
 
     const newTestimonials = data.map(item => {

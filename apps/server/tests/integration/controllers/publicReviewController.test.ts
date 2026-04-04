@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeAll, beforeEach } from "bun:test";
 import { testDb, clearDatabase } from "../IntegrationSetup";
 import { publicRouter } from "../../../src/interface/routes/public";
-import { container } from "../../../src/infrastructure/container";
+import { testRepositories } from '../../testContainer';
 import { Form } from "../../../src/domain/entities/Form";
 import { Slug } from "../../../src/domain/value-objects/Slug";
 import { sql } from "drizzle-orm";
@@ -27,7 +27,7 @@ describe("Public Review Controller Integration", () => {
       publicId: publicFormId,
       config: {}
     });
-    await container.formRepository.save(form);
+    await testRepositories.formRepository.save(form);
   });
 
   it("should successfully submit a valid review", async () => {
@@ -45,7 +45,7 @@ describe("Public Review Controller Integration", () => {
     const data = await res.json() as any;
     expect(data.success).toBe(true);
     
-    const testimonials = await container.testimonialRepository.findByUser(userId);
+    const testimonials = await testRepositories.testimonialRepository.findByUser(userId);
     expect(testimonials).toHaveLength(1);
     expect(testimonials[0]!.getProps().content).toBe("Great product!");
   });
@@ -66,7 +66,7 @@ describe("Public Review Controller Integration", () => {
     const data = await res.json() as any;
     expect(data.success).toBe(true);
     
-    const testimonials = await container.testimonialRepository.findByUser(userId);
+    const testimonials = await testRepositories.testimonialRepository.findByUser(userId);
     expect(testimonials).toHaveLength(0); // Should not be inserted!
   });
 

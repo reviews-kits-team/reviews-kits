@@ -56,6 +56,11 @@
     "apps/docs": {
       "name": "docs",
       "devDependencies": {
+        "@braintree/sanitize-url": "^7.1.1",
+        "cytoscape": "^3.31.0",
+        "cytoscape-cose-bilkent": "^4.1.0",
+        "dayjs": "^1.11.13",
+        "debug": "^4.4.0",
         "mermaid": "^11.13.0",
         "vitepress": "^1.6.4",
         "vitepress-plugin-mermaid": "^2.0.17",

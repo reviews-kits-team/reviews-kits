@@ -1,3 +1,4 @@
+import { NotFoundError } from '../../../domain/errors/NotFoundError';
 import type { IFormRepository } from '../../../domain/repositories/IFormRepository';
 import { Form } from '../../../domain/entities/Form';
 
@@ -14,7 +15,7 @@ export class ToggleFormStatusUseCase {
 
     const form = await this.formRepository.findById(id);
     if (!form || form.getUserId() !== userId) {
-      throw new Error('Form not found');
+      throw new NotFoundError('Form not found');
     }
 
     form.toggleActive();

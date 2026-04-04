@@ -1,3 +1,4 @@
+import { NotFoundError } from '../../../domain/errors/NotFoundError';
 import type { IFormRepository } from '../../../domain/repositories/IFormRepository';
 import type { ITestimonialRepository } from '../../../domain/repositories/ITestimonialRepository';
 
@@ -21,7 +22,7 @@ export class GetFormTestimonialsUseCase {
 
     const form = await this.formRepository.findById(id);
     if (!form || form.getUserId() !== userId) {
-      throw new Error('Form not found');
+      throw new NotFoundError('Form not found');
     }
 
     const offset = (page - 1) * limit;

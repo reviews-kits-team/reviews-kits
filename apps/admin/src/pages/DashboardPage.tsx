@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Plus,
@@ -14,7 +14,6 @@ import {
 import { TopBar } from '../components/dashboard/top-bar'
 import { StatCard } from '../components/dashboard/stat-card'
 import { FormTable } from '../components/dashboard/form-table'
-import { DetailView } from '../components/dashboard/detail-view'
 import { CreateFormModal } from '../components/dashboard/create-form-modal'
 import { DeleteConfirmModal } from '../components/dashboard/delete-confirm-modal'
 import { BulkDeleteModal } from '../components/dashboard/bulk-delete-modal'
@@ -27,7 +26,6 @@ export default function DashboardPage() {
   const { data: session } = authClient.useSession()
   const [forms, setForms] = useState<DashboardForm[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedFormId, setSelectedFormId] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [deletingFormId, setDeletingFormId] = useState<string | null>(null)
   const [bulkDeletingIds, setBulkDeletingIds] = useState<string[] | null>(null)
@@ -73,10 +71,6 @@ export default function DashboardPage() {
     fetchData();
     fetchStats();
   }, [])
-
-  const selectedForm = useMemo(() =>
-    forms.find(f => f.id === selectedFormId), [selectedFormId, forms]
-  )
 
   const handleDeleteForm = (id: string) => {
     setError(null);
@@ -194,12 +188,6 @@ export default function DashboardPage() {
     <div className="min-h-screen">
       <TopBar />
 
-      {selectedFormId && selectedForm ? (
-        <DetailView
-          form={selectedForm}
-          onBack={() => setSelectedFormId(null)}
-        />
-      ) : (
         <main className="max-w-[1140px] mx-auto px-6 py-12 pb-20 relative z-10">
           <div className="mb-10">
             <span className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--v3-teal)] mb-2.5 block">
@@ -282,7 +270,7 @@ export default function DashboardPage() {
               <FormTable
                 forms={forms}
                 onReorder={setForms}
-                onOpenForm={setSelectedFormId}
+                onOpenForm={(id) => navigate(`/forms/${id}`)}
                 onDeleteForm={handleDeleteForm}
                 onToggleFormStatus={handleToggleFormStatus}
                 onDuplicateForm={handleDuplicateForm}
@@ -304,7 +292,6 @@ export default function DashboardPage() {
             )}
           </div>
         </main>
-      )}
 
       <CreateFormModal
         isOpen={isModalOpen}
