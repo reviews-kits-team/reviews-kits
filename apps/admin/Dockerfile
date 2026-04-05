@@ -9,7 +9,9 @@ COPY apps/admin/package.json ./apps/admin/
 COPY apps/docs/package.json ./apps/docs/
 COPY packages/types/package.json ./packages/types/
 COPY packages/sdk-react/package.json ./packages/sdk-react/
+COPY packages/sdk-react/playground/package.json ./packages/sdk-react/playground/
 COPY packages/sdk-vue/package.json ./packages/sdk-vue/
+COPY packages/sdk-vue/playground/package.json ./packages/sdk-vue/playground/
 COPY packages/sdk-core/package.json ./packages/sdk-core/
 
 RUN bun install --frozen-lockfile
