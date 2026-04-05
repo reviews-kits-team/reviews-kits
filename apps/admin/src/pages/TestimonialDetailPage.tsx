@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   ChevronLeft,
@@ -19,22 +18,7 @@ import {
   LayoutGrid
 } from 'lucide-react'
 import { TopBar } from '../components/dashboard/top-bar'
-
-interface TestimonialDetail {
-  id: string
-  content: string
-  authorName: string
-  authorEmail?: string
-  authorTitle?: string
-  authorUrl?: string
-  rating?: number
-  status: 'pending' | 'approved' | 'rejected'
-  source: 'form' | 'import' | 'api'
-  formId?: string
-  metadata?: Record<string, unknown>
-  createdAt: string
-  updatedAt: string
-}
+import { useTestimonial, useUpdateTestimonialStatus } from '../hooks/useTestimonial'
 
 const STATUS_CONFIG = {
   approved: { label: 'Approved', icon: Check, color: 'text-emerald-400', bg: 'bg-emerald-400/10 border-emerald-400/20' },
@@ -70,9 +54,7 @@ function formatDate(dateStr: string) {
   })
 }
 
-// Detect and render the value of a metadata entry
 function MetadataValue({ value }: { value: unknown }) {
-  // NPS / number
   if (typeof value === 'number') {
     return (
       <div className="flex items-center gap-2 mt-1">
@@ -95,7 +77,6 @@ function MetadataValue({ value }: { value: unknown }) {
     )
   }
 
-  // Grid / object with row:column mapping
   if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
     const entries = Object.entries(value as Record<string, string>)
     return (
@@ -117,7 +98,6 @@ function MetadataValue({ value }: { value: unknown }) {
     )
   }
 
-  // Choice / plain string
   return (
     <span className="inline-block mt-1 px-3 py-1.5 rounded-xl bg-(--v3-bg3) border border-(--v3-border) text-sm text-(--v3-text)">
       {String(value)}
@@ -136,47 +116,11 @@ function guessFieldIcon(value: unknown) {
 export default function TestimonialDetailPage() {
   const { id } = useParams<{ formId: string; id: string }>()
   const navigate = useNavigate()
-  const [testimonial, setTestimonial] = useState<TestimonialDetail | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [updating, setUpdating] = useState(false)
 
-  useEffect(() => {
-    const fetchTestimonial = async () => {
-      try {
-        const res = await fetch(`/api/v1/testimonials/${id}`)
-        if (!res.ok) {
-          const data = await res.json()
-          throw new Error(data.error || 'Testimonial not found')
-        }
-        setTestimonial(await res.json())
-      } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : 'An error occurred')
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchTestimonial()
-  }, [id])
+  const { data: testimonial, isLoading, error } = useTestimonial(id)
+  const updateStatus = useUpdateTestimonialStatus(id!)
 
-  const handleStatusUpdate = async (status: 'approved' | 'rejected' | 'pending') => {
-    if (!testimonial || updating) return
-    setUpdating(true)
-    try {
-      const res = await fetch(`/api/v1/testimonials/${id}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
-      })
-      if (res.ok) setTestimonial(prev => prev ? { ...prev, status } : prev)
-    } catch (err) {
-      console.error('Failed to update status', err)
-    } finally {
-      setUpdating(false)
-    }
-  }
-
-  if (loading) return (
+  if (isLoading) return (
     <div className="min-h-screen bg-(--v3-bg) flex flex-col">
       <TopBar />
       <div className="flex-1 flex items-center justify-center">
@@ -190,7 +134,7 @@ export default function TestimonialDetailPage() {
       <TopBar />
       <div className="flex-1 flex flex-col items-center justify-center gap-4 text-(--v3-muted)">
         <MessageSquare size={40} />
-        <p className="text-sm">{error || 'Testimonial not found'}</p>
+        <p className="text-sm">{error?.message || 'Testimonial not found'}</p>
         <button onClick={() => navigate(-1)} className="text-xs text-(--v3-teal) hover:underline">Go back</button>
       </div>
     </div>
@@ -199,7 +143,9 @@ export default function TestimonialDetailPage() {
   const statusCfg = STATUS_CONFIG[testimonial.status]
   const StatusIcon = statusCfg.icon
   const gradient = getGradient(testimonial.authorName)
-  const metaEntries = testimonial.metadata ? Object.entries(testimonial.metadata).filter(([, v]) => v !== undefined && v !== null && v !== '') : []
+  const metaEntries = testimonial.metadata
+    ? Object.entries(testimonial.metadata).filter(([, v]) => v !== undefined && v !== null && v !== '')
+    : []
 
   return (
     <div className="min-h-screen bg-(--v3-bg) text-(--v3-text) flex flex-col">
@@ -207,7 +153,6 @@ export default function TestimonialDetailPage() {
 
       <main className="max-w-285 mx-auto px-6 py-8 flex flex-col gap-5">
 
-        {/* Back */}
         <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-(--v3-muted) hover:text-(--v3-text) transition-colors text-sm w-fit"
@@ -216,13 +161,11 @@ export default function TestimonialDetailPage() {
           Back to reviews
         </button>
 
-        {/* Two-column layout */}
         <div className="flex gap-5 items-start">
 
           {/* Left — main content */}
           <div className="flex-1 min-w-0 flex flex-col gap-4">
 
-            {/* Testimonial Content */}
             <div className="bg-(--v3-bg2) border border-(--v3-border) rounded-2xl p-5">
               <p className="text-[10px] font-black uppercase tracking-[0.15em] text-(--v3-muted) mb-3">Testimonial</p>
               <blockquote className="text-(--v3-text) text-[15px] leading-relaxed italic opacity-80">
@@ -230,7 +173,6 @@ export default function TestimonialDetailPage() {
               </blockquote>
             </div>
 
-            {/* Custom step answers */}
             {metaEntries.length > 0 && (
               <div className="bg-(--v3-bg2) border border-(--v3-border) rounded-2xl p-5">
                 <p className="text-[10px] font-black uppercase tracking-[0.15em] text-(--v3-muted) mb-4">Additional responses</p>
@@ -250,13 +192,11 @@ export default function TestimonialDetailPage() {
                 </div>
               </div>
             )}
-
           </div>
 
           {/* Right sidebar */}
           <div className="w-72 shrink-0 flex flex-col gap-4">
 
-            {/* Author Card — compact */}
             <div className="bg-(--v3-bg2) border border-(--v3-border) rounded-2xl p-4">
               <div className="flex items-center gap-3">
                 <div className={`w-9 h-9 rounded-lg bg-linear-to-br ${gradient} flex items-center justify-center text-white font-black text-xs shrink-0`}>
@@ -295,7 +235,6 @@ export default function TestimonialDetailPage() {
                 </div>
               </div>
 
-              {/* Rating inline */}
               {testimonial.rating != null && (
                 <div className="flex items-center gap-1 mt-3 pt-3 border-t border-(--v3-border)">
                   {[1, 2, 3, 4, 5].map(v => (
@@ -310,7 +249,6 @@ export default function TestimonialDetailPage() {
               )}
             </div>
 
-            {/* Details */}
             <div className="bg-(--v3-bg2) border border-(--v3-border) rounded-2xl p-4 space-y-2">
               <p className="text-[10px] font-black uppercase tracking-[0.15em] text-(--v3-muted) mb-2">Details</p>
               <div className="flex items-center gap-2 text-[11px] text-(--v3-muted)">
@@ -329,26 +267,25 @@ export default function TestimonialDetailPage() {
               </div>
             </div>
 
-            {/* Actions */}
             <div className="bg-(--v3-bg2) border border-(--v3-border) rounded-2xl p-4 flex flex-col gap-2">
               <p className="text-[10px] font-black uppercase tracking-[0.15em] text-(--v3-muted) mb-1">Actions</p>
               <button
-                disabled={testimonial.status === 'approved' || updating}
-                onClick={() => handleStatusUpdate('approved')}
+                disabled={testimonial.status === 'approved' || updateStatus.isPending}
+                onClick={() => updateStatus.mutate('approved')}
                 className="flex items-center justify-center gap-2 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold hover:bg-emerald-500/20 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <Check size={12} /> Approve
               </button>
               <button
-                disabled={testimonial.status === 'rejected' || updating}
-                onClick={() => handleStatusUpdate('rejected')}
+                disabled={testimonial.status === 'rejected' || updateStatus.isPending}
+                onClick={() => updateStatus.mutate('rejected')}
                 className="flex items-center justify-center gap-2 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold hover:bg-red-500/20 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <XCircle size={12} /> Reject
               </button>
               <button
-                disabled={testimonial.status === 'pending' || updating}
-                onClick={() => handleStatusUpdate('pending')}
+                disabled={testimonial.status === 'pending' || updateStatus.isPending}
+                onClick={() => updateStatus.mutate('pending')}
                 className="flex items-center justify-center gap-2 py-2 rounded-xl bg-(--v3-bg3) border border-(--v3-border) text-(--v3-muted) text-xs font-bold hover:border-(--v3-border2) transition-all disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <Clock size={12} /> Set to pending

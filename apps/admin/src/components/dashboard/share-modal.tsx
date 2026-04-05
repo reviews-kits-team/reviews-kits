@@ -40,16 +40,16 @@ export const ShareModal = ({ isOpen, onClose, formName, formSlug, publicId }: Sh
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 animate-in fade-in duration-200">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={onClose} />
       
-      <div className="relative w-full max-w-lg bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-3xl shadow-[0_32px_80px_rgba(0,0,0,0.6)] overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
+      <div className="relative w-full max-w-lg bg-(--v3-bg2) border border-(--v3-border) rounded-3xl shadow-[0_32px_80px_rgba(0,0,0,0.6)] overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
         <div className="p-8">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-black tracking-tight text-[var(--v3-text)]">
+            <h2 className="text-2xl font-black tracking-tight text-(--v3-text)">
               Share form
             </h2>
-            <button onClick={onClose} className="p-2 text-[var(--v3-muted2)] hover:text-[var(--v3-text)] hover:bg-white/5 rounded-xl transition-all">
+            <button onClick={onClose} className="p-2 text-(--v3-muted2) hover:text-(--v3-text) hover:bg-white/5 rounded-xl transition-all">
               <X size={20} />
             </button>
           </div>
@@ -58,18 +58,18 @@ export const ShareModal = ({ isOpen, onClose, formName, formSlug, publicId }: Sh
             {/* Direct Link */}
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <Globe size={14} className="text-[var(--v3-teal)]" />
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--v3-muted2)]">Direct link</span>
+                <Globe size={14} className="text-(--v3-teal)" />
+                <span className="text-[11px] font-bold uppercase tracking-wider text-(--v3-muted2)">Direct link</span>
               </div>
               <div className="flex gap-2">
                 <input 
                   readOnly 
                   value={shareUrl}
-                  className="flex-1 bg-black/20 border border-white/5 rounded-xl px-4 py-3 text-sm text-[var(--v3-muted2)] focus:outline-none focus:border-[var(--v3-teal)]/30 transition-all font-mono"
+                  className="flex-1 bg-black/20 border border-white/5 rounded-xl px-4 py-3 text-sm text-(--v3-muted2) focus:outline-none focus:border-(--v3-teal)/30 transition-all font-mono"
                 />
                 <button 
                   onClick={copyLink}
-                  className={`px-4 rounded-xl flex items-center gap-2 font-bold text-xs uppercase transition-all ${copiedLink ? 'bg-emerald-500 text-white' : 'bg-[var(--v3-teal)] text-white hover:shadow-[0_8px_20px_rgba(45,212,191,0.2)]'}`}
+                  className={`px-4 rounded-xl flex items-center gap-2 font-bold text-xs uppercase transition-all ${copiedLink ? 'bg-emerald-500 text-white' : 'bg-(--v3-teal) text-white hover:shadow-[0_8px_20px_rgba(45,212,191,0.2)]'}`}
                 >
                   {copiedLink ? <Check size={16} /> : <Copy size={16} />}
                   {copiedLink ? 'Copied' : 'Copy'}
@@ -81,13 +81,13 @@ export const ShareModal = ({ isOpen, onClose, formName, formSlug, publicId }: Sh
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <FileText size={14} className="text-purple-400" />
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--v3-muted2)]">Form ID (API)</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-(--v3-muted2)">Form ID (API)</span>
               </div>
               <div className="flex gap-2">
                 <input 
                   readOnly 
                   value={publicId}
-                  className="flex-1 bg-black/20 border border-white/5 rounded-xl px-4 py-3 text-sm text-[var(--v3-muted2)] focus:outline-none focus:border-purple-500/30 transition-all font-mono"
+                  className="flex-1 bg-black/20 border border-white/5 rounded-xl px-4 py-3 text-sm text-(--v3-muted2) focus:outline-none focus:border-purple-500/30 transition-all font-mono"
                 />
                 <button 
                   onClick={copyId}
@@ -97,14 +97,14 @@ export const ShareModal = ({ isOpen, onClose, formName, formSlug, publicId }: Sh
                   {copiedId ? 'Copied' : 'Copy'}
                 </button>
               </div>
-              <p className="mt-2 text-[10px] text-[var(--v3-muted2)] italic">
+              <p className="mt-2 text-[10px] text-(--v3-muted2) italic">
                 Use this ID for your public API requests.
               </p>
             </div>
 
             {/* Social Sharing */}
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--v3-muted2)] block mb-4">Share on networks</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-(--v3-muted2) block mb-4">Share on networks</span>
               <div className="grid grid-cols-3 gap-2">
                 <button 
                   onClick={() => shareSocial('twitter')}

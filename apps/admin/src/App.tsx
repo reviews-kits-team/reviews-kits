@@ -10,6 +10,7 @@ import FormEditorPage from './pages/FormEditorPage'
 import PublicFormPage from './pages/PublicFormPage'
 import TestimonialDetailPage from './pages/TestimonialDetailPage'
 import IntegrationsPage from './pages/IntegrationsPage'
+import SecurityPage from './pages/SecurityPage'
 import './App.css'
 
 // Apply saved theme before first render to avoid flash
@@ -39,6 +40,7 @@ function App() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/integrations" element={<IntegrationsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/security" element={<SecurityPage />} />
           <Route path="/forms/:id" element={<FormDetailPage />} />
           <Route path="/forms/:id/edit" element={<FormEditorPage />} />
           <Route path="/forms/:formId/testimonials/:id" element={<TestimonialDetailPage />} />

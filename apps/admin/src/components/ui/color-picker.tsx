@@ -185,8 +185,8 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
 
       {/* Popover */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-3 w-[300px] bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 z-50 animate-in fade-in zoom-in duration-200">
-          <div className="flex gap-4 mb-4 h-[200px]">
+        <div className="absolute top-full left-0 mt-3 w-75 bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 z-50 animate-in fade-in zoom-in duration-200">
+          <div className="flex gap-4 mb-4 h-50">
             {/* Saturation/Value Square */}
             <div 
               ref={saturationRef}
@@ -195,8 +195,8 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
               className="relative flex-1 rounded-lg overflow-hidden cursor-crosshair"
               style={{ backgroundColor: `hsl(${hsv.h}, 100%, 50%)` }}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-white to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-r from-white to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-black to-transparent" />
               
               {/* Selector Dot */}
               <div 
