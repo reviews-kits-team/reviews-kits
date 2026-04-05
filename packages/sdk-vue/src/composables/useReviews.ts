@@ -1,14 +1,15 @@
-import { ref, watch, onMounted, onUnmounted, inject } from 'vue';
-import { reviewsApi, mapReviews } from '@reviewskits/core';
-import type { ReviewApiParams, Review } from '@reviewskits/core';
-import { InjectionKey } from '../core/config';
+import { ref, watchEffect } from 'vue';
+import { reviewsApi } from '../api/reviews';
+import { mapReviews } from '../api/mappers/review.mapper';
+import { ReviewApiParams, Review } from '../types';
 
 export const useReviews = (params: ReviewApiParams) => {
   const config = inject(InjectionKey, undefined);
   const data = ref<{ reviews: Review[] } | null>(null);
   const isLoading = ref(true);
   const error = ref<any>(null);
-  let controller: AbortController | null = null;
+  // Incrementing this ref forces watchEffect to re-run on manual refetch.
+  const refreshTick = ref(0);
 
   const fetchReviews = async (signal?: AbortSignal) => {
     isLoading.value = true;
@@ -31,33 +32,31 @@ export const useReviews = (params: ReviewApiParams) => {
     }
   };
 
-  const executeFetch = () => {
-    if (controller) controller.abort();
-    controller = new AbortController();
-    fetchReviews(controller.signal);
-  };
+    const controller = new AbortController();
+    onCleanup(() => controller.abort());
 
-  onMounted(() => {
-    executeFetch();
+    isLoading.value = true;
+    error.value = null;
+
+    reviewsApi
+      .getReviews({ ...params }, { signal: controller.signal })
+      .then((response) => {
+        if (controller.signal.aborted) return;
+        data.value = { reviews: mapReviews(response.data) };
+      })
+      .catch((err: any) => {
+        if (err.name === 'AbortError') return;
+        error.value = err;
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) isLoading.value = false;
+      });
   });
-
-  onUnmounted(() => {
-    if (controller) controller.abort();
-  });
-
-  // Re-fetch when params change
-  watch(
-    () => params,
-    () => {
-      executeFetch();
-    },
-    { deep: true }
-  );
 
   return {
     data,
     isLoading,
     error,
-    refetch: executeFetch,
+    refetch: () => { refreshTick.value++ },
   };
 };

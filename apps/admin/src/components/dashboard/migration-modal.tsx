@@ -100,19 +100,19 @@ export function MigrationModal({ isOpen, onClose, formId, onImported }: Migratio
   ]
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
-      <div className="bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
-        <div className="p-6 border-b border-[var(--v3-border)] flex items-center justify-between bg-[var(--v3-bg3)]/50">
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
+      <div className="bg-(--v3-bg2) border border-(--v3-border) rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
+        <div className="p-6 border-b border-(--v3-border) flex items-center justify-between bg-(--v3-bg3)/50">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[var(--v3-teal)]/10 flex items-center justify-center text-[var(--v3-teal)]">
+            <div className="w-10 h-10 rounded-xl bg-(--v3-teal)/10 flex items-center justify-center text-(--v3-teal)">
               <Upload size={20} />
             </div>
             <div>
-              <h3 className="font-black text-xl text-[var(--v3-text)]">Import Testimonials</h3>
-              <p className="text-[10px] font-bold text-[var(--v3-muted2)] uppercase tracking-widest">Migration Wizard</p>
+              <h3 className="font-black text-xl text-(--v3-text)">Import Testimonials</h3>
+              <p className="text-[10px] font-bold text-(--v3-muted2) uppercase tracking-widest">Migration Wizard</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-[var(--v3-muted2)] hover:text-[var(--v3-text)] transition-colors">
+          <button onClick={onClose} className="text-(--v3-muted2) hover:text-(--v3-text) transition-colors">
             <X size={20} />
           </button>
         </div>
@@ -121,8 +121,8 @@ export function MigrationModal({ isOpen, onClose, formId, onImported }: Migratio
           {step === 'source' && (
             <div className="space-y-6">
               <div className="text-center mb-8">
-                <h4 className="text-[var(--v3-text)] font-bold mb-2">Where are your reviews?</h4>
-                <p className="text-xs text-[var(--v3-muted2)]">Select the platform you want to migrate from.</p>
+                <h4 className="text-(--v3-text) font-bold mb-2">Where are your reviews?</h4>
+                <p className="text-xs text-(--v3-muted2)">Select the platform you want to migrate from.</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 {sources.map(s => (
@@ -143,20 +143,20 @@ export function MigrationModal({ isOpen, onClose, formId, onImported }: Migratio
             <div className="space-y-6">
               <button 
                 onClick={() => setStep('source')}
-                className="text-[10px] font-bold uppercase tracking-widest text-[var(--v3-muted2)] hover:text-[var(--v3-teal)] mb-4"
+                className="text-[10px] font-bold uppercase tracking-widest text-(--v3-muted2) hover:text-(--v3-teal) mb-4"
               >
                 ← Back to sources
               </button>
               <div 
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-[var(--v3-border)] rounded-3xl p-12 flex flex-col items-center justify-center gap-4 transition-all hover:border-[var(--v3-teal)] hover:bg-[var(--v3-teal)]/5 cursor-pointer group"
+                className="border-2 border-dashed border-(--v3-border) rounded-3xl p-12 flex flex-col items-center justify-center gap-4 transition-all hover:border-(--v3-teal) hover:bg-(--v3-teal)/5 cursor-pointer group"
               >
-                <div className="w-16 h-16 rounded-2xl bg-[var(--v3-bg3)] flex items-center justify-center text-[var(--v3-muted2)] group-hover:text-[var(--v3-teal)] transition-colors">
+                <div className="w-16 h-16 rounded-2xl bg-(--v3-bg3) flex items-center justify-center text-(--v3-muted2) group-hover:text-(--v3-teal) transition-colors">
                   <Upload size={32} />
                 </div>
                 <div className="text-center">
-                  <p className="text-[var(--v3-text)] font-bold mb-1">Click to upload or drag & drop</p>
-                  <p className="text-xs text-[var(--v3-muted2)]">Support for {source === 'csv' ? '.csv' : source === 'json' ? '.json' : 'official exports'}</p>
+                  <p className="text-(--v3-text) font-bold mb-1">Click to upload or drag & drop</p>
+                  <p className="text-xs text-(--v3-muted2)">Support for {source === 'csv' ? '.csv' : source === 'json' ? '.json' : 'official exports'}</p>
                 </div>
                 <input 
                   type="file" 
@@ -171,13 +171,13 @@ export function MigrationModal({ isOpen, onClose, formId, onImported }: Migratio
 
           {step === 'preview' && (
             <div className="space-y-6">
-              <div className="bg-[var(--v3-bg3)] border border-[var(--v3-border)] rounded-2xl p-6 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[var(--v3-teal)]/10 flex items-center justify-center text-[var(--v3-teal)]">
+              <div className="bg-(--v3-bg3) border border-(--v3-border) rounded-2xl p-6 flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-(--v3-teal)/10 flex items-center justify-center text-(--v3-teal)">
                   {file?.name.endsWith('.json') ? <FileJson size={24} /> : <FileSpreadsheet size={24} />}
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-bold text-[var(--v3-text)]">{file?.name}</p>
-                  <p className="text-[10px] text-[var(--v3-muted2)] uppercase tracking-widest">Ready to import</p>
+                  <p className="text-sm font-bold text-(--v3-text)">{file?.name}</p>
+                  <p className="text-[10px] text-(--v3-muted2) uppercase tracking-widest">Ready to import</p>
                 </div>
                 <button onClick={() => setStep('upload')} className="text-xs font-bold text-red-400 hover:underline">Remove</button>
               </div>
@@ -189,12 +189,12 @@ export function MigrationModal({ isOpen, onClose, formId, onImported }: Migratio
                 </div>
               )}
 
-              <div className="bg-[var(--v3-teal)]/5 border border-[var(--v3-teal)]/20 rounded-2xl p-6">
+              <div className="bg-(--v3-teal)/5 border border-(--v3-teal)/20 rounded-2xl p-6">
                 <div className="flex items-center gap-3 mb-4">
-                  <Check className="text-[var(--v3-teal)]" size={16} />
-                  <p className="text-xs text-[var(--v3-text)] font-medium">Auto-detecting headers...</p>
+                  <Check className="text-(--v3-teal)" size={16} />
+                  <p className="text-xs text-(--v3-text) font-medium">Auto-detecting headers...</p>
                 </div>
-                <p className="text-[10px] text-[var(--v3-muted2)] leading-relaxed">
+                <p className="text-[10px] text-(--v3-muted2) leading-relaxed">
                   We will automatically map fields like Author, Content, and Rating. You can review and edit these after the import is complete.
                 </p>
               </div>
@@ -202,7 +202,7 @@ export function MigrationModal({ isOpen, onClose, formId, onImported }: Migratio
               <button
                 onClick={startImport}
                 disabled={isProcessing}
-                className="w-full py-4 bg-[var(--v3-teal)] text-white font-bold rounded-2xl shadow-xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-3 active:scale-[0.98]"
+                className="w-full py-4 bg-(--v3-teal) text-white font-bold rounded-2xl shadow-xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-3 active:scale-[0.98]"
               >
                 {isProcessing ? <Loader2 className="animate-spin" size={20} /> : <ChevronRight size={20} />}
                 Start Migration
@@ -213,32 +213,32 @@ export function MigrationModal({ isOpen, onClose, formId, onImported }: Migratio
           {step === 'importing' && (
             <div className="py-12 flex flex-col items-center justify-center gap-6">
               <div className="relative">
-                <div className="w-24 h-24 rounded-full border-4 border-[var(--v3-teal)]/10 border-t-[var(--v3-teal)] animate-spin" />
-                <div className="absolute inset-0 flex items-center justify-center text-[var(--v3-teal)]">
+                <div className="w-24 h-24 rounded-full border-4 border-(--v3-teal)/10 border-t-(--v3-teal) animate-spin" />
+                <div className="absolute inset-0 flex items-center justify-center text-(--v3-teal)">
                   <Upload size={32} />
                 </div>
               </div>
               <div className="text-center">
-                <h4 className="text-[var(--v3-text)] font-bold text-lg mb-2">Importing your reviews</h4>
-                <p className="text-xs text-[var(--v3-muted2)]">Please don't close this window.</p>
+                <h4 className="text-(--v3-text) font-bold text-lg mb-2">Importing your reviews</h4>
+                <p className="text-xs text-(--v3-muted2)">Please don't close this window.</p>
               </div>
             </div>
           )}
 
           {step === 'success' && (
             <div className="py-8 flex flex-col items-center justify-center text-center gap-6">
-              <div className="w-20 h-20 rounded-full bg-[var(--v3-teal)]/10 flex items-center justify-center text-[var(--v3-teal)] shadow-[0_0_40px_rgba(45,212,191,0.2)] animate-bounce">
+              <div className="w-20 h-20 rounded-full bg-(--v3-teal)/10 flex items-center justify-center text-(--v3-teal) shadow-[0_0_40px_rgba(45,212,191,0.2)] animate-bounce">
                 <Check size={40} />
               </div>
               <div>
-                <h4 className="text-[var(--v3-text)] font-bold text-2xl mb-2">Migration Successful!</h4>
-                <p className="text-sm text-[var(--v3-muted2)]">
-                  Successfully imported <span className="text-[var(--v3-teal)] font-black">{importedCount}</span> testimonials into your platform.
+                <h4 className="text-(--v3-text) font-bold text-2xl mb-2">Migration Successful!</h4>
+                <p className="text-sm text-(--v3-muted2)">
+                  Successfully imported <span className="text-(--v3-teal) font-black">{importedCount}</span> testimonials into your platform.
                 </p>
               </div>
               <button
                 onClick={onClose}
-                className="mt-4 px-8 py-3 bg-[var(--v3-teal)] text-white font-bold rounded-xl hover:shadow-lg transition-all"
+                className="mt-4 px-8 py-3 bg-(--v3-teal) text-white font-bold rounded-xl hover:shadow-lg transition-all"
               >
                 Done
               </button>

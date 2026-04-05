@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
-import { reviewsApi, mapReviews } from '@reviewskits/core';
-import type { ReviewApiParams, Review, ReviewApiResponseMeta } from '@reviewskits/core';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { reviewsApi } from '../api/reviews';
+import { mapReviews } from '../api/mappers/review.mapper';
+import type { ReviewApiParams, Review, ReviewApiResponseMeta } from '../types';
 import { useReviewsKitConfig } from '../context/ReviewsKitProvider';
 
 export interface InfiniteData {
@@ -19,6 +20,9 @@ export function useInfiniteReviews(params: Omit<ReviewApiParams, 'page'>) {
   const [hasNextPage, setHasNextPage] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const stableParams = useMemo(() => params, [JSON.stringify(params)]);
+
   const fetchPage = useCallback(
     async (page: number, isInitial = false, signal?: AbortSignal) => {
       if (!config) return;
@@ -34,7 +38,7 @@ export function useInfiniteReviews(params: Omit<ReviewApiParams, 'page'>) {
       try {
         const response = await reviewsApi.getReviews(
           {
-            ...params,
+            ...stableParams,
             page,
           },
           { signal },
@@ -70,7 +74,7 @@ export function useInfiniteReviews(params: Omit<ReviewApiParams, 'page'>) {
         }
       }
     },
-    [config, JSON.stringify(params)]
+    [config, stableParams]
   );
 
   const fetchNextPage = useCallback(async () => {

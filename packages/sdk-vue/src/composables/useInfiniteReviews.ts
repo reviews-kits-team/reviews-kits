@@ -1,7 +1,7 @@
-import { ref, onMounted, onUnmounted, watch, inject } from 'vue';
-import { reviewsApi, mapReviews } from '@reviewskits/core';
-import type { ReviewApiParams, Review, ReviewApiResponseMeta } from '@reviewskits/core';
-import { InjectionKey } from '../core/config';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import { reviewsApi } from '../api/reviews';
+import { mapReviews } from '../api/mappers/review.mapper';
+import { ReviewApiParams, Review, ReviewApiResponseMeta } from '../types';
 
 export interface InfiniteData {
   pages: {
@@ -83,14 +83,12 @@ export const useInfiniteReviews = (params: Omit<ReviewApiParams, 'page'>) => {
     if (controller) controller.abort();
   });
 
-  // Re-fetch everything if params change
-  watch(
-    () => params,
-    () => {
-      fetchPage(1, true);
-    },
-    { deep: true }
-  );
+  // Serialize params to a string so Vue compares values, not object identity.
+  // Avoids deep: true which traverses the whole object tree every tick.
+  const serializedParams = computed(() => JSON.stringify(params));
+  watch(serializedParams, () => {
+    fetchPage(1, true);
+  });
 
   return {
     data,

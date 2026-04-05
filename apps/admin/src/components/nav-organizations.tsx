@@ -124,7 +124,7 @@ export function NavOrganizations() {
 
               <CollapsibleContent className="relative ml-0 overflow-hidden transition-all data-[state=closed]:animate-collapse-up data-[state=open]:animate-collapse-down">
                 {/* Vertical guide line for projects - shifted left */}
-                <div className="absolute left-[31px] top-0 bottom-6 w-px bg-gradient-to-b from-zinc-800 to-transparent opacity-60" />
+                <div className="absolute left-7.75 top-0 bottom-6 w-px bg-linear-to-b from-zinc-800 to-transparent opacity-60" />
                 
                 <SidebarMenuSub className="ml-0 mr-0 border-none px-0">
                   {org.projects.map((project) => (
@@ -161,7 +161,7 @@ export function NavOrganizations() {
 
                       <CollapsibleContent className="relative ml-0">
                           {/* Vertical guide line for forms - shifted left */}
-                          <div className="absolute left-[15px] top-0 bottom-4 w-px bg-gradient-to-b from-zinc-800 to-transparent opacity-40" />
+                          <div className="absolute left-3.75 top-0 bottom-4 w-px bg-linear-to-b from-zinc-800 to-transparent opacity-40" />
                           
                           <SidebarMenuSub className="ml-0 mr-0 border-none px-0">
                             {project.forms.map((form) => (
