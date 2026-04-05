@@ -45,7 +45,7 @@
     "react": ">=18"
   },
   "dependencies": {
-    "@reviewskits/core": "0.0.1"
+    "@reviewskits/core": "workspace:*"
   },
   "devDependencies": {
     "@reviewskits/types": "^0.0.4",

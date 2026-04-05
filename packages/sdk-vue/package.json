@@ -44,7 +44,7 @@
     "vue": "^3.3.0"
   },
   "dependencies": {
-    "@reviewskits/core": "0.0.1"
+    "@reviewskits/core": "workspace:*"
   },
   "devDependencies": {
     "@reviewskits/types": "^0.0.4",
