@@ -77,14 +77,14 @@ const SortableRow = ({ form, isSelected, onSelect, onOpen, onDelete, onDuplicate
     <tr
       ref={setNodeRef}
       style={style}
-      className={`group border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors ${isSelected ? 'bg-[var(--v3-teal)]/[0.03]' : ''}`}
+      className={`group border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors ${isSelected ? 'bg-(--v3-teal)/[0.03]' : ''}`}
     >
       <td className="py-3.5 pl-4 w-10">
         <div className="flex items-center gap-3">
           <div
             {...attributes}
             {...listeners}
-            className="cursor-grab active:cursor-grabbing text-[var(--v3-muted2)] hover:text-[var(--v3-text)] p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="cursor-grab active:cursor-grabbing text-(--v3-muted2) hover:text-(--v3-text) p-1 opacity-0 group-hover:opacity-100 transition-opacity"
           >
             <GripVertical size={16} />
           </div>
@@ -92,24 +92,24 @@ const SortableRow = ({ form, isSelected, onSelect, onOpen, onDelete, onDuplicate
             type="checkbox"
             checked={isSelected}
             onChange={(e) => onSelect(form.id, e.target.checked)}
-            className="w-4 h-4 rounded border-[var(--v3-border)] bg-[var(--v3-bg)] text-[var(--v3-teal)] focus:ring-offset-0 focus:ring-0 cursor-pointer"
+            className="w-4 h-4 rounded border-(--v3-border) bg-(--v3-bg) text-(--v3-teal) focus:ring-offset-0 focus:ring-0 cursor-pointer"
           />
         </div>
       </td>
-      <td className="py-3.5 px-4 min-w-[240px]" onClick={() => onOpen(form.id)}>
+      <td className="py-3.5 px-4 min-w-60" onClick={() => onOpen(form.id)}>
         <div className="flex items-center gap-3 cursor-pointer">
-          <div className="w-8 h-8 rounded-lg bg-[var(--v3-teal-dim)] border border-[var(--v3-teal)]/20 flex items-center justify-center shrink-0 text-[var(--v3-teal)]">
+          <div className="w-8 h-8 rounded-lg bg-(--v3-teal-dim) border border-(--v3-teal)/20 flex items-center justify-center shrink-0 text-(--v3-teal)">
             <FileText size={16} />
           </div>
-          <div className="min-w-0 max-w-[140px] sm:max-w-[180px]">
-            <div className="font-bold text-[var(--v3-text)] truncate" title={form.name}>
+          <div className="min-w-0 max-w-35 sm:max-w-45">
+            <div className="font-bold text-(--v3-text) truncate" title={form.name}>
               {form.name.length > 25 ? form.name.substring(0, 25) + '...' : form.name}
             </div>
                 <div className="flex items-center gap-1.5 mt-0.5 group/id">
-                  <div className="text-[9px] text-[var(--v3-muted2)] font-mono truncate opacity-40">ID: {form.publicId.substring(0, 10)}...</div>
+                  <div className="text-[9px] text-(--v3-muted2) font-mono truncate opacity-40">ID: {form.publicId.substring(0, 10)}...</div>
                   <button 
                     onClick={copyId}
-                    className={`opacity-0 group-hover/id:opacity-100 p-0.5 rounded transition-all ${isCopied ? 'text-emerald-500' : 'text-[var(--v3-muted2)] hover:text-[var(--v3-teal)] hover:bg-white/5'}`}
+                    className={`opacity-0 group-hover/id:opacity-100 p-0.5 rounded transition-all ${isCopied ? 'text-emerald-500' : 'text-(--v3-muted2) hover:text-(--v3-teal) hover:bg-white/5'}`}
                     title="Copy ID"
                   >
                     {isCopied ? <Check size={10} /> : <Copy size={10} />}
@@ -123,33 +123,33 @@ const SortableRow = ({ form, isSelected, onSelect, onOpen, onDelete, onDuplicate
           </td>
           <td className="py-3.5 px-4 text-center">
             <div className="flex flex-col items-center">
-              <span className="text-sm font-bold text-[var(--v3-text)]">{form.responses ?? 0}</span>
-              <span className="text-[9px] uppercase tracking-wider font-bold text-[var(--v3-muted2)] opacity-60">Responses</span>
+              <span className="text-sm font-bold text-(--v3-text)">{form.responses ?? 0}</span>
+              <span className="text-[9px] uppercase tracking-wider font-bold text-(--v3-muted2) opacity-60">Responses</span>
             </div>
           </td>
           <td className="py-3.5 px-4 text-center hidden sm:table-cell">
             <div className="flex flex-col items-center">
               <div className="h-4 flex items-center justify-center">
-                {form.rating ? <Stars rating={form.rating} size={10} /> : <span className="text-[var(--v3-muted2)]">—</span>}
+                {form.rating ? <Stars rating={form.rating} size={10} /> : <span className="text-(--v3-muted2)">—</span>}
               </div>
-              <span className="text-[9px] uppercase tracking-wider font-bold text-[var(--v3-muted2)] opacity-60 mt-0.5">Avg. Rating</span>
+              <span className="text-[9px] uppercase tracking-wider font-bold text-(--v3-muted2) opacity-60 mt-0.5">Avg. Rating</span>
             </div>
           </td>
           <td className="py-3.5 px-4">
             <div className="flex flex-col gap-1 w-24 mx-auto">
               <div className="flex justify-between items-center px-0.5">
-                <span className="text-[9px] font-bold text-[var(--v3-muted2)] opacity-60 uppercase">Progress</span>
-                <span className="text-[9px] font-bold text-[var(--v3-teal)]">{form.completion ?? 0}%</span>
+                <span className="text-[9px] font-bold text-(--v3-muted2) opacity-60 uppercase">Progress</span>
+                <span className="text-[9px] font-bold text-(--v3-teal)">{form.completion ?? 0}%</span>
               </div>
               <div className="h-1 bg-white/[0.05] rounded-full overflow-hidden">
-                <div className="h-full bg-[var(--v3-teal)] transition-all" style={{ width: `${form.completion ?? 0}%` }} />
+                <div className="h-full bg-(--v3-teal) transition-all" style={{ width: `${form.completion ?? 0}%` }} />
               </div>
             </div>
           </td>
           <td className="py-3.5 px-4 text-right pr-6 whitespace-nowrap">
             <div className="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
-                className="p-2 text-[var(--v3-muted2)] hover:text-[var(--v3-text)] hover:bg-white/5 rounded-lg transition-all group/btn"
+                className="p-2 text-(--v3-muted2) hover:text-(--v3-text) hover:bg-white/5 rounded-lg transition-all group/btn"
                 title="Testimonials"
                 onClick={() => onOpen(form.id)}
               >
@@ -157,7 +157,7 @@ const SortableRow = ({ form, isSelected, onSelect, onOpen, onDelete, onDuplicate
               </button>
     
               <button
-                className="p-2 text-[var(--v3-muted2)] hover:text-[var(--v3-teal)] hover:bg-[var(--v3-teal)]/10 rounded-lg transition-all group/btn"
+                className="p-2 text-(--v3-muted2) hover:text-(--v3-teal) hover:bg-(--v3-teal)/10 rounded-lg transition-all group/btn"
                 title="Edit"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -168,7 +168,7 @@ const SortableRow = ({ form, isSelected, onSelect, onOpen, onDelete, onDuplicate
               </button>
     
               <button
-                className="p-2 text-[var(--v3-muted2)] hover:text-purple-400 hover:bg-purple-500/10 rounded-lg transition-all group/btn"
+                className="p-2 text-(--v3-muted2) hover:text-purple-400 hover:bg-purple-500/10 rounded-lg transition-all group/btn"
                 title="Duplicate"
                 onClick={() => onDuplicate(form.id)}
               >
@@ -176,7 +176,7 @@ const SortableRow = ({ form, isSelected, onSelect, onOpen, onDelete, onDuplicate
               </button>
     
               <button
-                className="p-2 text-[var(--v3-muted2)] hover:text-sky-400 hover:bg-sky-500/10 rounded-lg transition-all group/btn"
+                className="p-2 text-(--v3-muted2) hover:text-sky-400 hover:bg-sky-500/10 rounded-lg transition-all group/btn"
                 title="Share"
                 onClick={() => onShare(form.id)}
               >
@@ -184,7 +184,7 @@ const SortableRow = ({ form, isSelected, onSelect, onOpen, onDelete, onDuplicate
               </button>
     
               <button
-                className={`p-2 rounded-lg transition-all group/btn ${form.isActive ? 'text-[var(--v3-muted2)] hover:text-amber-400 hover:bg-amber-500/10' : 'text-emerald-500 hover:bg-emerald-500/10'}`}
+                className={`p-2 rounded-lg transition-all group/btn ${form.isActive ? 'text-(--v3-muted2) hover:text-amber-400 hover:bg-amber-500/10' : 'text-emerald-500 hover:bg-emerald-500/10'}`}
                 title={form.isActive ? "Pause" : "Activate"}
                 onClick={() => onTogglePause(form.id)}
               >
@@ -192,7 +192,7 @@ const SortableRow = ({ form, isSelected, onSelect, onOpen, onDelete, onDuplicate
               </button>
     
               <button
-                className="p-2 text-[var(--v3-muted2)] hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-all group/btn"
+                className="p-2 text-(--v3-muted2) hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-all group/btn"
                 title="Delete"
                 onClick={() => onDelete(form.id)}
               >
@@ -278,10 +278,10 @@ const SortableRow = ({ form, isSelected, onSelect, onOpen, onDelete, onDuplicate
       };
     
       return (
-        <div className="relative overflow-hidden bg-[var(--v3-bg2)] border border-[var(--v3-border)] rounded-2xl shadow-2xl">
+        <div className="relative overflow-hidden bg-(--v3-bg2) border border-(--v3-border) rounded-2xl shadow-2xl">
           {/* Bulk Toolbar */}
           {selectedIds.size > 0 && (
-            <div className="absolute top-0 left-0 right-0 z-20 h-14 bg-[var(--v3-teal)] flex items-center justify-between px-6 animate-in slide-in-from-top duration-300">
+            <div className="absolute top-0 left-0 right-0 z-20 h-14 bg-(--v3-teal) flex items-center justify-between px-6 animate-in slide-in-from-top duration-300">
               <div className="flex items-center gap-4">
                 <span className="text-sm font-bold text-white">{selectedIds.size} selected</span>
                 <div className="h-4 w-px bg-white/20" />
@@ -335,16 +335,16 @@ const SortableRow = ({ form, isSelected, onSelect, onOpen, onDelete, onDuplicate
                             type="checkbox"
                             checked={forms.length > 0 && selectedIds.size === forms.length}
                             onChange={(e) => toggleSelectAll(e.target.checked)}
-                            className="w-4 h-4 rounded border-[var(--v3-border)] bg-[var(--v3-bg)] text-[var(--v3-teal)] focus:ring-offset-0 focus:ring-0 cursor-pointer"
+                            className="w-4 h-4 rounded border-(--v3-border) bg-(--v3-bg) text-(--v3-teal) focus:ring-offset-0 focus:ring-0 cursor-pointer"
                           />
                         </div>
                       </th>
-                      <th className="py-4 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)]">Form</th>
-                  <th className="py-4 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] hidden md:table-cell">Status</th>
-                  <th className="py-4 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] text-center">Stats</th>
-                  <th className="py-4 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] text-center hidden sm:table-cell">Rating</th>
-                  <th className="py-4 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)] text-center">Completion</th>
-                  <th className="py-4 px-4 text-right pr-6 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--v3-muted2)]">Actions</th>
+                      <th className="py-4 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-(--v3-muted2)">Form</th>
+                  <th className="py-4 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-(--v3-muted2) hidden md:table-cell">Status</th>
+                  <th className="py-4 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-(--v3-muted2) text-center">Stats</th>
+                  <th className="py-4 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-(--v3-muted2) text-center hidden sm:table-cell">Rating</th>
+                  <th className="py-4 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-(--v3-muted2) text-center">Completion</th>
+                  <th className="py-4 px-4 text-right pr-6 text-[10px] font-black uppercase tracking-[0.2em] text-(--v3-muted2)">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/[0.04]">
@@ -371,14 +371,14 @@ const SortableRow = ({ form, isSelected, onSelect, onOpen, onDelete, onDuplicate
       {/* Pagination Footer */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-6 py-4 border-t border-white/5 bg-white/[0.01]">
-          <div className="text-xs text-[var(--v3-muted2)]">
-            Showing <span className="text-[var(--v3-text)] font-bold">{startIndex + 1}</span> to <span className="text-[var(--v3-text)] font-bold">{Math.min(startIndex + ITEMS_PER_PAGE, forms.length)}</span> of <span className="text-[var(--v3-text)] font-bold">{forms.length}</span> forms
+          <div className="text-xs text-(--v3-muted2)">
+            Showing <span className="text-(--v3-text) font-bold">{startIndex + 1}</span> to <span className="text-(--v3-text) font-bold">{Math.min(startIndex + ITEMS_PER_PAGE, forms.length)}</span> of <span className="text-(--v3-text) font-bold">{forms.length}</span> forms
           </div>
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="p-2 rounded-lg border border-white/5 text-[var(--v3-muted2)] hover:text-[var(--v3-text)] hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              className="p-2 rounded-lg border border-white/5 text-(--v3-muted2) hover:text-(--v3-text) hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
             >
               <ChevronLeft size={16} />
             </button>
@@ -390,8 +390,8 @@ const SortableRow = ({ form, isSelected, onSelect, onOpen, onDelete, onDuplicate
                   onClick={() => handlePageChange(i + 1)}
                   className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
                     currentPage === i + 1 
-                    ? 'bg-[var(--v3-teal)]/20 border border-[var(--v3-teal)]/30 text-[var(--v3-teal)]' 
-                    : 'text-[var(--v3-muted2)] hover:text-[var(--v3-text)] hover:bg-white/5'
+                    ? 'bg-(--v3-teal)/20 border border-(--v3-teal)/30 text-(--v3-teal)' 
+                    : 'text-(--v3-muted2) hover:text-(--v3-text) hover:bg-white/5'
                   }`}
                 >
                   {i + 1}
@@ -402,7 +402,7 @@ const SortableRow = ({ form, isSelected, onSelect, onOpen, onDelete, onDuplicate
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="p-2 rounded-lg border border-white/5 text-[var(--v3-muted2)] hover:text-[var(--v3-text)] hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              className="p-2 rounded-lg border border-white/5 text-(--v3-muted2) hover:text-(--v3-text) hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
             >
               <ChevronRight size={16} />
             </button>

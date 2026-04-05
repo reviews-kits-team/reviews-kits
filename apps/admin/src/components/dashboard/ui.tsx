@@ -4,7 +4,7 @@ export const Stars = ({ rating, size = 13 }: { rating: number | null, size?: num
   return (
     <div className="flex items-center gap-1" style={{ fontSize: size }}>
       {[...Array(5)].map((_, i) => (
-        <span key={i} className={i < rounded ? "text-[var(--v3-teal)]" : "text-[var(--v3-bg3)]"}>
+        <span key={i} className={i < rounded ? "text-(--v3-teal)" : "text-(--v3-bg3)"}>
           ★
         </span>
       ))}
@@ -27,12 +27,12 @@ export const Badge = ({ status }: { status: string }) => {
     <div className={`inline-flex items-center gap-1 px-3 py-0 rounded-full text-[6px] font-black uppercase tracking-[0.15em] border backdrop-blur-md transition-all whitespace-nowrap ${
       active 
         ? `bg-[${color}]/10 text-[${color}] border-[${color}]/20 shadow-[0_0_15px_rgba(45,212,191,0.05)]` 
-        : 'bg-white/5 text-[var(--v3-muted2)] border-white/10'
+        : 'bg-white/5 text-(--v3-muted2) border-white/10'
     }`} style={{ color: active ? color : undefined, borderColor: active ? `${color}33` : undefined, backgroundColor: active ? `${color}1a` : undefined }}>
       <div className="relative flex items-center justify-center">
-        <div className={`w-[3px] h-[3px] rounded-full ${active ? '' : 'bg-white/20'}`} style={{ backgroundColor: active ? color : undefined }} />
+        <div className={`w-0.75 h-0.75 rounded-full ${active ? '' : 'bg-white/20'}`} style={{ backgroundColor: active ? color : undefined }} />
         {active && (
-          <div className="absolute w-[3px] h-[3px] rounded-full animate-ping opacity-60" style={{ backgroundColor: color }} />
+          <div className="absolute w-0.75 h-0.75 rounded-full animate-ping opacity-60" style={{ backgroundColor: color }} />
         )}
       </div>
       {label}
@@ -49,7 +49,7 @@ export const Checkbox = ({ checked, onChange }: { checked: boolean; onChange: (v
       }}
       className={`w-4 h-4 rounded border transition-all cursor-pointer flex items-center justify-center ${
         checked 
-          ? 'bg-[var(--v3-teal)] border-[var(--v3-teal)] shadow-[0_0_10px_rgba(45,212,191,0.2)]' 
+          ? 'bg-(--v3-teal) border-(--v3-teal) shadow-[0_0_10px_rgba(45,212,191,0.2)]' 
           : 'bg-white/5 border-white/20 hover:border-white/40'
       }`}
     >

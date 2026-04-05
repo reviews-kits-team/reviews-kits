@@ -1,0 +1,35 @@
+{
+  "$schema": "https://unpkg.com/knip@latest/schema.json",
+  "ignoreDependencies": ["@types/bun", "typescript"],
+  "workspaces": {
+    ".": {
+      "entry": [],
+      "project": [],
+      "ignoreDependencies": ["@types/bun", "typescript"]
+    },
+    "apps/admin": {
+      "entry": ["src/main.tsx"],
+      "project": ["src/**/*.{ts,tsx}"]
+    },
+    "apps/server": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.ts", "scripts/**/*.ts"]
+    },
+    "apps/docs": {
+      "entry": ["docs/.vitepress/config.ts", "docs/**/*.md"],
+      "project": ["docs/**/*.{md,ts}"]
+    },
+    "packages/sdk-react": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.{ts,tsx}"]
+    },
+    "packages/sdk-vue": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.{ts,vue}"]
+    },
+    "packages/types": {
+      "entry": ["index.ts"],
+      "project": ["**/*.ts", "!node_modules/**", "!dist/**"]
+    }
+  }
+}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { reviewsApi } from '../api/reviews';
 import { mapReviews } from '../api/mappers/review.mapper';
 import type { ReviewApiParams, Review } from '../types';
@@ -10,6 +10,13 @@ export function useReviews(params: ReviewApiParams) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<any>(null);
 
+  // Stabilize params: new reference only when values actually change.
+  // JSON.stringify is intentional here — used in useMemo deps, not in
+  // useCallback deps, so it pays the serialization cost only once per
+  // params change rather than on every render.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const stableParams = useMemo(() => params, [JSON.stringify(params)]);
+
   const fetchReviews = useCallback(
     async (signal?: AbortSignal) => {
       if (!config) return;
@@ -17,7 +24,7 @@ export function useReviews(params: ReviewApiParams) {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await reviewsApi.getReviews(params, { signal }, config);
+        const response = await reviewsApi.getReviews(stableParams, { signal }, config);
         if (signal?.aborted) return;
         setData({
           reviews: mapReviews(response.data),
@@ -33,7 +40,7 @@ export function useReviews(params: ReviewApiParams) {
         }
       }
     },
-    [config, JSON.stringify(params)]
+    [config, stableParams]
   );
 
   useEffect(() => {
