@@ -7,6 +7,7 @@ const POSTGRES_USER = process.env.POSTGRES_USER || 'postgres';
 const POSTGRES_PASSWORD = process.env.POSTGRES_PASSWORD || 'your_secure_password';
 const POSTGRES_DB = process.env.POSTGRES_DB || 'reviewskits';
 const url = `postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5433/${POSTGRES_DB}`;
+process.env.DATABASE_URL = url;
 
 // In Bun.sql, we pass the URL directly to drizzle
 export const testDb = drizzle(url, { schema });

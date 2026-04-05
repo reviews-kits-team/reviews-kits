@@ -1,0 +1,9 @@
+[test]
+# Exclure les specs des SDKs Vue et React du runner root Bun :
+# Ils utilisent happy-dom et sont isolés via leurs propres configurations `bunfig.toml`.
+# Lancer leurs tests via : cd packages/sdk-vue && bun run test
+#                         : cd packages/sdk-react && bun run test
+pathIgnorePatterns = [
+  "packages/sdk-vue/**",
+  "packages/sdk-react/**"
+]

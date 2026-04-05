@@ -37,20 +37,20 @@
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --clean",
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
-    "test": "vitest --run",
-    "test:watch": "vitest"
+    "test": "bun test",
+    "test:watch": "bun test --watch"
   },
   "peerDependencies": {
     "vue": "^3.3.0"
   },
   "devDependencies": {
+    "@happy-dom/global-registrator": "^20.8.9",
     "@reviewskits/types": "^0.0.4",
     "@vue/test-utils": "^2.4.3",
     "happy-dom": "^20.0.0",
     "msw": "^2.0.11",
     "tsup": "^8.3.5",
     "typescript": "^5.2.2",
-    "vitest": "^4.1.2",
     "vue": "^3.3.11"
   }
 }

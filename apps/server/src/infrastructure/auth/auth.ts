@@ -5,7 +5,7 @@ import { sql } from "drizzle-orm";
 import { db } from "../database/db";
 import * as schema from "../database/schema";
 
-const secret = process.env.BETTER_AUTH_SECRET;
+const secret = process.env.BETTER_AUTH_SECRET || (process.env.NODE_ENV === 'test' ? 'test-secret-must-be-at-least-32-characters-long' : undefined);
 if (!secret) {
   throw new Error("BETTER_AUTH_SECRET environment variable is required for session encryption. Please set it in your .env file.");
 }
