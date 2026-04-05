@@ -11,9 +11,12 @@
   "dependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "@reviewskits/react": "workspace:*"
+    "@reviewskits/react": "workspace:*",
+    "@reviewskits/core": "workspace:*",
+    "@reviewskits/types": "workspace:*"
   },
   "devDependencies": {
+    "@types/node": "^22.13.4",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4",

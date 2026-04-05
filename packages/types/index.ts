@@ -32,6 +32,25 @@ export interface Form {
   created_at: Date;
 }
 
+
+// ─── Caching types ────────────────────────────────────────────────────────────
+
+export interface CacheAdapter {
+  get<T>(key: string): Promise<T | null>;
+  set<T>(key: string, value: T, ttl?: number, tags?: string[]): Promise<void>;
+  delete(key: string): Promise<void>;
+  invalidateTags(tags: string[]): Promise<void>;
+}
+
+export interface CacheConfig {
+  /** Time to live in seconds. Default is 300 (5 minutes) */
+  ttl?: number;
+  /** Custom cache adapter implementation. Defaults to memory cache. */
+  adapter?: CacheAdapter;
+  /** Whether caching is enabled. Default is true. */
+  enabled?: boolean;
+}
+
 // ─── SDK shared types ─────────────────────────────────────────────────────────
 
 /**
@@ -42,6 +61,8 @@ export interface ReviewsKitConfig {
   host: string;
   /** Your public API key (pk_…) */
   pk: string;
+  /** Enable or configure caching. Defaults to true. */
+  cache?: boolean | CacheConfig;
 }
 
 /**

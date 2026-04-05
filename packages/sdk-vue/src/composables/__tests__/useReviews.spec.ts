@@ -1,14 +1,12 @@
 import { describe, it, expect, mock, beforeEach, type Mock } from 'bun:test';
 import { useReviews } from '../useReviews';
-import { reviewsApi } from '../../api/reviews';
+import { reviewsApi } from '@reviewskits/core';
 import { reactive, nextTick, defineComponent } from 'vue';
 import { mount } from '@vue/test-utils';
 
-mock.module('../../api/reviews', () => ({
-  reviewsApi: {
-    getReviews: mock(),
-  },
-}));
+import { spyOn } from 'bun:test';
+
+spyOn(reviewsApi, 'getReviews');
 
 const TestComponent = defineComponent({
   props: {
@@ -28,7 +26,7 @@ describe('useReviews Stale Closures & Cancellation', () => {
 
   it('should cancel previous request when params change', async () => {
     let abortSignal: AbortSignal | undefined;
-    
+
     (reviewsApi.getReviews as Mock<any>).mockImplementation((_params: any, options?: RequestInit) => {
       abortSignal = options?.signal ?? undefined;
       return new Promise((resolve) => {
@@ -79,7 +77,7 @@ describe('useReviews Stale Closures & Cancellation', () => {
     while (!wrapper.vm.data?.reviews?.[0]) {
       await new Promise(r => setTimeout(r, 10));
     }
-    
+
     expect(wrapper.vm.data.reviews[0].id).toBe('2');
 
     resolveFirst({ data: [{ id: '1' }], meta: { page: 1, totalPages: 1 } });

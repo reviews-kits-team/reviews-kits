@@ -1,15 +1,13 @@
 import { describe, it, expect, mock, beforeEach, type Mock } from 'bun:test';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useReviews } from '../useReviews';
-import { reviewsApi } from '../../api/reviews';
+import { reviewsApi } from '@reviewskits/core';
 import React from 'react';
 import { ReviewsKitProvider } from '../../context/ReviewsKitProvider';
 
-mock.module('../../api/reviews', () => ({
-  reviewsApi: {
-    getReviews: mock(),
-  },
-}));
+import { spyOn } from 'bun:test';
+
+spyOn(reviewsApi, 'getReviews');
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <ReviewsKitProvider config={{ pk: 'test', host: 'test' }}>
@@ -24,14 +22,14 @@ describe('useReviews Stale Closures & Cancellation (React)', () => {
 
   it('should cancel previous request when params change', async () => {
     let abortSignal: AbortSignal | undefined;
-    
+
     (reviewsApi.getReviews as Mock<any>).mockImplementation((_params: any, options?: RequestInit) => {
       const signal = options?.signal;
       return new Promise((resolve, reject) => {
         const onAbort = () => reject(new DOMException('Aborted', 'AbortError'));
         if (signal?.aborted) return onAbort();
         signal?.addEventListener('abort', onAbort);
-        
+
         setTimeout(() => {
           signal?.removeEventListener('abort', onAbort);
           resolve({ data: [], meta: { page: 1, totalPages: 1 } });
@@ -91,7 +89,7 @@ describe('useReviews Stale Closures & Cancellation (React)', () => {
     // Try to resolve the first request now (it should be ignored by the hook if it checks signal.aborted)
     // Or if the hook aborted the signal, it should already be handled.
     resolveFirst({ data: [{ id: '1' }], meta: { page: 1, totalPages: 1 } });
-    
+
     // Small delay
     await new Promise(r => setTimeout(r, 20));
 

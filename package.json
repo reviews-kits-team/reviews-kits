@@ -5,11 +5,12 @@
   "packageManager": "bun@1.0.0",
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "packages/*",
+    "packages/*/playground"
   ],
   "scripts": {
     "build": "turbo build",
-    "dev": "turbo dev",
+    "dev": "turbo dev --filter=@reviewskits/admin --filter=@reviewskits/server --filter=docs",
     "lint": "turbo lint",
     "test": "turbo test",
     "prepare": "husky",

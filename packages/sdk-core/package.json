@@ -1,23 +1,18 @@
 {
-  "name": "@reviewskits/vue",
-  "version": "0.0.2",
-  "description": "The official Vue 3 SDK for ReviewsKits",
+  "name": "@reviewskits/core",
+  "version": "0.0.1",
+  "description": "The framework-agnostic core logic for ReviewsKits SDKs",
   "keywords": [
     "reviewskits",
-    "testimonials",
-    "vue",
-    "nuxt",
     "sdk",
+    "core",
     "reviews"
   ],
   "homepage": "https://reviewskits.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/reviews-kits-team/reviews-kits.git",
-    "directory": "packages/sdk-vue"
-  },
-  "bugs": {
-    "url": "https://github.com/reviews-kits-team/reviews-kits/issues"
+    "directory": "packages/sdk-core"
   },
   "type": "module",
   "sideEffects": false,
@@ -40,20 +35,9 @@
     "test": "bun test",
     "test:watch": "bun test --watch"
   },
-  "peerDependencies": {
-    "vue": "^3.3.0"
-  },
-  "dependencies": {
-    "@reviewskits/core": "workspace:*"
-  },
   "devDependencies": {
-    "@happy-dom/global-registrator": "^20.8.9",
     "@reviewskits/types": "^0.0.4",
-    "@vue/test-utils": "^2.4.3",
-    "happy-dom": "^20.0.0",
-    "msw": "^2.0.11",
     "tsup": "^8.3.5",
-    "typescript": "^5.2.2",
-    "vue": "^3.3.11"
+    "typescript": "^5.2.2"
   }
 }

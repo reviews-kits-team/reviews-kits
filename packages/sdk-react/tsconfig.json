@@ -3,13 +3,14 @@
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "module": "ESNext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
     "jsx": "react-jsx",
-    "allowImportingTsExtensions": false,
-    "rootDir": "src",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@reviewskits/core": ["../sdk-core/src/index.ts"],
+      "@reviewskits/types": ["../types/index.ts"]
     },
     "skipLibCheck": true
   },

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'bun:test';
-import { mapReview } from './review.mapper';
+import { mapReview } from '@reviewskits/core';
 import { RawReview } from '../../types';
 
 describe('Review Mapper', () => {

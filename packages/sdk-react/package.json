@@ -44,6 +44,9 @@
   "peerDependencies": {
     "react": ">=18"
   },
+  "dependencies": {
+    "@reviewskits/core": "workspace:*"
+  },
   "devDependencies": {
     "@happy-dom/global-registrator": "^20.8.9",
     "@reviewskits/types": "^0.0.4",
