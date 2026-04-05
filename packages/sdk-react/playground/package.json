@@ -11,7 +11,9 @@
   "dependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "@reviewskits/react": "workspace:*"
+    "@reviewskits/react": "workspace:*",
+    "@reviewskits/core": "workspace:*",
+    "@reviewskits/types": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",

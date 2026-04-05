@@ -102,7 +102,7 @@
       "name": "@reviewskits/react",
       "version": "0.0.2",
       "dependencies": {
-        "@reviewskits/core": "0.0.1",
+        "@reviewskits/core": "workspace:*",
       },
       "devDependencies": {
         "@reviewskits/types": "^0.0.4",
@@ -125,7 +125,9 @@
       "name": "react-playground",
       "version": "0.0.0",
       "dependencies": {
+        "@reviewskits/core": "workspace:*",
         "@reviewskits/react": "workspace:*",
+        "@reviewskits/types": "workspace:*",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
       },
@@ -141,7 +143,7 @@
       "name": "@reviewskits/vue",
       "version": "0.0.2",
       "dependencies": {
-        "@reviewskits/core": "0.0.1",
+        "@reviewskits/core": "workspace:*",
       },
       "devDependencies": {
         "@reviewskits/types": "^0.0.4",
@@ -161,6 +163,9 @@
       "name": "playground",
       "version": "0.0.0",
       "dependencies": {
+        "@reviewskits/core": "workspace:*",
+        "@reviewskits/types": "workspace:*",
+        "@reviewskits/vue": "workspace:*",
         "vue": "^3.5.30",
       },
       "devDependencies": {
