@@ -6,8 +6,8 @@ import type { FormData } from '../components/form-editor/types'
 import { normalizeStepOrder } from '../components/form-editor/utils'
 
 export const formDetailKey = (id: string) => ['form', id] as const
-const formStatsKey = (id: string) => ['form', id, 'stats'] as const
-const formTestimonialsKey = (id: string, page: number, sort: string | null, order: string) =>
+export const formStatsKey = (id: string) => ['form', id, 'stats'] as const
+export const formTestimonialsKey = (id: string, page: number, sort: string | null, order: string) =>
   ['form', id, 'testimonials', page, sort, order] as const
 
 /** For FormEditorPage — returns FullForm with steps normalized */
@@ -53,24 +53,26 @@ export function useFormTestimonials(
   })
 }
 
-export function useUpdateTestimonialStatus(formId: string, page: number, sort: string | null, order: 'asc' | 'desc') {
+const formTestimonialsBaseKey = (formId: string) => ['form', formId, 'testimonials'] as const
+
+export function useUpdateTestimonialStatus(formId: string) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: 'approved' | 'rejected' | 'pending' }) =>
       testimonialsService.updateStatus(id, status),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: formTestimonialsKey(formId, page, sort, order) })
+      qc.invalidateQueries({ queryKey: formTestimonialsBaseKey(formId) })
     },
   })
 }
 
-export function useBatchUpdateStatus(formId: string, page: number, sort: string | null, order: 'asc' | 'desc') {
+export function useBatchUpdateStatus(formId: string) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ ids, status }: { ids: string[]; status: 'approved' | 'rejected' | 'pending' }) =>
       testimonialsService.batchUpdateStatus(ids, status),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: formTestimonialsKey(formId, page, sort, order) })
+      qc.invalidateQueries({ queryKey: formTestimonialsBaseKey(formId) })
     },
   })
 }

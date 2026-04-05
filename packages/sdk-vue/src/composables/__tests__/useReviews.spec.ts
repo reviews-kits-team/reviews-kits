@@ -1,17 +1,12 @@
-/**
- * @vitest-environment happy-dom
- */
-import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
+import { describe, it, expect, mock, beforeEach, type Mock } from 'bun:test';
 import { useReviews } from '../useReviews';
-import { reviewsApi } from '../../api/reviews';
+import { reviewsApi } from '@reviewskits/core';
 import { reactive, nextTick, defineComponent } from 'vue';
 import { mount } from '@vue/test-utils';
 
-vi.mock('../../api/reviews', () => ({
-  reviewsApi: {
-    getReviews: vi.fn(),
-  },
-}));
+import { spyOn } from 'bun:test';
+
+spyOn(reviewsApi, 'getReviews');
 
 const TestComponent = defineComponent({
   props: {
@@ -26,13 +21,13 @@ const TestComponent = defineComponent({
 
 describe('useReviews Stale Closures & Cancellation', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    (reviewsApi.getReviews as Mock<any>).mockClear();
   });
 
   it('should cancel previous request when params change', async () => {
     let abortSignal: AbortSignal | undefined;
-    
-    (reviewsApi.getReviews as Mock).mockImplementation((_params: any, options?: RequestInit) => {
+
+    (reviewsApi.getReviews as Mock<any>).mockImplementation((_params: any, options?: RequestInit) => {
       abortSignal = options?.signal ?? undefined;
       return new Promise((resolve) => {
         setTimeout(() => {
@@ -62,7 +57,7 @@ describe('useReviews Stale Closures & Cancellation', () => {
       resolveFirst = resolve;
     });
 
-    (reviewsApi.getReviews as Mock)
+    (reviewsApi.getReviews as Mock<any>)
       .mockReturnValueOnce(firstPromise)
       .mockResolvedValueOnce({ data: [{ id: '2' }], meta: { page: 1, totalPages: 1 } });
 
@@ -78,10 +73,12 @@ describe('useReviews Stale Closures & Cancellation', () => {
 
     expect(reviewsApi.getReviews).toHaveBeenCalledTimes(2);
 
-    await vi.waitFor(() => {
-      if (!wrapper.vm.data) throw new Error('No data');
-      expect(wrapper.vm.data.reviews[0].id).toBe('2');
-    });
+    // wait until the data in vm is updated
+    while (!wrapper.vm.data?.reviews?.[0]) {
+      await new Promise(r => setTimeout(r, 10));
+    }
+
+    expect(wrapper.vm.data.reviews[0].id).toBe('2');
 
     resolveFirst({ data: [{ id: '1' }], meta: { page: 1, totalPages: 1 } });
     await nextTick();

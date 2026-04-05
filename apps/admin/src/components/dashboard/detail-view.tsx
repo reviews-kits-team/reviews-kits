@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { 
+import { useQueryClient } from '@tanstack/react-query'
+import {
   ChevronLeft as ChevronLeftIcon,
-  Share2, 
-  MessageSquare, 
-  Star, 
+  Share2,
+  MessageSquare,
+  Star,
   Users,
   TrendingUp,
   Pencil,
@@ -41,8 +42,16 @@ import { StatCard } from './stat-card'
 import { Stars, Badge, Checkbox } from './ui'
 import { MigrationModal } from './migration-modal'
 import type { DashboardForm } from './types'
-import { testimonialsService, type FormStats, type TestimonialListItem as Testimonial } from '../../services/testimonials.service'
-
+import { testimonialsService, type TestimonialListItem as Testimonial } from '../../services/testimonials.service'
+import {
+  useFormStats,
+  useFormTestimonials,
+  useUpdateTestimonialStatus,
+  useBatchUpdateStatus,
+  useReorderTestimonials,
+  formStatsKey,
+  formTestimonialsKey,
+} from '../../hooks/useFormDetail'
 
 interface DetailViewProps {
   form: DashboardForm
@@ -65,51 +74,30 @@ interface SortableTestimonialRowProps {
   onView: (testimonial: Testimonial) => void
 }
 
-const SortableTestimonialRow = ({ 
-  testimonial, 
-  isSelected, 
-  onSelect, 
-  onStatusUpdate, 
-  formatDate, 
-  getRandomGradient, 
+const SortableTestimonialRow = ({
+  testimonial,
+  isSelected,
+  onSelect,
+  onStatusUpdate,
+  formatDate,
+  getRandomGradient,
   getInitials,
   onView
 }: SortableTestimonialRowProps) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging
-  } = useSortable({ id: testimonial.id })
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    zIndex: isDragging ? 50 : 'auto',
-    opacity: isDragging ? 0.5 : 1,
-  }
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: testimonial.id })
 
   return (
-    <tr 
+    <tr
       ref={setNodeRef}
-      style={style}
+      style={{ transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 50 : 'auto', opacity: isDragging ? 0.5 : 1 }}
       className={`group hover:bg-white/[0.03] transition-colors ${isSelected ? 'bg-(--v3-teal)/5' : ''} ${isDragging ? 'bg-(--v3-teal)/10 shadow-2xl relative z-50' : ''}`}
     >
       <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-3">
-          <div 
-            {...attributes} 
-            {...listeners}
-            className="w-6 h-6 flex items-center justify-center cursor-grab active:cursor-grabbing text-(--v3-muted2) hover:text-(--v3-text) p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-          >
+          <div {...attributes} {...listeners} className="w-6 h-6 flex items-center justify-center cursor-grab active:cursor-grabbing text-(--v3-muted2) hover:text-(--v3-text) p-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <GripVertical size={14} />
           </div>
-          <Checkbox 
-            checked={isSelected} 
-            onChange={() => onSelect(testimonial.id)} 
-          />
+          <Checkbox checked={isSelected} onChange={() => onSelect(testimonial.id)} />
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
@@ -119,19 +107,13 @@ const SortableTestimonialRow = ({
           </div>
           <div className="flex flex-col">
             <span className="text-[13px] font-bold text-(--v3-text) leading-tight">{testimonial.authorName}</span>
-            <span className="text-[10px] font-medium text-(--v3-muted2) leading-tight opacity-70 group-hover:opacity-100 transition-opacity">
-              {testimonial.authorEmail || 'N/A'}
-            </span>
+            <span className="text-[10px] font-medium text-(--v3-muted2) leading-tight opacity-70 group-hover:opacity-100 transition-opacity">{testimonial.authorEmail || 'N/A'}</span>
           </div>
         </div>
       </td>
       <td className="px-6 py-4 max-w-sm cursor-pointer group/content" onClick={() => onView(testimonial)}>
         <p className="text-[13px] text-(--v3-muted2) leading-relaxed italic group-hover/content:text-(--v3-text) transition-colors">
-          "{testimonial.content.length > 48 ? (
-            <>
-              {testimonial.content.substring(0, 48)}...
-            </>
-          ) : testimonial.content}"
+          "{testimonial.content.length > 48 ? <>{testimonial.content.substring(0, 48)}...</> : testimonial.content}"
         </p>
       </td>
       <td className="px-6 py-4 text-center">
@@ -140,27 +122,13 @@ const SortableTestimonialRow = ({
           <span className="text-[10px] font-black text-(--v3-text) mt-1">{testimonial.rating}/5</span>
         </div>
       </td>
-      <td className="px-6 py-4 text-center">
-        <Badge status={testimonial.status} />
-      </td>
+      <td className="px-6 py-4 text-center"><Badge status={testimonial.status} /></td>
       <td className="px-6 py-4 text-right">
         <div className="flex flex-col items-end">
           <span className="text-[11px] font-bold text-(--v3-text)">{formatDate(testimonial.createdAt)}</span>
           <div className="flex items-center gap-1.5 mt-2 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
-            <button 
-              onClick={() => onStatusUpdate(testimonial.id, 'approved')}
-              className="w-6 h-6 flex items-center justify-center rounded-md bg-(--v3-teal)/10 text-(--v3-teal) hover:bg-(--v3-teal) hover:text-white transition-all shadow-sm"
-              title="Approve"
-            >
-              <Check size={12} />
-            </button>
-            <button 
-              onClick={() => onStatusUpdate(testimonial.id, 'rejected')}
-              className="w-6 h-6 flex items-center justify-center rounded-md bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all shadow-sm"
-              title="Reject"
-            >
-              <XCircle size={12} />
-            </button>
+            <button onClick={() => onStatusUpdate(testimonial.id, 'approved')} className="w-6 h-6 flex items-center justify-center rounded-md bg-(--v3-teal)/10 text-(--v3-teal) hover:bg-(--v3-teal) hover:text-white transition-all shadow-sm" title="Approve"><Check size={12} /></button>
+            <button onClick={() => onStatusUpdate(testimonial.id, 'rejected')} className="w-6 h-6 flex items-center justify-center rounded-md bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all shadow-sm" title="Reject"><XCircle size={12} /></button>
           </div>
         </div>
       </td>
@@ -170,9 +138,9 @@ const SortableTestimonialRow = ({
 
 export const DetailView = ({ form, onBack }: DetailViewProps) => {
   const navigate = useNavigate()
-  const [stats, setStats] = useState<FormStats | null>(null)
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([])
-  const [loading, setLoading] = useState(true)
+  const qc = useQueryClient()
+
+  // ── UI state only ──────────────────────────────────────────────────────────
   const [page, setPage] = useState(1)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [sortConfig, setSortConfig] = useState<{ field: string | null; order: 'asc' | 'desc' }>({ field: null, order: 'desc' })
@@ -181,131 +149,63 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
   const [copiedLink, setCopiedLink] = useState(false)
   const [isMigrationModalOpen, setIsMigrationModalOpen] = useState(false)
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
+  // ── Data queries ───────────────────────────────────────────────────────────
+  const { data: stats, isLoading: statsLoading } = useFormStats(form.id)
+  const { data: testimonials = [], isLoading: testimonialsLoading } = useFormTestimonials(
+    form.id, page, sortConfig.field, sortConfig.order
   )
 
-  const fetchData = useCallback(async (currentPage: number = page, sort = sortConfig) => {
-    try {
-      const [statsData, testimonialsData] = await Promise.all([
-        testimonialsService.getFormStats(form.id),
-        testimonialsService.listByForm(form.id, { 
-          page: currentPage, 
-          sort: sort.field, 
-          order: sort.order 
-        })
-      ])
+  // ── Mutations ──────────────────────────────────────────────────────────────
+  const updateStatus = useUpdateTestimonialStatus(form.id)
+  const batchUpdateStatus = useBatchUpdateStatus(form.id)
+  const reorderMutation = useReorderTestimonials()
 
-      setStats(statsData)
-      setTestimonials(testimonialsData)
-    } catch (error) {
-      console.error("Failed to fetch form details", error)
-    }
-  }, [form.id, page, sortConfig])
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  )
 
-  useEffect(() => {
-    const fetchDetailData = async () => {
-      setLoading(true)
-      await fetchData(page)
-      setLoading(false)
-    }
-
-    fetchDetailData()
-  }, [form.id, page, fetchData])
-
-  const handleStatusUpdate = async (id: string, newStatus: string) => {
-    try {
-      await testimonialsService.updateStatus(id, newStatus as 'approved' | 'rejected' | 'pending')
-      await fetchData(page)
-    } catch (error) {
-      console.error("Failed to update status", error)
-    }
+  // ── Handlers ───────────────────────────────────────────────────────────────
+  const handleStatusUpdate = (id: string, status: string) => {
+    updateStatus.mutate({ id, status: status as 'approved' | 'rejected' | 'pending' })
   }
 
-  const handleBatchStatusUpdate = async (newStatus: 'approved' | 'rejected' | 'pending') => {
-    try {
-      await testimonialsService.batchUpdateStatus(selectedIds, newStatus)
-      setSelectedIds([])
-      await fetchData(page)
-    } catch (error) {
-      console.error("Batch update failed", error)
-    }
+  const handleBatchStatusUpdate = (newStatus: 'approved' | 'rejected' | 'pending') => {
+    batchUpdateStatus.mutate(
+      { ids: selectedIds, status: newStatus },
+      { onSuccess: () => setSelectedIds([]) }
+    )
   }
 
   const handleSort = (field: string) => {
-    setSortConfig(prev => ({
-      field,
-      order: prev.field === field && prev.order === 'desc' ? 'asc' : 'desc'
-    }))
+    setSortConfig(prev => ({ field, order: prev.field === field && prev.order === 'desc' ? 'asc' : 'desc' }))
     setPage(1)
   }
 
-  const handleDragEnd = async (event: DragEndEvent) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
     if (!over || active.id === over.id) return
 
     const oldIndex = testimonials.findIndex((t) => t.id === active.id)
     const newIndex = testimonials.findIndex((t) => t.id === over.id)
-    const newTestimonials = arrayMove(testimonials, oldIndex, newIndex)
-    
-    setTestimonials(newTestimonials)
+    const reordered = arrayMove(testimonials, oldIndex, newIndex)
 
-    // Persist new order
-    try {
-      // Position is simply the index in the current list
-      const positions = newTestimonials.map((t, index) => ({
-        id: t.id,
-        position: index + ((page - 1) * 10)
-      }))
-
-      await testimonialsService.reorder(positions)
-    } catch (error) {
-      console.error("Failed to persist new order", error)
-    }
+    // Optimistic update
+    qc.setQueryData(formTestimonialsKey(form.id, page, sortConfig.field, sortConfig.order), reordered)
+    // Persist
+    reorderMutation.mutate(reordered.map((t, i) => ({ id: t.id, position: i + (page - 1) * 10 })))
   }
 
-  const toggleSelectAll = () => {
-    if (selectedIds.length === testimonials.length) {
-      setSelectedIds([])
-    } else {
-      setSelectedIds(testimonials.map(t => t.id))
-    }
+  const handleImported = () => {
+    qc.invalidateQueries({ queryKey: formStatsKey(form.id) })
+    qc.invalidateQueries({ queryKey: formTestimonialsKey(form.id, page, sortConfig.field, sortConfig.order) })
   }
 
-  const toggleSelectOne = (id: string) => {
-    setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id])
-  }
-
-  const copyPublicId = () => {
-    navigator.clipboard.writeText(form.publicId)
-    setCopyingId(true)
-    setTimeout(() => setCopyingId(false), 2000)
-  }
-
-  const handleCopyLink = () => {
-    const url = `${window.location.origin}/f/${form.publicId}`
-    navigator.clipboard.writeText(url)
-    setCopiedLink(true)
-    setTimeout(() => setCopiedLink(false), 2000)
-  }
-
-  const handleExport = () => {
-    window.open(testimonialsService.exportUrl(form.id), '_blank');
-  }
-
+  // ── Derived values ─────────────────────────────────────────────────────────
   const totReviews = stats?.totalReviews || 0
   const avgRating = stats?.averageRating || 0
-  
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-  }
+
+  const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
 
   const getRandomGradient = (name: string) => {
     const gradients = [
@@ -315,27 +215,20 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
       "linear-gradient(135deg,#e05454,#c03030)",
       "linear-gradient(135deg,#3b82f6,#2563eb)",
     ]
-    const index = name.length % gradients.length
-    return gradients[index]
+    return gradients[name.length % gradients.length]
   }
 
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr)
-    const now = new Date()
-    const diffInMs = now.getTime() - date.getTime()
-    const diffInSeconds = Math.floor(diffInMs / 1000)
-    const diffInMinutes = Math.floor(diffInSeconds / 60)
-    const diffInHours = Math.floor(diffInMinutes / 60)
-    const diffInDays = Math.floor(diffInHours / 24)
-    
-    if (diffInSeconds < 60) return "Just now"
-    if (diffInMinutes < 60) return `${diffInMinutes}min`
-    if (diffInHours < 24) return `${diffInHours}h`
-    if (diffInDays < 7) return `${diffInDays}d`
-    return date.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    const s = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
+    if (s < 60) return "Just now"
+    if (s < 3600) return `${Math.floor(s / 60)}min`
+    if (s < 86400) return `${Math.floor(s / 3600)}h`
+    if (s < 604800) return `${Math.floor(s / 86400)}d`
+    return new Date(dateStr).toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' })
   }
 
-  if (loading && !stats) {
+  // ── Loading state ──────────────────────────────────────────────────────────
+  if (statsLoading && testimonialsLoading) {
     return (
       <main className="max-w-285 mx-auto px-6 py-12 pb-20 relative z-10">
         <div className="flex flex-col items-center justify-center py-20 text-(--v3-muted)">
@@ -346,32 +239,22 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
     )
   }
 
-
+  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <main className="max-w-285 mx-auto px-6 py-12 pb-20 relative z-10">
-      <button 
-        onClick={onBack}
-        className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-(--v3-muted2) hover:text-(--v3-teal) transition-colors mb-6"
-      >
+      <button onClick={onBack} className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-(--v3-muted2) hover:text-(--v3-teal) transition-colors mb-6">
         <ChevronLeftIcon size={14} />
         Back to Dashboard
       </button>
 
       <div className="mb-8">
-        <span className="text-[12px] font-semibold uppercase tracking-[0.12em] text-(--v3-teal) mb-2.5 block">
-          // form
-        </span>
+        <span className="text-[12px] font-semibold uppercase tracking-[0.12em] text-(--v3-teal) mb-2.5 block">// form</span>
         <div className="flex flex-wrap justify-between items-start gap-4">
           <div className="flex-1">
-            <h1 className="text-[clamp(20px,2.5vw,28px)] font-extrabold tracking-tighter leading-tight text-(--v3-text) mb-3">
-              {form.name}
-            </h1>
-            
+            <h1 className="text-[clamp(20px,2.5vw,28px)] font-extrabold tracking-tighter leading-tight text-(--v3-text) mb-3">{form.name}</h1>
             <div className="flex flex-wrap items-center gap-3">
-              <div 
-                onClick={copyPublicId}
-                className="flex items-center gap-2.5 bg-white/5 border border-white/10 text-(--v3-muted2) pl-3 pr-2 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-pointer hover:bg-white/10 hover:border-white/20 transition-all group"
-              >
+              <div onClick={() => { navigator.clipboard.writeText(form.publicId); setCopyingId(true); setTimeout(() => setCopyingId(false), 2000) }}
+                className="flex items-center gap-2.5 bg-white/5 border border-white/10 text-(--v3-muted2) pl-3 pr-2 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-pointer hover:bg-white/10 hover:border-white/20 transition-all group">
                 <span className="opacity-60">ID:</span>
                 <span className="text-(--v3-text) opacity-100">{form.publicId}</span>
                 <div className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all ${copyingId ? 'bg-(--v3-teal) text-white' : 'bg-white/5 text-(--v3-muted2) group-hover:bg-white/10'}`}>
@@ -379,50 +262,34 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
                 </div>
               </div>
 
-              <button 
-                onClick={() => navigate(`/forms/${form.id}/edit`)}
-                className="flex items-center gap-2 bg-white/5 border border-white/10 text-(--v3-text) px-4 py-2 rounded-xl text-xs font-bold hover:bg-white/10 hover:border-white/20 transition-all group"
-              >
+              <button onClick={() => navigate(`/forms/${form.id}/edit`)} className="flex items-center gap-2 bg-white/5 border border-white/10 text-(--v3-text) px-4 py-2 rounded-xl text-xs font-bold hover:bg-white/10 hover:border-white/20 transition-all group">
                 <Pencil size={13} className="text-(--v3-muted2) group-hover:text-(--v3-teal) transition-colors" />
                 Edit
               </button>
 
               <div className="relative">
-                <button 
-                  onClick={() => setShowSharePopover(!showSharePopover)}
-                  className="flex items-center gap-2 bg-(--v3-teal) text-white px-4 py-2 rounded-xl text-xs font-bold hover:-translate-y-0.5 hover:shadow-[0_8px_24px_var(--v3-teal-glow)] transition-all overflow-hidden relative group"
-                >
+                <button onClick={() => setShowSharePopover(!showSharePopover)} className="flex items-center gap-2 bg-(--v3-teal) text-white px-4 py-2 rounded-xl text-xs font-bold hover:-translate-y-0.5 hover:shadow-[0_8px_24px_var(--v3-teal-glow)] transition-all overflow-hidden relative group">
                   <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                   <Share2 size={13} />
                   Share
                 </button>
-
                 {showSharePopover && (
                   <div className="absolute top-full right-0 mt-2 w-72 bg-[#0A0A0A] border border-white/10 rounded-2xl shadow-2xl p-4 z-400 animate-in fade-in zoom-in-95 duration-200">
                     <div className="flex flex-col gap-3">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Public Link</span>
-                        <button onClick={() => setShowSharePopover(false)} className="text-white/20 hover:text-white">
-                          <Plus size={14} className="rotate-45" />
-                        </button>
+                        <button onClick={() => setShowSharePopover(false)} className="text-white/20 hover:text-white"><Plus size={14} className="rotate-45" /></button>
                       </div>
                       <div className="flex items-center gap-2 bg-white/5 border border-white/5 rounded-xl px-3 py-2 overflow-hidden">
-                        <span className="text-[10px] text-white/40 truncate flex-1">
-                          {`${window.location.origin}/f/${form.publicId}`}
-                        </span>
-                        <button 
-                          onClick={handleCopyLink}
+                        <span className="text-[10px] text-white/40 truncate flex-1">{`${window.location.origin}/f/${form.publicId}`}</span>
+                        <button
+                          onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/f/${form.publicId}`); setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000) }}
                           className={`p-1.5 rounded-lg transition-all ${copiedLink ? 'bg-(--v3-teal) text-white' : 'hover:bg-white/10 text-white/40'}`}
                         >
                           {copiedLink ? <Check size={12} /> : <Copy size={12} />}
                         </button>
                       </div>
-                      <a 
-                        href={`/f/${form.publicId}`} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-[10px] font-bold text-(--v3-teal) hover:underline flex items-center gap-1 mt-1"
-                      >
+                      <a href={`/f/${form.publicId}`} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold text-(--v3-teal) hover:underline flex items-center gap-1 mt-1">
                         Open link <ChevronRight size={10} />
                       </a>
                     </div>
@@ -431,7 +298,6 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
               </div>
 
               <div className="h-4 w-px bg-white/10 mx-1" />
-
               <div className="flex items-center gap-2.5">
                 <Badge status={form.isActive ? 'active' : 'draft'} />
                 {avgRating > 0 && (
@@ -446,46 +312,31 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
         </div>
       </div>
 
+      {/* Stats cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard 
-          icon={<MessageSquare size={18} />} 
-          label="Total reviews" 
-          value={totReviews.toString()} 
-          delta={stats?.reviewsGrowth !== undefined ? (stats.reviewsGrowth > 0 ? `↑ +${stats.reviewsGrowth}%` : stats.reviewsGrowth < 0 ? `↓ ${stats.reviewsGrowth}%` : "0%") : "—"} 
-          colorClass="bg-(--v3-teal-dim) border-(--v3-teal)/20 text-(--v3-teal)" 
-        />
-        <StatCard 
-          icon={<TrendingUp size={18} />} 
-          label="Completion" 
-          value={`${stats?.completionRate ?? form.completion ?? 100}%`} 
-          delta={stats?.completionGrowth !== undefined ? (stats.completionGrowth > 0 ? `↑ +${stats.completionGrowth}%` : stats.completionGrowth < 0 ? `↓ ${stats.completionGrowth}%` : "0%") : "—"} 
-          colorClass="bg-sky-500/10 border-sky-500/20 text-sky-500" 
-        />
+        <StatCard icon={<MessageSquare size={18} />} label="Total reviews" value={totReviews.toString()} delta={stats?.reviewsGrowth !== undefined ? (stats.reviewsGrowth > 0 ? `↑ +${stats.reviewsGrowth}%` : stats.reviewsGrowth < 0 ? `↓ ${stats.reviewsGrowth}%` : "0%") : "—"} colorClass="bg-(--v3-teal-dim) border-(--v3-teal)/20 text-(--v3-teal)" />
+        <StatCard icon={<TrendingUp size={18} />} label="Completion" value={`${stats?.completionRate ?? form.completion ?? 100}%`} delta={stats?.completionGrowth !== undefined ? (stats.completionGrowth > 0 ? `↑ +${stats.completionGrowth}%` : stats.completionGrowth < 0 ? `↓ ${stats.completionGrowth}%` : "0%") : "—"} colorClass="bg-sky-500/10 border-sky-500/20 text-sky-500" />
         <StatCard icon={<Star size={18} />} label="Average rating" value={avgRating > 0 ? avgRating.toFixed(1) : "—"} colorClass="bg-amber-500/10 border-amber-500/20 text-amber-500" />
         <StatCard icon={<Users size={18} />} label="Unique respondents" value={(stats?.uniqueRespondents || 0).toString()} colorClass="bg-purple-500/10 border-purple-500/20 text-purple-500" />
       </div>
 
+      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-5 mb-8">
         <div className="bg-(--v3-bg2) border border-(--v3-border) rounded-2xl p-6 flex flex-col">
           <div className="text-sm font-bold text-(--v3-text) mb-1.5">Review Volume</div>
           <div className="text-[12px] text-(--v3-muted2) mb-5">Last 14 days</div>
           <div className="flex items-end gap-1.5 h-50 mt-auto">
-            {stats?.reviewVolume.length === 0 ? (
-                <div className="w-full h-full flex items-center justify-center text-[10px] text-(--v3-muted) italic">Not enough data yet</div>
-            ) : (
-                stats?.reviewVolume.map((v, i) => {
-                    const maxVolume = Math.max(...stats.reviewVolume.map(rv => rv.value), 1)
-                    return (
-                        <div key={i} className="flex-1 flex flex-col items-center gap-1 h-full group">
-                            <div 
-                            className="w-full bg-(--v3-teal)/25 rounded-t-lg mt-auto group-hover:bg-(--v3-teal) transition-all cursor-pointer" 
-                            style={{ height: `${Math.max(5, Math.round((v.value / maxVolume) * 100))}%` }}
-                            />
-                            <div className="text-[8px] text-(--v3-muted) text-center font-bold tracking-tighter opacity-70">{v.label}</div>
-                        </div>
-                    )
-                })
-            )}
+            {!stats?.reviewVolume?.length ? (
+              <div className="w-full h-full flex items-center justify-center text-[10px] text-(--v3-muted) italic">Not enough data yet</div>
+            ) : stats.reviewVolume.map((v, i) => {
+              const maxVolume = Math.max(...stats.reviewVolume.map(rv => rv.value), 1)
+              return (
+                <div key={i} className="flex-1 flex flex-col items-center gap-1 h-full group">
+                  <div className="w-full bg-(--v3-teal)/25 rounded-t-lg mt-auto group-hover:bg-(--v3-teal) transition-all cursor-pointer" style={{ height: `${Math.max(5, Math.round((v.value / maxVolume) * 100))}%` }} />
+                  <div className="text-[8px] text-(--v3-muted) text-center font-bold tracking-tighter opacity-70">{v.label}</div>
+                </div>
+              )
+            })}
           </div>
         </div>
         <div className="bg-(--v3-bg2) border border-(--v3-border) rounded-2xl p-6">
@@ -496,13 +347,7 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
               <div key={i} className="flex items-center gap-2.5">
                 <span className="text-[10px] font-bold text-(--v3-muted2) w-6 shrink-0">{s.rating} ★</span>
                 <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full rounded-full transition-all duration-700 ease-out" 
-                    style={{ 
-                        width: `${totReviews > 0 ? Math.round((s.count / totReviews) * 100) : 0}%`, 
-                        backgroundColor: s.rating >= 4 ? 'var(--v3-teal)' : s.rating === 3 ? '#ca8a04' : '#ef4444' 
-                    }} 
-                  />
+                  <div className="h-full rounded-full transition-all duration-700 ease-out" style={{ width: `${totReviews > 0 ? Math.round((s.count / totReviews) * 100) : 0}%`, backgroundColor: s.rating >= 4 ? 'var(--v3-teal)' : s.rating === 3 ? '#ca8a04' : '#ef4444' }} />
                 </div>
                 <span className="text-[10px] font-bold text-(--v3-muted2) w-4 text-right shrink-0">{s.count}</span>
               </div>
@@ -518,156 +363,98 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
         </div>
       </div>
 
+      {/* Review table */}
       <div className="bg-(--v3-bg2) border border-(--v3-border) rounded-2xl overflow-hidden shadow-2xl relative">
         <div className="flex justify-between items-center px-6 py-5 border-b border-(--v3-border) bg-white/1">
-          <span className="text-[14px] font-black uppercase tracking-widest text-(--v3-text) opacity-80">
-            // Review Management
-          </span>
+          <span className="text-[14px] font-black uppercase tracking-widest text-(--v3-text) opacity-80">// Review Management</span>
           <div className="flex items-center gap-3">
-            <button 
-              onClick={handleExport}
-              className="flex items-center gap-1.5 bg-white/5 border border-white/10 text-(--v3-muted2) px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-white/10 hover:text-(--v3-teal) transition-all"
-            >
-              <Download size={12} />
-              Export CSV
+            <button onClick={() => window.open(testimonialsService.exportUrl(form.id), '_blank')} className="flex items-center gap-1.5 bg-white/5 border border-white/10 text-(--v3-muted2) px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-white/10 hover:text-(--v3-teal) transition-all">
+              <Download size={12} /> Export CSV
             </button>
-            <button 
-              onClick={() => setIsMigrationModalOpen(true)}
-              className="flex items-center gap-1.5 bg-white/5 border border-white/10 text-(--v3-muted2) px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-white/10 hover:text-(--v3-teal) transition-all"
-            >
-              <Upload size={12} />
-              Import
+            <button onClick={() => setIsMigrationModalOpen(true)} className="flex items-center gap-1.5 bg-white/5 border border-white/10 text-(--v3-muted2) px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-white/10 hover:text-(--v3-teal) transition-all">
+              <Upload size={12} /> Import
             </button>
             <div className="w-px h-4 bg-white/10 mx-1" />
             <span className="text-[11px] font-bold text-(--v3-muted2)">{totReviews} total</span>
           </div>
         </div>
-        
+
         <div className="overflow-x-auto">
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={testimonials.map(t => t.id)} strategy={verticalListSortingStrategy}>
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="border-b border-(--v3-border) text-left bg-white/1">
                     <th className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-6 h-6 shrink-0" /> {/* Space for grip icon */}
-                        <Checkbox 
-                          checked={testimonials.length > 0 && selectedIds.length === testimonials.length} 
-                          onChange={toggleSelectAll} 
+                        <div className="w-6 h-6 shrink-0" />
+                        <Checkbox
+                          checked={testimonials.length > 0 && selectedIds.length === testimonials.length}
+                          onChange={(checked) => setSelectedIds(checked ? testimonials.map(t => t.id) : [])}
                         />
                       </div>
                     </th>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-(--v3-muted2) cursor-pointer hover:text-(--v3-teal) transition-colors" onClick={() => handleSort('authorName')}>
-                      <div className="flex items-center">Author <SortIcon field="authorName" sortConfig={sortConfig} /></div>
-                    </th>
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-(--v3-muted2) cursor-pointer hover:text-(--v3-teal) transition-colors" onClick={() => handleSort('authorName')}><div className="flex items-center">Author <SortIcon field="authorName" sortConfig={sortConfig} /></div></th>
                     <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-(--v3-muted2)">Review</th>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-(--v3-muted2) text-center cursor-pointer hover:text-(--v3-teal) transition-colors" onClick={() => handleSort('rating')}>
-                      <div className="flex items-center justify-center">Rating <SortIcon field="rating" sortConfig={sortConfig} /></div>
-                    </th>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-(--v3-muted2) text-center cursor-pointer hover:text-(--v3-teal) transition-colors" onClick={() => handleSort('status')}>
-                      <div className="flex items-center justify-center">Status <SortIcon field="status" sortConfig={sortConfig} /></div>
-                    </th>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-(--v3-muted2) text-right cursor-pointer hover:text-(--v3-teal) transition-colors" onClick={() => handleSort('createdAt')}>
-                      <div className="flex items-center justify-end">Date <SortIcon field="createdAt" sortConfig={sortConfig} /></div>
-                    </th>
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-(--v3-muted2) text-center cursor-pointer hover:text-(--v3-teal) transition-colors" onClick={() => handleSort('rating')}><div className="flex items-center justify-center">Rating <SortIcon field="rating" sortConfig={sortConfig} /></div></th>
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-(--v3-muted2) text-center cursor-pointer hover:text-(--v3-teal) transition-colors" onClick={() => handleSort('status')}><div className="flex items-center justify-center">Status <SortIcon field="status" sortConfig={sortConfig} /></div></th>
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-(--v3-muted2) text-right cursor-pointer hover:text-(--v3-teal) transition-colors" onClick={() => handleSort('createdAt')}><div className="flex items-center justify-end">Date <SortIcon field="createdAt" sortConfig={sortConfig} /></div></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-(--v3-border)">
-                  {testimonials.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="py-16 text-center text-(--v3-muted2) italic text-sm">
-                        No reviews found.
-                      </td>
-                    </tr>
-                  ) : (
-                    testimonials.map((r) => (
-                      <SortableTestimonialRow
-                        key={r.id}
-                        testimonial={r}
-                        isSelected={selectedIds.includes(r.id)}
-                        onSelect={toggleSelectOne}
-                        onStatusUpdate={handleStatusUpdate}
-                        formatDate={formatDate}
-                        getRandomGradient={getRandomGradient}
-                        getInitials={getInitials}
-                        onView={(t) => navigate(`/forms/${form.id}/testimonials/${t.id}`)}
-                      />
-                    ))
-                  )}
+                  {testimonialsLoading ? (
+                    <tr><td colSpan={6} className="py-16 text-center"><RefreshCw size={20} className="animate-spin text-(--v3-teal) mx-auto" /></td></tr>
+                  ) : testimonials.length === 0 ? (
+                    <tr><td colSpan={6} className="py-16 text-center text-(--v3-muted2) italic text-sm">No reviews found.</td></tr>
+                  ) : testimonials.map((r) => (
+                    <SortableTestimonialRow
+                      key={r.id}
+                      testimonial={r}
+                      isSelected={selectedIds.includes(r.id)}
+                      onSelect={(id) => setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id])}
+                      onStatusUpdate={handleStatusUpdate}
+                      formatDate={formatDate}
+                      getRandomGradient={getRandomGradient}
+                      getInitials={getInitials}
+                      onView={(t) => navigate(`/forms/${form.id}/testimonials/${t.id}`)}
+                    />
+                  ))}
                 </tbody>
               </table>
             </SortableContext>
           </DndContext>
         </div>
 
-        {/* Floating Bulk Action Bar */}
+        {/* Bulk action bar */}
         {selectedIds.length > 0 && (
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-(--v3-bg) border border-(--v3-teal)/30 px-6 py-3 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5),0_0_20px_rgba(45,212,191,0.1)] backdrop-blur-xl flex items-center gap-6 animate-in slide-in-from-bottom-4 duration-300 z-50">
             <div className="flex items-center gap-3 pr-6 border-r border-white/10">
-              <div className="w-6 h-6 rounded-full bg-(--v3-teal) text-white text-[11px] font-black flex items-center justify-center shadow-[0_0_15px_rgba(45,212,191,0.4)]">
-                {selectedIds.length}
-              </div>
+              <div className="w-6 h-6 rounded-full bg-(--v3-teal) text-white text-[11px] font-black flex items-center justify-center shadow-[0_0_15px_rgba(45,212,191,0.4)]">{selectedIds.length}</div>
               <span className="text-[11px] font-black uppercase tracking-widest text-(--v3-text)">Selected</span>
             </div>
-            
             <div className="flex items-center gap-3">
-              <button 
-                onClick={() => handleBatchStatusUpdate('approved')}
-                className="flex items-center gap-2 bg-(--v3-teal)/10 text-(--v3-teal) border border-(--v3-teal)/20 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-(--v3-teal) hover:text-white transition-all"
-              >
-                <Check size={14} /> Approve
-              </button>
-              <button 
-                onClick={() => handleBatchStatusUpdate('rejected')}
-                className="flex items-center gap-2 bg-red-500/10 text-red-400 border border-red-500/20 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all"
-              >
-                <XCircle size={14} /> Reject
-              </button>
+              <button onClick={() => handleBatchStatusUpdate('approved')} disabled={batchUpdateStatus.isPending} className="flex items-center gap-2 bg-(--v3-teal)/10 text-(--v3-teal) border border-(--v3-teal)/20 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-(--v3-teal) hover:text-white transition-all disabled:opacity-50"><Check size={14} /> Approve</button>
+              <button onClick={() => handleBatchStatusUpdate('rejected')} disabled={batchUpdateStatus.isPending} className="flex items-center gap-2 bg-red-500/10 text-red-400 border border-red-500/20 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all disabled:opacity-50"><XCircle size={14} /> Reject</button>
             </div>
-
-            <button 
-              onClick={() => setSelectedIds([])}
-              className="text-[10px] font-black uppercase tracking-widest text-(--v3-muted2) hover:text-(--v3-text) ml-2"
-            >
-              Cancel
-            </button>
+            <button onClick={() => setSelectedIds([])} className="text-[10px] font-black uppercase tracking-widest text-(--v3-muted2) hover:text-(--v3-text) ml-2">Cancel</button>
           </div>
         )}
 
-        {/* Pagination Footer */}
+        {/* Pagination */}
         <div className="flex justify-between items-center px-6 py-4 bg-white/1 border-t border-(--v3-border)">
-          <div className="text-[11px] font-bold text-(--v3-muted2)">
-            Page <span className="text-(--v3-text)">{page}</span> of <span className="text-(--v3-text)">{Math.ceil(totReviews / 10) || 1}</span>
-          </div>
+          <div className="text-[11px] font-bold text-(--v3-muted2)">Page <span className="text-(--v3-text)">{page}</span> of <span className="text-(--v3-text)">{Math.ceil(totReviews / 10) || 1}</span></div>
           <div className="flex items-center gap-2">
-            <button 
-              disabled={page === 1}
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              className="p-1 px-3 rounded-lg border border-white/5 bg-white/5 text-(--v3-muted2) text-[11px] font-bold hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 transition-all flex items-center gap-1"
-            >
-              <ChevronLeftIcon size={12} /> Previous
-            </button>
-            <button 
-              disabled={page >= Math.ceil(totReviews / 10)}
-              onClick={() => setPage(p => p + 1)}
-              className="p-1 px-3 rounded-lg border border-white/5 bg-white/5 text-(--v3-muted2) text-[11px] font-bold hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 transition-all flex items-center gap-1"
-            >
-              Next <ChevronRight size={12} />
-            </button>
+            <button disabled={page === 1} onClick={() => setPage(p => Math.max(1, p - 1))} className="p-1 px-3 rounded-lg border border-white/5 bg-white/5 text-(--v3-muted2) text-[11px] font-bold hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 transition-all flex items-center gap-1"><ChevronLeftIcon size={12} /> Previous</button>
+            <button disabled={page >= Math.ceil(totReviews / 10)} onClick={() => setPage(p => p + 1)} className="p-1 px-3 rounded-lg border border-white/5 bg-white/5 text-(--v3-muted2) text-[11px] font-bold hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 transition-all flex items-center gap-1">Next <ChevronRight size={12} /></button>
           </div>
         </div>
       </div>
 
-      <MigrationModal 
+      <MigrationModal
         isOpen={isMigrationModalOpen}
         onClose={() => setIsMigrationModalOpen(false)}
         formId={form.id}
-        onImported={() => fetchData()}
+        onImported={handleImported}
       />
     </main>
   )

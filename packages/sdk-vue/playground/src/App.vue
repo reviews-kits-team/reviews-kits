@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useReviews } from '@reviewskits/vue'
 
-const { data, isLoading, error } = useReviews({ formId: 'rk_frm_live_72330eb710b17f3baa56d87f' })
+const { data: _data, isLoading, error } = useReviews({ formId: 'rk_frm_live_4352ebf7c8008a48c5d70ae4' })
+const data = computed(() => _data.value)
 </script>
 
 <template>

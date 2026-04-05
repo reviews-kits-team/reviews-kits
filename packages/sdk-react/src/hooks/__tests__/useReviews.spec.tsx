@@ -1,18 +1,13 @@
-/**
- * @vitest-environment jsdom
- */
-import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
+import { describe, it, expect, mock, beforeEach, type Mock } from 'bun:test';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useReviews } from '../useReviews';
-import { reviewsApi } from '../../api/reviews';
+import { reviewsApi } from '@reviewskits/core';
 import React from 'react';
 import { ReviewsKitProvider } from '../../context/ReviewsKitProvider';
 
-vi.mock('../../api/reviews', () => ({
-  reviewsApi: {
-    getReviews: vi.fn(),
-  },
-}));
+import { spyOn } from 'bun:test';
+
+spyOn(reviewsApi, 'getReviews');
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <ReviewsKitProvider config={{ pk: 'test', host: 'test' }}>
@@ -22,19 +17,19 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('useReviews Stale Closures & Cancellation (React)', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    (reviewsApi.getReviews as Mock<any>).mockClear();
   });
 
   it('should cancel previous request when params change', async () => {
     let abortSignal: AbortSignal | undefined;
-    
-    (reviewsApi.getReviews as Mock).mockImplementation((_params: any, options?: RequestInit) => {
+
+    (reviewsApi.getReviews as Mock<any>).mockImplementation((_params: any, options?: RequestInit) => {
       const signal = options?.signal;
       return new Promise((resolve, reject) => {
         const onAbort = () => reject(new DOMException('Aborted', 'AbortError'));
         if (signal?.aborted) return onAbort();
         signal?.addEventListener('abort', onAbort);
-        
+
         setTimeout(() => {
           signal?.removeEventListener('abort', onAbort);
           resolve({ data: [], meta: { page: 1, totalPages: 1 } });
@@ -67,7 +62,7 @@ describe('useReviews Stale Closures & Cancellation (React)', () => {
       rejectFirst = reject;
     });
 
-    (reviewsApi.getReviews as Mock)
+    (reviewsApi.getReviews as Mock<any>)
       .mockReturnValueOnce(firstPromise)
       .mockResolvedValueOnce({ data: [{ id: '2' }], meta: { page: 1, totalPages: 1 } });
 
@@ -94,7 +89,7 @@ describe('useReviews Stale Closures & Cancellation (React)', () => {
     // Try to resolve the first request now (it should be ignored by the hook if it checks signal.aborted)
     // Or if the hook aborted the signal, it should already be handled.
     resolveFirst({ data: [{ id: '1' }], meta: { page: 1, totalPages: 1 } });
-    
+
     // Small delay
     await new Promise(r => setTimeout(r, 20));
 

@@ -2,7 +2,7 @@ import { useReviews } from '@reviewskits/react'
 
 function App() {
   const { data, isLoading, error } = useReviews({ 
-    formId: 'rk_frm_live_72330eb710b17f3baa56d87f' 
+    formId: 'rk_frm_live_4352ebf7c8008a48c5d70ae4' 
   })
 
   return (

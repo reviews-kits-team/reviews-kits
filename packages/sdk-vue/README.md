@@ -60,7 +60,8 @@ const app = createApp(App)
 // Initialize Reviewskits
 app.use(createReviewsKit({
   pk: 'pk_your_public_key',
-  host: 'https://api.reviewskits.com'
+  host: 'https://api.reviewskits.com',
+  cache: true // Enabled by default
 }))
 
 app.mount('#app')

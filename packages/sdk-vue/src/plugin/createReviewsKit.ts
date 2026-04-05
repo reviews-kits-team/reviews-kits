@@ -1,9 +1,13 @@
-import { App } from 'vue';
-import { setConfig, InjectionKey, ReviewsKitConfig } from '../core/config';
+import { setConfig, InjectionKey } from '../core/config';
+import type { ReviewsKitConfig } from '@reviewskits/core';
 
+/**
+ * Creates a ReviewsKit plugin instance for Vue 3.
+ * Returns an object with an install method compatible with app.use().
+ */
 export const createReviewsKit = (config: ReviewsKitConfig) => {
   return {
-    install(app: App) {
+    install(app: any) {
       if (!config.pk) {
         throw new Error('[ReviewsKit] Public key (pk) is required.');
       }

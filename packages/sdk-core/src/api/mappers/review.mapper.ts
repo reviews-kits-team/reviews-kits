@@ -1,4 +1,4 @@
-import { RawReview, Review } from '../../types';
+import type { RawReview, Review } from '@reviewskits/types';
 
 export const mapReview = (raw: RawReview): Review => {
   return {

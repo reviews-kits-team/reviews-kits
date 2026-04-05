@@ -31,7 +31,8 @@ const app = createApp(App);
 
 app.use(createReviewsKit({
   pk: 'pk_your_public_key',
-  host: 'https://reviews.yourdomain.com'
+  host: 'https://reviews.yourdomain.com',
+  cache: true // Enabled by default
 }));
 
 app.mount('#app');

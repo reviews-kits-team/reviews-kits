@@ -1,21 +1,18 @@
-import { ref, watchEffect } from 'vue';
-import { reviewsApi } from '../api/reviews';
-import { mapReviews } from '../api/mappers/review.mapper';
+import { ref, watchEffect, inject } from 'vue';
+import { reviewsApi, mapReviews } from '@reviewskits/core';
 import { ReviewApiParams, Review } from '../types';
+import { InjectionKey } from '../core/config';
 
 export const useReviews = (params: ReviewApiParams) => {
+  const config = inject(InjectionKey, undefined);
   const data = ref<{ reviews: Review[] } | null>(null);
   const isLoading = ref(true);
   const error = ref<any>(null);
   // Incrementing this ref forces watchEffect to re-run on manual refetch.
   const refreshTick = ref(0);
 
-  // watchEffect auto-tracks every reactive property read inside (including
-  // reactive params fields and refreshTick), and re-runs when they change.
-  // onCleanup replaces onMounted + onUnmounted + deep watch entirely.
   watchEffect((onCleanup) => {
-    void refreshTick.value; // track for manual refetch
-
+    refreshTick.value; // Force dependency tracking
     const controller = new AbortController();
     onCleanup(() => controller.abort());
 
@@ -23,7 +20,7 @@ export const useReviews = (params: ReviewApiParams) => {
     error.value = null;
 
     reviewsApi
-      .getReviews({ ...params }, { signal: controller.signal })
+      .getReviews({ ...params }, { signal: controller.signal }, config)
       .then((response) => {
         if (controller.signal.aborted) return;
         data.value = { reviews: mapReviews(response.data) };

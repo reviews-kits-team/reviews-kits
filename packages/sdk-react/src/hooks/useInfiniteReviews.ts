@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { reviewsApi } from '../api/reviews';
-import { mapReviews } from '../api/mappers/review.mapper';
+import { reviewsApi, mapReviews } from '@reviewskits/core';
 import type { ReviewApiParams, Review, ReviewApiResponseMeta } from '../types';
 import { useReviewsKitConfig } from '../context/ReviewsKitProvider';
 

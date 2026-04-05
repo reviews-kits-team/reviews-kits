@@ -30,7 +30,8 @@ function App({ children }) {
     <ReviewsKitProvider 
       config={{
         pk: 'pk_your_public_key',
-        host: 'https://reviews.yourdomain.com'
+        host: 'https://reviews.yourdomain.com',
+        cache: true // Enabled by default
       }}
     >
       {children}
