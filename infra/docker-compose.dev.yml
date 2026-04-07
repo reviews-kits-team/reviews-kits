@@ -42,6 +42,15 @@ services:
     volumes:
       - minio-dev-data:/data
 
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI → http://localhost:8025
+    environment:
+      MP_MAX_MESSAGES: 100
+
 volumes:
   db-dev-data:
   redis-dev-data:
