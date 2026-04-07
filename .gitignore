@@ -51,6 +51,9 @@ pnpm-lock.yaml
 
 *.tsbuildinfo
 
+# Local dev seeds (credentials perso, ne pas committer)
+apps/server/scripts/seed-local-*.ts
+
 .eslintcache
 
 .DS_Store

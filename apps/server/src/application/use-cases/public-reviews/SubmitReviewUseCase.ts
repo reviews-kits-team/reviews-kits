@@ -1,10 +1,13 @@
 import { randomUUID } from 'node:crypto';
 import type { ITestimonialRepository } from '../../../domain/repositories/ITestimonialRepository';
 import type { IFormRepository } from '../../../domain/repositories/IFormRepository';
+import type { IUserRepository } from '../../../domain/repositories/IUserRepository';
+import type { IEmailService } from '../../../domain/services/IEmailService';
 import { Testimonial } from '../../../domain/entities/Testimonial';
 import { Rating } from '../../../domain/value-objects/Rating';
 import { Email } from '../../../domain/value-objects/Email';
 import type { WebhookService } from '../../services/WebhookService';
+import { newReviewEmailHtml } from '../../../infrastructure/email/templates/newReview';
 
 export interface SubmitReviewRequest {
   formId: string;
@@ -21,7 +24,9 @@ export class SubmitReviewUseCase {
   constructor(
     private readonly testimonialRepository: ITestimonialRepository,
     private readonly formRepository: IFormRepository,
-    private readonly webhookService: WebhookService
+    private readonly webhookService: WebhookService,
+    private readonly userRepository: IUserRepository,
+    private readonly emailService: IEmailService | null
   ) {}
 
   async execute(request: SubmitReviewRequest): Promise<string> {
@@ -60,6 +65,26 @@ export class SubmitReviewUseCase {
       rating: tProps.rating?.getValue(),
       createdAt: tProps.createdAt
     }).catch(err => console.error('Webhook trigger failed:', err));
+
+    // Send email notification asynchronously
+    if (this.emailService) {
+      this.userRepository.findById(form.getUserId()).then(owner => {
+        if (!owner) return;
+        const adminUrl = process.env.ADMIN_URL ?? 'http://localhost:5180';
+        return this.emailService!.send({
+          to: owner.getEmail(),
+          subject: `New review on "${form.getName()}"`,
+          html: newReviewEmailHtml({
+            formName: form.getName(),
+            formId: form.getId(),
+            authorName,
+            rating: tProps.rating?.getValue(),
+            content,
+            adminUrl,
+          }),
+        });
+      }).catch(err => console.error('Email notification failed:', err));
+    }
 
     return testimonial.getId();
   }

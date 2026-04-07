@@ -5,6 +5,7 @@
   "private": true,
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/nodemailer": "^8.0.0",
     "drizzle-kit": "^0.31.9",
     "postgres": "^3.4.8"
   },
@@ -30,6 +31,7 @@
     "better-auth": "^1.5.5",
     "drizzle-orm": "^0.45.1",
     "hono": "^4.12.8",
+    "nodemailer": "^8.0.4",
     "zod": "^4.3.6"
   }
 }
