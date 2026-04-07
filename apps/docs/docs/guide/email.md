@@ -47,7 +47,7 @@ SMTP_PASS=
 
 ### View captured emails
 
-Open [http://localhost:8025](http://localhost:8025) in your browser.
+Open `http://localhost:8025` in your browser.
 
 All emails sent by the server will appear there in real time, including the full HTML render of the notification template.
 
