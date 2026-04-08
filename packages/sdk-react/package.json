@@ -1,6 +1,6 @@
 {
   "name": "@reviewskits/react",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "The official React SDK for ReviewsKits",
   "keywords": [
     "reviewskits",
@@ -45,7 +45,7 @@
     "react": ">=18"
   },
   "dependencies": {
-    "@reviewskits/core": "workspace:*"
+    "@reviewskits/core": "^0.1.0"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "^20.8.9",
