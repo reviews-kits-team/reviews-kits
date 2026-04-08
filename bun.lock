@@ -89,7 +89,7 @@
     },
     "packages/sdk-core": {
       "name": "@reviewskits/core",
-      "version": "0.0.1",
+      "version": "0.1.0",
       "devDependencies": {
         "@reviewskits/types": "^0.0.4",
         "tsup": "^8.3.5",
@@ -98,9 +98,9 @@
     },
     "packages/sdk-react": {
       "name": "@reviewskits/react",
-      "version": "0.0.2",
+      "version": "0.1.0",
       "dependencies": {
-        "@reviewskits/core": "workspace:*",
+        "@reviewskits/core": "^0.1.0",
       },
       "devDependencies": {
         "@happy-dom/global-registrator": "^20.8.9",
@@ -140,9 +140,9 @@
     },
     "packages/sdk-vue": {
       "name": "@reviewskits/vue",
-      "version": "0.0.2",
+      "version": "0.1.0",
       "dependencies": {
-        "@reviewskits/core": "workspace:*",
+        "@reviewskits/core": "^0.1.0",
       },
       "devDependencies": {
         "@happy-dom/global-registrator": "^20.8.9",
@@ -178,7 +178,7 @@
     },
     "packages/types": {
       "name": "@reviewskits/types",
-      "version": "0.0.4",
+      "version": "0.1.0",
       "devDependencies": {
         "@types/bun": "latest",
       },
@@ -2184,7 +2184,13 @@
 
     "@noble/curves/@noble/hashes": ["@noble/hashes@1.8.0", "", {}, "sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A=="],
 
+    "@reviewskits/core/@reviewskits/types": ["@reviewskits/types@0.0.4", "", { "peerDependencies": { "typescript": "^5.9.3" } }, "sha512-021zw3JY4Vjhv9u46e8y+Z3hJrg6mXbK/ea5uJZSLk70j5C6i8nqCiRXPfR0PVE6Yo+kQeheFXdhwKj+wNZHlw=="],
+
+    "@reviewskits/react/@reviewskits/types": ["@reviewskits/types@0.0.4", "", { "peerDependencies": { "typescript": "^5.9.3" } }, "sha512-021zw3JY4Vjhv9u46e8y+Z3hJrg6mXbK/ea5uJZSLk70j5C6i8nqCiRXPfR0PVE6Yo+kQeheFXdhwKj+wNZHlw=="],
+
     "@reviewskits/react/@vitejs/plugin-react": ["@vitejs/plugin-react@6.0.1", "", { "dependencies": { "@rolldown/pluginutils": "1.0.0-rc.7" }, "peerDependencies": { "@rolldown/plugin-babel": "^0.1.7 || ^0.2.0", "babel-plugin-react-compiler": "^1.0.0", "vite": "^8.0.0" }, "optionalPeers": ["@rolldown/plugin-babel", "babel-plugin-react-compiler"] }, "sha512-l9X/E3cDb+xY3SWzlG1MOGt2usfEHGMNIaegaUGFsLkb3RCn/k8/TOXBcab+OndDI4TBtktT8/9BwwW8Vi9KUQ=="],
+
+    "@reviewskits/vue/@reviewskits/types": ["@reviewskits/types@0.0.4", "", { "peerDependencies": { "typescript": "^5.9.3" } }, "sha512-021zw3JY4Vjhv9u46e8y+Z3hJrg6mXbK/ea5uJZSLk70j5C6i8nqCiRXPfR0PVE6Yo+kQeheFXdhwKj+wNZHlw=="],
 
     "@tailwindcss/oxide-wasm32-wasi/@emnapi/core": ["@emnapi/core@1.9.2", "", { "dependencies": { "@emnapi/wasi-threads": "1.2.1", "tslib": "^2.4.0" }, "bundled": true }, "sha512-UC+ZhH3XtczQYfOlu3lNEkdW/p4dsJ1r/bP7H8+rhao3TTTMO1ATq/4DdIi23XuGoFY+Cz0JmCbdVl0hz9jZcA=="],
 
