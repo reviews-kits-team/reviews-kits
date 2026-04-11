@@ -5,26 +5,45 @@ import { NewReviewEmail } from './templates/newReview';
 
 export class NodemailerEmailService implements IEmailService {
   private transporter: nodemailer.Transporter;
+  private readonly smtpUser: string;
 
-  constructor(private readonly baseUrl: string) {
+  constructor(private readonly baseUrl: string, transporter?: nodemailer.Transporter) {
+    if (transporter) {
+      this.transporter = transporter;
+      this.smtpUser = '';
+      return;
+    }
+
+    const host = process.env.SMTP_HOST;
+
+    if (!host) throw new Error('SMTP_HOST is required to instantiate NodemailerEmailService');
+
+    const user = process.env.SMTP_USER ?? '';
+    const port = Number(process.env.SMTP_PORT) || 587;
+
+    this.smtpUser = user;
     this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT) || 587,
-      secure: Number(process.env.SMTP_PORT) === 465,
+      host,
+      port,
+      secure: port === 465,
       auth: {
-        user: process.env.SMTP_USER,
+        user,
         pass: process.env.SMTP_PASS,
       },
     });
   }
 
   async send(options: SendEmailOptions): Promise<void> {
-    await this.transporter.sendMail({
-      from: `"Reviewskits" <${process.env.SMTP_USER}>`,
-      to: options.to,
-      subject: options.subject,
-      html: options.html,
-    });
+    try {
+      await this.transporter.sendMail({
+        from: `"Reviewskits" <${this.smtpUser}>`,
+        to: options.to,
+        subject: options.subject,
+        html: options.html,
+      });
+    } catch (err) {
+      throw new Error(`Failed to send email to ${options.to}: ${(err as Error).message}`);
+    }
   }
 
   async sendNewReviewNotification(data: NewReviewNotificationData): Promise<void> {
@@ -38,12 +57,16 @@ export class NodemailerEmailService implements IEmailService {
       render(NewReviewEmail(templateProps)),
       render(NewReviewEmail(templateProps), { plainText: true }),
     ]);
-    await this.transporter.sendMail({
-      from: `"Reviewskits" <${process.env.SMTP_USER}>`,
-      to: data.ownerEmail,
-      subject: `New review on "${data.formName}"`,
-      html,
-      text,
-    });
+    try {
+      await this.transporter.sendMail({
+        from: `"Reviewskits" <${this.smtpUser}>`,
+        to: data.ownerEmail,
+        subject: `New review on "${data.formName}"`,
+        html,
+        text,
+      });
+    } catch (err) {
+      throw new Error(`Failed to send review notification to ${data.ownerEmail}: ${(err as Error).message}`);
+    }
   }
 }
