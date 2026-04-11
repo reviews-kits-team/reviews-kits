@@ -28,18 +28,22 @@ export class NodemailerEmailService implements IEmailService {
   }
 
   async sendNewReviewNotification(data: NewReviewNotificationData): Promise<void> {
-    const html = await render(NewReviewEmail({
+    const templateProps = {
       formName: data.formName,
       formId: data.formId,
       authorName: data.authorName,
-      rating: data.rating,
-      content: data.content,
       adminUrl: this.baseUrl,
-    }));
-    await this.send({
+    };
+    const [html, text] = await Promise.all([
+      render(NewReviewEmail(templateProps)),
+      render(NewReviewEmail(templateProps), { plainText: true }),
+    ]);
+    await this.transporter.sendMail({
+      from: `"Reviewskits" <${process.env.SMTP_USER}>`,
       to: data.ownerEmail,
       subject: `New review on "${data.formName}"`,
       html,
+      text,
     });
   }
 }
