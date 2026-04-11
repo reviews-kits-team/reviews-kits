@@ -34,6 +34,25 @@ BETTER_AUTH_URL=http://localhost:3000/api/auth
 
 ```
 
+## Email Notifications (SMTP)
+
+Email notifications are **opt-in**: leave `SMTP_HOST` empty to disable them entirely.
+
+```env
+# Local dev — use Mailpit (see Email guide)
+SMTP_HOST=localhost
+SMTP_PORT=1025
+SMTP_USER=
+SMTP_PASS=
+
+# Base URL of the application (used in email links)
+BASE_URL=http://localhost:5180
+```
+
+See the [Email Notifications guide](/guide/email) for production configuration and provider examples.
+
+---
+
 ## Production Mode
 
 Use these secure configurations when deploying to your `.env` in production:

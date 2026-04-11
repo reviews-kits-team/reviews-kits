@@ -43,6 +43,7 @@ export default withMermaid(defineConfig({
           { text: 'Forms & Collection', link: '/guide/forms' },
           { text: 'Reviews & Moderation', link: '/guide/moderation' },
           { text: 'Webhooks & Events', link: '/guide/webhooks' },
+          { text: 'Email Notifications', link: '/guide/email' },
           { text: 'API Keys & Security', link: '/guide/security' },
         ]
       },
