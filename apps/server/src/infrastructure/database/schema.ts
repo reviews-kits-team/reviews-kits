@@ -178,6 +178,25 @@ export const webhookLogs = pgTable('webhook_logs', {
   deliveredIdx: index('idx_webhook_logs_delivered').on(t.delivered),
 }));
 // ═══════════════════════════════════════
+// NOTIFICATIONS
+// ═══════════════════════════════════════
+
+export const notifications = pgTable('notifications', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  type: text('type').notNull(), // new_review
+  title: text('title').notNull(),
+  body: text('body'),
+  formId: uuid('form_id').references(() => forms.id, { onDelete: 'set null' }),
+  testimonialId: uuid('testimonial_id').references(() => testimonials.id, { onDelete: 'set null' }),
+  isRead: boolean('is_read').notNull().default(false),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (t) => ({
+  userIdx: index('idx_notifications_user').on(t.userId),
+  unreadIdx: index('idx_notifications_unread').on(t.userId, t.isRead),
+}));
+
+// ═══════════════════════════════════════
 // RATE LIMITING
 // ═══════════════════════════════════════
 

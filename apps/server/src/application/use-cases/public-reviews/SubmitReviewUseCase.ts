@@ -3,7 +3,9 @@ import type { ITestimonialRepository } from '../../../domain/repositories/ITesti
 import type { IFormRepository } from '../../../domain/repositories/IFormRepository';
 import type { IUserRepository } from '../../../domain/repositories/IUserRepository';
 import type { IEmailService } from '../../../domain/services/IEmailService';
+import type { INotificationRepository } from '../../../domain/repositories/INotificationRepository';
 import { Testimonial } from '../../../domain/entities/Testimonial';
+import { Notification } from '../../../domain/entities/Notification';
 import { Rating } from '../../../domain/value-objects/Rating';
 import { Email } from '../../../domain/value-objects/Email';
 import type { WebhookService } from '../../services/WebhookService';
@@ -27,7 +29,8 @@ export class SubmitReviewUseCase {
     private readonly formRepository: IFormRepository,
     private readonly webhookService: WebhookService,
     private readonly userRepository: IUserRepository,
-    private readonly emailService: IEmailService | null
+    private readonly emailService: IEmailService | null,
+    private readonly notificationRepository: INotificationRepository
   ) {}
 
   async execute(request: SubmitReviewRequest): Promise<string> {
@@ -66,6 +69,18 @@ export class SubmitReviewUseCase {
       rating: tProps.rating?.getValue(),
       createdAt: tProps.createdAt
     }).catch(err => console.error('Webhook trigger failed:', err));
+
+    // Save in-app notification
+    this.notificationRepository.save(new Notification({
+      id: randomUUID(),
+      userId: form.getUserId(),
+      type: 'new_review',
+      title: `New review from ${authorName}`,
+      body: content.length > 120 ? content.slice(0, 120) + '...' : content,
+      formId: form.getId(),
+      testimonialId: testimonial.getId(),
+      isRead: false,
+    })).catch(err => console.error('Notification save failed:', err));
 
     // Send email notification asynchronously
     if (this.emailService) {
