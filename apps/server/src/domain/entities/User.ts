@@ -1,3 +1,8 @@
+export interface NotificationPrefs {
+  newReview: boolean;
+  weeklyReport: boolean;
+}
+
 export interface UserProps {
   id: string;
   email: string;
@@ -5,6 +10,7 @@ export interface UserProps {
   emailVerified: boolean;
   isSystemAdmin: boolean;
   avatarUrl?: string | null;
+  notificationPrefs?: NotificationPrefs;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -16,6 +22,7 @@ export class User {
   private emailVerified: boolean;
   private isSystemAdmin: boolean;
   private avatarUrl?: string | null;
+  private notificationPrefs: NotificationPrefs;
   public readonly createdAt: Date;
   private updatedAt: Date;
 
@@ -29,6 +36,7 @@ export class User {
     this.emailVerified = props.emailVerified;
     this.isSystemAdmin = props.isSystemAdmin;
     this.avatarUrl = props.avatarUrl;
+    this.notificationPrefs = props.notificationPrefs ?? { newReview: true, weeklyReport: true };
     this.createdAt = props.createdAt ?? new Date();
     this.updatedAt = props.updatedAt ?? new Date();
   }
@@ -41,6 +49,7 @@ export class User {
       emailVerified: this.emailVerified,
       isSystemAdmin: this.isSystemAdmin,
       avatarUrl: this.avatarUrl,
+      notificationPrefs: this.notificationPrefs,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     };
@@ -81,6 +90,15 @@ export class User {
 
   public getEmailVerified(): boolean {
     return this.emailVerified;
+  }
+
+  public getNotificationPrefs(): NotificationPrefs {
+    return { ...this.notificationPrefs };
+  }
+
+  public updateNotificationPrefs(prefs: Partial<NotificationPrefs>): void {
+    this.notificationPrefs = { ...this.notificationPrefs, ...prefs };
+    this.updatedAt = new Date();
   }
 
   public equals(other: User): boolean {

@@ -11,6 +11,7 @@ export const users = pgTable('users', {
   emailVerified: boolean('email_verified').notNull().default(false),
   image: text('image'),
   isSystemAdmin: boolean('is_system_admin').notNull().default(false),
+  notificationPrefs: jsonb('notification_prefs').default({ newReview: true, weeklyReport: true }),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });

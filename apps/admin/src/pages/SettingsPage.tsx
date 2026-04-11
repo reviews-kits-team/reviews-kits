@@ -1,10 +1,27 @@
+import { useState, useEffect } from 'react'
 import { SettingsLayout } from '../components/dashboard/settings-layout'
 import { Globe, Bell, Moon, Sun } from 'lucide-react'
 import { useTheme } from '../hooks/useTheme'
+import { meService, type NotificationPrefs } from '../services/me.service'
+
+const defaultPrefs: NotificationPrefs = { newReview: true, weeklyReport: true }
 
 export default function SettingsPage() {
   const { theme, toggleTheme } = useTheme()
   const isDark = theme === 'dark'
+
+  const [notifPrefs, setNotifPrefs] = useState<NotificationPrefs>(defaultPrefs)
+  useEffect(() => {
+    meService.getMe().then(data => {
+      if (data.user.notificationPrefs) setNotifPrefs(data.user.notificationPrefs)
+    })
+  }, [])
+
+  const togglePref = (key: keyof NotificationPrefs) => {
+    const updated = { ...notifPrefs, [key]: !notifPrefs[key] }
+    setNotifPrefs(updated)
+    meService.updateNotificationPrefs({ [key]: updated[key] })
+  }
 
   return (
     <SettingsLayout
@@ -65,19 +82,15 @@ export default function SettingsPage() {
            </div>
            <div className="space-y-4 pt-2">
               <label className="flex items-center gap-3 cursor-pointer group">
-                 <input type="checkbox" defaultChecked className="w-4 h-4 rounded border-(--v3-border) bg-(--v3-bg) text-(--v3-teal)" />
-                 <span className="text-sm text-(--v3-text) group-hover:text-(--v3-teal) transition-colors">Nouveaux formulaires reçus</span>
+                 <input type="checkbox" checked={notifPrefs.newReview} onChange={() => togglePref('newReview')} className="w-4 h-4 rounded border-(--v3-border) bg-(--v3-bg) text-(--v3-teal)" />
+                 <span className="text-sm text-(--v3-text) group-hover:text-(--v3-teal) transition-colors">New reviews received</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer group">
-                 <input type="checkbox" defaultChecked className="w-4 h-4 rounded border-(--v3-border) bg-(--v3-bg) text-(--v3-teal)" />
-                 <span className="text-sm text-(--v3-text) group-hover:text-(--v3-teal) transition-colors">Rapports hebdomadaires</span>
+                 <input type="checkbox" checked={notifPrefs.weeklyReport} onChange={() => togglePref('weeklyReport')} className="w-4 h-4 rounded border-(--v3-border) bg-(--v3-bg) text-(--v3-teal)" />
+                 <span className="text-sm text-(--v3-text) group-hover:text-(--v3-teal) transition-colors">Weekly reports</span>
               </label>
            </div>
         </div>
-
-        <button className="w-full py-3.5 bg-(--v3-bg3) border border-(--v3-border) text-(--v3-muted2) rounded-xl font-bold text-sm transition-all opacity-50 cursor-not-allowed">
-          Coming soon
-        </button>
       </div>
     </SettingsLayout>
   )

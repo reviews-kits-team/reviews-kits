@@ -101,6 +101,9 @@ const submitReviewUseCase = new SubmitReviewUseCase(testimonialRepository, formR
 const getPublicFormUseCase = new GetPublicFormUseCase(formRepository);
 
 export const container = {
+  // Repositories
+  userRepository,
+
   // Services
   webhookService,
   

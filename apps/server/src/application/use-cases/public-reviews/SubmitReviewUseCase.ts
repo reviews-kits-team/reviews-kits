@@ -71,6 +71,7 @@ export class SubmitReviewUseCase {
     if (this.emailService) {
       this.userRepository.findById(form.getUserId()).then(owner => {
         if (!owner) return;
+        if (!owner.getNotificationPrefs().newReview) return;
         const adminUrl = process.env.ADMIN_URL ?? 'http://localhost:5180';
         const emailProps = {
           formName: form.getName(),

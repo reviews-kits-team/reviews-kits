@@ -93,10 +93,13 @@ app.get('/', (c) => {
 
 const port = Number(process.env.PORT) || 3000;
 
+const smtpHost = process.env.SMTP_HOST;
+const mailpitLine = smtpHost === 'localhost' ? '\n  ➜  Mailpit: http://localhost:8025' : '';
+
 console.log(`
   🚀 API Server ready
   ➜  Local:   http://localhost:${port}/
-  ➜  Swagger: http://localhost:${port}/ui
+  ➜  Swagger: http://localhost:${port}/ui${mailpitLine}
 `);
 
 export default {
