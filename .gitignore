@@ -84,3 +84,6 @@ docker-compose.override.yml
 *.backup
 *.old
 *.tgz
+
+# this file is for owner only
+PROJECT_CONTEXT.md
