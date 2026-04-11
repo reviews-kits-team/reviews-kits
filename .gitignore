@@ -81,3 +81,5 @@ docker-compose.override.yml
 *.backup
 *.old
 *.tgz
+
+PROJECT_CONTEXT.md
