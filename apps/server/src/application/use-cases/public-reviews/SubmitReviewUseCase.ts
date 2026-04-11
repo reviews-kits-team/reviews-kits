@@ -7,7 +7,8 @@ import { Testimonial } from '../../../domain/entities/Testimonial';
 import { Rating } from '../../../domain/value-objects/Rating';
 import { Email } from '../../../domain/value-objects/Email';
 import type { WebhookService } from '../../services/WebhookService';
-import { newReviewEmailHtml } from '../../../infrastructure/email/templates/newReview';
+import { render } from '@react-email/render';
+import { NewReviewEmail } from '../../../infrastructure/email/templates/newReview';
 
 export interface SubmitReviewRequest {
   formId: string;
@@ -71,18 +72,21 @@ export class SubmitReviewUseCase {
       this.userRepository.findById(form.getUserId()).then(owner => {
         if (!owner) return;
         const adminUrl = process.env.ADMIN_URL ?? 'http://localhost:5180';
-        return this.emailService!.send({
-          to: owner.getEmail(),
-          subject: `New review on "${form.getName()}"`,
-          html: newReviewEmailHtml({
-            formName: form.getName(),
-            formId: form.getId(),
-            authorName,
-            rating: tProps.rating?.getValue(),
-            content,
-            adminUrl,
-          }),
-        });
+        const emailProps = {
+          formName: form.getName(),
+          formId: form.getId(),
+          authorName,
+          rating: tProps.rating?.getValue(),
+          content,
+          adminUrl,
+        };
+        return render(NewReviewEmail(emailProps)).then(html =>
+          this.emailService!.send({
+            to: owner.getEmail(),
+            subject: `New review on "${form.getName()}"`,
+            html,
+          })
+        );
       }).catch(err => console.error('Email notification failed:', err));
     }
 
