@@ -16,8 +16,8 @@ SMTP_PORT=587
 SMTP_USER=your@email.com
 SMTP_PASS=your-password
 
-# Base URL of the admin panel (used in email links)
-ADMIN_URL=https://your-admin-domain.com
+# Base URL of the application (used in email links)
+BASE_URL=https://your-domain.com
 ```
 
 The email is sent **asynchronously** — it never blocks the review submission response.
@@ -60,7 +60,7 @@ All emails sent by the server will appear there in real time, including the full
    - Triggers webhooks (existing behavior)
    - Looks up the form owner via `userId` → `users.email`
    - Sends an HTML email notification to that address
-3. The email contains the review content and a **View in dashboard** button linking to `ADMIN_URL/forms/:formId`
+3. The email contains the review content and a **View in dashboard** button linking to `BASE_URL/forms/:formId`
 
 ---
 

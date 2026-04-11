@@ -63,7 +63,7 @@ export class SubmitReviewUseCase {
       authorEmail: tProps.authorEmail?.getValue(),
       rating: tProps.rating?.getValue(),
       createdAt: tProps.createdAt
-    }).catch(err => console.error('Webhook trigger failed:', err));
+    }).catch(err => { throw new Error(`Webhook trigger failed: ${err.message}`); });
 
     // Send email notification asynchronously
     if (this.emailService) {
@@ -76,9 +76,8 @@ export class SubmitReviewUseCase {
           authorName,
           rating: tProps.rating?.getValue(),
           content,
-          adminUrl: process.env.ADMIN_URL ?? 'http://localhost:5180',
         });
-      }).catch(err => console.error('Email notification failed:', err));
+      }).catch(err => { throw new Error(`Email notification failed: ${err.message}`); });
     }
 
     return testimonial.getId();

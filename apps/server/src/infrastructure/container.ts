@@ -60,7 +60,9 @@ const webhookRepository = new DrizzleWebhookRepository(db as any);
 const webhookService = new WebhookService(webhookRepository);
 
 const emailService: IEmailService | null = process.env.SMTP_HOST
-  ? new NodemailerEmailService()
+  ? new NodemailerEmailService(
+      process.env.BASE_URL ?? (() => { throw new Error('BASE_URL must be set when SMTP_HOST is configured'); })()
+    )
   : null;
 
 // Use Case Instances

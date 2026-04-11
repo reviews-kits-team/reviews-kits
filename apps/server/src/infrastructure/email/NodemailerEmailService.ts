@@ -6,7 +6,7 @@ import { NewReviewEmail } from './templates/newReview';
 export class NodemailerEmailService implements IEmailService {
   private transporter: nodemailer.Transporter;
 
-  constructor() {
+  constructor(private readonly baseUrl: string) {
     this.transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: Number(process.env.SMTP_PORT) || 587,
@@ -34,7 +34,7 @@ export class NodemailerEmailService implements IEmailService {
       authorName: data.authorName,
       rating: data.rating,
       content: data.content,
-      adminUrl: data.adminUrl,
+      adminUrl: this.baseUrl,
     }));
     await this.send({
       to: data.ownerEmail,

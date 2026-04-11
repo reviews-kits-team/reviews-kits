@@ -11,7 +11,6 @@ export interface NewReviewNotificationData {
   authorName: string;
   rating?: number;
   content: string;
-  adminUrl: string;
 }
 
 export interface IEmailService {

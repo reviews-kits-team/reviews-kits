@@ -45,8 +45,8 @@ SMTP_PORT=1025
 SMTP_USER=
 SMTP_PASS=
 
-# Base URL of the admin panel (used in email links)
-ADMIN_URL=http://localhost:5180
+# Base URL of the application (used in email links)
+BASE_URL=http://localhost:5180
 ```
 
 See the [Email Notifications guide](/guide/email) for production configuration and provider examples.
