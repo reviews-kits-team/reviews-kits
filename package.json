@@ -19,6 +19,7 @@
     "db:reset": "docker compose -f infra/docker-compose.dev.yml down -v && bun run db:start && sleep 3 && cd apps/server && bun run db:push && bun run db:seed:admin"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.30.0",
     "@types/bun": "latest",
     "husky": "^9.1.7",
     "turbo": "^2.8.20",
