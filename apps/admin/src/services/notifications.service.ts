@@ -22,11 +22,11 @@ async function handleResponse<T>(res: Response): Promise<T> {
 
 export const notificationsService = {
   list: (limit = 20, offset = 0): Promise<NotificationsResponse> =>
-    fetch(`/api/v1/notifications?limit=${limit}&offset=${offset}`).then(handleResponse),
+    fetch(`/api/v1/notifications?limit=${limit}&offset=${offset}`).then(res => handleResponse<NotificationsResponse>(res)),
 
   markRead: (id: string): Promise<{ success: boolean }> =>
-    fetch(`/api/v1/notifications/${id}/read`, { method: 'PATCH' }).then(handleResponse),
+    fetch(`/api/v1/notifications/${id}/read`, { method: 'PATCH' }).then(res => handleResponse<{ success: boolean }>(res)),
 
   markAllRead: (): Promise<{ success: boolean }> =>
-    fetch('/api/v1/notifications/read-all', { method: 'POST' }).then(handleResponse),
+    fetch('/api/v1/notifications/read-all', { method: 'POST' }).then(res => handleResponse<{ success: boolean }>(res)),
 }
