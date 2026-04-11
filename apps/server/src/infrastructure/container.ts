@@ -4,6 +4,8 @@ import { DrizzleTestimonialRepository } from './repositories/DrizzleTestimonialR
 import { DrizzleApiKeyRepository } from './repositories/DrizzleApiKeyRepository';
 import { DrizzleUserRepository } from './repositories/DrizzleUserRepository';
 import { DrizzleWebhookRepository } from './repositories/DrizzleWebhookRepository';
+import { NodemailerEmailService } from './email/NodemailerEmailService';
+import type { IEmailService } from '../domain/services/IEmailService';
 
 import { WebhookService } from '../application/services/WebhookService';
 
@@ -57,6 +59,12 @@ const webhookRepository = new DrizzleWebhookRepository(db as any);
 // Services
 const webhookService = new WebhookService(webhookRepository);
 
+const emailService: IEmailService | null = process.env.SMTP_HOST
+  ? new NodemailerEmailService(
+      process.env.BASE_URL ?? (() => { throw new Error('BASE_URL must be set when SMTP_HOST is configured'); })()
+    )
+  : null;
+
 // Use Case Instances
 const generateUserApiKeys = new GenerateUserApiKeys(apiKeyRepository);
 const rotateApiKeysUseCase = new RotateApiKeysUseCase(apiKeyRepository);
@@ -91,7 +99,7 @@ const getFormStatsUseCase = new GetFormStatsUseCase(formRepository, testimonialR
 const getFormTestimonialsUseCase = new GetFormTestimonialsUseCase(formRepository, testimonialRepository);
 
 const getPublicReviewsUseCase = new GetPublicReviewsUseCase(testimonialRepository, formRepository);
-const submitReviewUseCase = new SubmitReviewUseCase(testimonialRepository, formRepository, webhookService);
+const submitReviewUseCase = new SubmitReviewUseCase(testimonialRepository, formRepository, webhookService, userRepository, emailService);
 const getPublicFormUseCase = new GetPublicFormUseCase(formRepository);
 
 export const container = {

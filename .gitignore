@@ -51,6 +51,9 @@ pnpm-lock.yaml
 
 *.tsbuildinfo
 
+# Local dev seeds (credentials perso, ne pas committer)
+apps/server/scripts/seed-local-*.ts
+
 .eslintcache
 
 .DS_Store
@@ -81,3 +84,6 @@ docker-compose.override.yml
 *.backup
 *.old
 *.tgz
+
+# this file is for owner only
+PROJECT_CONTEXT.md

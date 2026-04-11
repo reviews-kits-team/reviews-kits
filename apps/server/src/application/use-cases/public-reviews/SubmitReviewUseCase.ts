@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import type { ITestimonialRepository } from '../../../domain/repositories/ITestimonialRepository';
 import type { IFormRepository } from '../../../domain/repositories/IFormRepository';
+import type { IUserRepository } from '../../../domain/repositories/IUserRepository';
+import type { IEmailService } from '../../../domain/services/IEmailService';
 import { Testimonial } from '../../../domain/entities/Testimonial';
 import { Rating } from '../../../domain/value-objects/Rating';
 import { Email } from '../../../domain/value-objects/Email';
@@ -21,7 +23,9 @@ export class SubmitReviewUseCase {
   constructor(
     private readonly testimonialRepository: ITestimonialRepository,
     private readonly formRepository: IFormRepository,
-    private readonly webhookService: WebhookService
+    private readonly webhookService: WebhookService,
+    private readonly userRepository: IUserRepository,
+    private readonly emailService: IEmailService | null
   ) {}
 
   async execute(request: SubmitReviewRequest): Promise<string> {
@@ -59,7 +63,22 @@ export class SubmitReviewUseCase {
       authorEmail: tProps.authorEmail?.getValue(),
       rating: tProps.rating?.getValue(),
       createdAt: tProps.createdAt
-    }).catch(err => console.error('Webhook trigger failed:', err));
+    }).catch(err => { throw new Error(`Webhook trigger failed: ${err.message}`); });
+
+    // Send email notification asynchronously
+    if (this.emailService) {
+      this.userRepository.findById(form.getUserId()).then(owner => {
+        if (!owner) return;
+        return this.emailService!.sendNewReviewNotification({
+          ownerEmail: owner.getEmail(),
+          formName: form.getName(),
+          formId: form.getId(),
+          authorName,
+          rating: tProps.rating?.getValue(),
+          content,
+        });
+      }).catch(err => { throw new Error(`Email notification failed: ${err.message}`); });
+    }
 
     return testimonial.getId();
   }
