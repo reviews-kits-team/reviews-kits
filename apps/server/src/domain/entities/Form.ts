@@ -3,7 +3,7 @@ import { deepMerge } from "../../shared/utils/deepMerge";
 
 export interface FormStep {
   id: string;
-  type: 'welcome' | 'core' | 'identity' | 'success' | 'custom' | 'rating' | 'textarea' | 'attribution' | 'informative';
+  type: 'welcome' | 'core' | 'identity' | 'success' | 'custom' | 'rating' | 'textarea' | 'attribution' | 'informative' | 'consent';
   title: string;
   description?: string;
   isEnabled: boolean;
@@ -81,6 +81,11 @@ export class Form {
         { id: 'welcome',  type: 'welcome',  title: 'Welcome',    isEnabled: true, locked: true },
         { id: 'core',     type: 'core',     title: 'Your review', isEnabled: true, locked: true },
         { id: 'identity', type: 'identity', title: 'About you',  isEnabled: true, locked: false },
+        { id: 'consent',  type: 'consent',  title: 'Consent',    isEnabled: true, locked: true, config: {
+          publicLabel: 'I agree that my testimonial (name, photo, review) may be displayed publicly on the company\'s website or marketing materials.',
+          internalLabel: 'I agree that my data may be used internally for product improvement and analytics, and will not be shared publicly.',
+          privacyPolicyUrl: '',
+        }},
         { id: 'success',  type: 'success',  title: 'Thank you',  isEnabled: true, locked: true },
       ];
     }

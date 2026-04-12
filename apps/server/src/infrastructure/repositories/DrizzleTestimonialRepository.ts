@@ -56,11 +56,16 @@ export class DrizzleTestimonialRepository implements ITestimonialRepository {
       authorEmail: props.authorEmail?.getValue(),
       authorTitle: props.authorTitle,
       authorUrl: props.authorUrl,
+      authorPhotoUrl: props.authorPhotoUrl,
+      videoUrl: props.videoUrl,
       mediaId: props.mediaId,
       position: props.position,
       metadata: props.metadata ?? {},
       createdAt: props.createdAt,
       updatedAt: props.updatedAt,
+      consentPublic: props.consentPublic,
+      consentInternal: props.consentInternal,
+      consentedAt: props.consentedAt,
     });
   }
 
@@ -81,11 +86,16 @@ export class DrizzleTestimonialRepository implements ITestimonialRepository {
         authorEmail: props.authorEmail?.getValue(),
         authorTitle: props.authorTitle,
         authorUrl: props.authorUrl,
+        authorPhotoUrl: props.authorPhotoUrl,
+        videoUrl: props.videoUrl,
         mediaId: props.mediaId,
         position: props.position,
         metadata: props.metadata ?? {},
         createdAt: props.createdAt,
         updatedAt: props.updatedAt,
+        consentPublic: props.consentPublic,
+        consentInternal: props.consentInternal,
+        consentedAt: props.consentedAt,
       };
     });
 
@@ -484,12 +494,17 @@ export class DrizzleTestimonialRepository implements ITestimonialRepository {
       authorEmail: row.authorEmail ? Email.create(row.authorEmail) : undefined,
       authorTitle: row.authorTitle || undefined,
       authorUrl: row.authorUrl || undefined,
+      authorPhotoUrl: row.authorPhotoUrl || undefined,
+      videoUrl: row.videoUrl || undefined,
       formId: row.formId || undefined,
       mediaId: row.mediaId || undefined,
       position: row.position || 0,
       metadata: this.parseJsonb(row.metadata),
       createdAt: row.createdAt || undefined,
       updatedAt: row.updatedAt || undefined,
+      consentPublic: row.consentPublic || undefined,
+      consentInternal: row.consentInternal || undefined,
+      consentedAt: row.consentedAt || undefined,
     });
   }
 }

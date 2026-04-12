@@ -13,12 +13,17 @@ export interface TestimonialProps {
   authorEmail?: Email;
   authorTitle?: string;
   authorUrl?: string;
+  authorPhotoUrl?: string;
+  videoUrl?: string;
   formId?: string;
   mediaId?: string;
   position?: number;
   createdAt?: Date;
   updatedAt?: Date;
   metadata?: Record<string, any>;
+  consentPublic?: boolean;
+  consentInternal?: boolean;
+  consentedAt?: Date;
 }
 
 export class Testimonial {
@@ -32,12 +37,17 @@ export class Testimonial {
   private authorEmail?: Email;
   private authorTitle?: string;
   private authorUrl?: string;
+  private authorPhotoUrl?: string;
+  private videoUrl?: string;
   private formId?: string;
   private mediaId?: string;
   private position: number;
   public readonly createdAt: Date;
   private updatedAt: Date;
   private metadata: Record<string, any>;
+  private consentPublic?: boolean;
+  private consentInternal?: boolean;
+  private consentedAt?: Date;
 
   constructor(props: TestimonialProps) {
     if (!props.content) throw new Error("Testimonial content cannot be empty");
@@ -59,12 +69,17 @@ export class Testimonial {
     this.authorEmail = props.authorEmail;
     this.authorTitle = props.authorTitle;
     this.authorUrl = props.authorUrl;
+    this.authorPhotoUrl = props.authorPhotoUrl;
+    this.videoUrl = props.videoUrl;
     this.formId = props.formId;
     this.mediaId = props.mediaId;
     this.position = props.position ?? 0;
     this.createdAt = props.createdAt ?? new Date();
     this.updatedAt = props.updatedAt ?? new Date();
     this.metadata = props.metadata ?? {};
+    this.consentPublic = props.consentPublic;
+    this.consentInternal = props.consentInternal;
+    this.consentedAt = props.consentedAt;
   }
 
   public getProps(): TestimonialProps {
@@ -79,12 +94,17 @@ export class Testimonial {
       authorEmail: this.authorEmail,
       authorTitle: this.authorTitle,
       authorUrl: this.authorUrl,
+      authorPhotoUrl: this.authorPhotoUrl,
+      videoUrl: this.videoUrl,
       formId: this.formId,
       mediaId: this.mediaId,
       position: this.position,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
       metadata: this.metadata,
+      consentPublic: this.consentPublic,
+      consentInternal: this.consentInternal,
+      consentedAt: this.consentedAt,
     };
   }
 
@@ -127,6 +147,26 @@ export class Testimonial {
 
   public getAuthorEmailValue(): string | undefined {
     return this.authorEmail?.getValue();
+  }
+
+  public getAuthorPhotoUrl(): string | undefined {
+    return this.authorPhotoUrl;
+  }
+
+  public getVideoUrl(): string | undefined {
+    return this.videoUrl;
+  }
+
+  public getConsentPublic(): boolean | undefined {
+    return this.consentPublic;
+  }
+
+  public getConsentInternal(): boolean | undefined {
+    return this.consentInternal;
+  }
+
+  public getConsentedAt(): Date | undefined {
+    return this.consentedAt;
   }
 
   public equals(other: Testimonial): boolean {

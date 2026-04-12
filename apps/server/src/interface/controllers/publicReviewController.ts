@@ -13,8 +13,16 @@ const submitReviewSchema = z.object({
   authorUrl: z.string().url('Invalid URL format').refine(val => val.startsWith('http://') || val.startsWith('https://'), {
     message: "Only http and https protocols are allowed for authorUrl"
   }).optional().or(z.literal('')),
+  authorPhotoUrl: z.string().url('Invalid URL format').refine(val => val.startsWith('http://') || val.startsWith('https://'), {
+    message: "Only http and https protocols are allowed for authorPhotoUrl"
+  }).optional().or(z.literal('')),
+  videoUrl: z.string().url('Invalid URL format').refine(val => val.startsWith('http://') || val.startsWith('https://'), {
+    message: "Only http and https protocols are allowed for videoUrl"
+  }).optional().or(z.literal('')),
   _honey: z.string().optional(),
-  metadata: z.record(z.string(), z.unknown()).optional()
+  metadata: z.record(z.string(), z.unknown()).optional(),
+  consentPublic: z.boolean().optional(),
+  consentInternal: z.boolean().optional(),
 });
 
 export const publicReviewController = {
@@ -63,7 +71,7 @@ export const publicReviewController = {
       return c.json({ error: validation.error.issues[0]?.message || 'Invalid input' }, 400);
     }
 
-    const { formId, content, authorName, authorEmail, rating, authorTitle, authorUrl, _honey, metadata } = validation.data;
+    const { formId, content, authorName, authorEmail, rating, authorTitle, authorUrl, authorPhotoUrl, videoUrl, _honey, metadata, consentPublic, consentInternal } = validation.data;
 
     // Honeypot check - Spambots usually fill hidden fields
     if (_honey) {
@@ -84,7 +92,11 @@ export const publicReviewController = {
         rating,
         authorTitle,
         authorUrl,
-        metadata
+        authorPhotoUrl,
+        videoUrl,
+        metadata,
+        consentPublic,
+        consentInternal,
       });
 
       return c.json({ 

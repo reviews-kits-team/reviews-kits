@@ -137,15 +137,22 @@ export const testimonials = pgTable('testimonials', {
   authorEmail: text('author_email'),
   authorTitle: text('author_title'),
   authorUrl: text('author_url'),
+  authorPhotoUrl: text('author_photo_url'),
+  videoUrl: text('video_url'),
   mediaId: uuid('media_id').references(() => media.id, { onDelete: 'set null' }),
   position: integer('position').notNull().default(0),
   metadata: jsonb('metadata').default({}),
+  consentPublic: boolean('consent_public').default(false),
+  consentInternal: boolean('consent_internal').default(false),
+  consentedAt: timestamp('consented_at'),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 }, (t) => ({
   userIdIdx: index('idx_testimonials_user').on(t.userId),
   statusIdx: index('idx_testimonials_status').on(t.status),
   formIdx: index('idx_testimonials_form').on(t.formId),
+  consentPublicIdx: index('idx_testimonials_consent_public').on(t.consentPublic),
+  consentInternalIdx: index('idx_testimonials_consent_internal').on(t.consentInternal),
 }));
 
 // ═══════════════════════════════════════
