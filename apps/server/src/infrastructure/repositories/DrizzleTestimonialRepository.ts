@@ -61,6 +61,9 @@ export class DrizzleTestimonialRepository implements ITestimonialRepository {
       metadata: props.metadata ?? {},
       createdAt: props.createdAt,
       updatedAt: props.updatedAt,
+      consentPublic: props.consentPublic,
+      consentInternal: props.consentInternal,
+      consentedAt: props.consentedAt,
     });
   }
 
@@ -86,6 +89,9 @@ export class DrizzleTestimonialRepository implements ITestimonialRepository {
         metadata: props.metadata ?? {},
         createdAt: props.createdAt,
         updatedAt: props.updatedAt,
+        consentPublic: props.consentPublic,
+        consentInternal: props.consentInternal,
+        consentedAt: props.consentedAt,
       };
     });
 
@@ -490,6 +496,9 @@ export class DrizzleTestimonialRepository implements ITestimonialRepository {
       metadata: this.parseJsonb(row.metadata),
       createdAt: row.createdAt || undefined,
       updatedAt: row.updatedAt || undefined,
+      consentPublic: row.consentPublic || undefined,
+      consentInternal: row.consentInternal || undefined,
+      consentedAt: row.consentedAt || undefined,
     });
   }
 }
