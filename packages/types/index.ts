@@ -20,7 +20,10 @@ export interface Testimonial {
     name: string;
     email?: string;
     title?: string;
+    url?: string;
+    photoUrl?: string;
   };
+  videoUrl?: string;
   consentPublic?: boolean;
   consentInternal?: boolean;
   consentedAt?: Date;
@@ -76,6 +79,7 @@ export interface ReviewAuthor {
   email?: string;
   title?: string;
   url?: string;
+  photoUrl?: string;
 }
 
 /**
@@ -86,6 +90,7 @@ export interface Review {
   content: string;
   rating: number;
   author: ReviewAuthor;
+  videoUrl?: string;
   /** ISO 8601 date string */
   createdAt: string;
   /** Source platform (e.g. "google", "direct") */
@@ -114,6 +119,8 @@ export interface RawReview {
   authorEmail?: string;
   authorTitle?: string;
   authorUrl?: string;
+  authorPhotoUrl?: string;
+  videoUrl?: string;
   createdAt: string;
   type: string;
   metadata?: Record<string, unknown>;

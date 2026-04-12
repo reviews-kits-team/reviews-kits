@@ -13,6 +13,8 @@ export interface TestimonialProps {
   authorEmail?: Email;
   authorTitle?: string;
   authorUrl?: string;
+  authorPhotoUrl?: string;
+  videoUrl?: string;
   formId?: string;
   mediaId?: string;
   position?: number;
@@ -35,6 +37,8 @@ export class Testimonial {
   private authorEmail?: Email;
   private authorTitle?: string;
   private authorUrl?: string;
+  private authorPhotoUrl?: string;
+  private videoUrl?: string;
   private formId?: string;
   private mediaId?: string;
   private position: number;
@@ -65,6 +69,8 @@ export class Testimonial {
     this.authorEmail = props.authorEmail;
     this.authorTitle = props.authorTitle;
     this.authorUrl = props.authorUrl;
+    this.authorPhotoUrl = props.authorPhotoUrl;
+    this.videoUrl = props.videoUrl;
     this.formId = props.formId;
     this.mediaId = props.mediaId;
     this.position = props.position ?? 0;
@@ -88,6 +94,8 @@ export class Testimonial {
       authorEmail: this.authorEmail,
       authorTitle: this.authorTitle,
       authorUrl: this.authorUrl,
+      authorPhotoUrl: this.authorPhotoUrl,
+      videoUrl: this.videoUrl,
       formId: this.formId,
       mediaId: this.mediaId,
       position: this.position,
@@ -139,6 +147,14 @@ export class Testimonial {
 
   public getAuthorEmailValue(): string | undefined {
     return this.authorEmail?.getValue();
+  }
+
+  public getAuthorPhotoUrl(): string | undefined {
+    return this.authorPhotoUrl;
+  }
+
+  public getVideoUrl(): string | undefined {
+    return this.videoUrl;
   }
 
   public getConsentPublic(): boolean | undefined {

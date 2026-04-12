@@ -137,6 +137,8 @@ export const testimonials = pgTable('testimonials', {
   authorEmail: text('author_email'),
   authorTitle: text('author_title'),
   authorUrl: text('author_url'),
+  authorPhotoUrl: text('author_photo_url'),
+  videoUrl: text('video_url'),
   mediaId: uuid('media_id').references(() => media.id, { onDelete: 'set null' }),
   position: integer('position').notNull().default(0),
   metadata: jsonb('metadata').default({}),

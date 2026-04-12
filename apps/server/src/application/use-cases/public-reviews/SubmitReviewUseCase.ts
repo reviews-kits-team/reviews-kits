@@ -18,6 +18,8 @@ export interface SubmitReviewRequest {
   rating?: string | number;
   authorTitle?: string;
   authorUrl?: string;
+  authorPhotoUrl?: string;
+  videoUrl?: string;
   metadata?: Record<string, unknown>;
   consentPublic?: boolean;
   consentInternal?: boolean;
@@ -34,7 +36,7 @@ export class SubmitReviewUseCase {
   ) {}
 
   async execute(request: SubmitReviewRequest): Promise<string> {
-    const { formId, content, authorName, authorEmail, rating, authorTitle, authorUrl, metadata, consentPublic, consentInternal } = request;
+    const { formId, content, authorName, authorEmail, rating, authorTitle, authorUrl, authorPhotoUrl, videoUrl, metadata, consentPublic, consentInternal } = request;
 
     const form = await this.formRepository.findByPublicId(formId);
     if (!form) {
@@ -51,6 +53,8 @@ export class SubmitReviewUseCase {
       authorEmail: (authorEmail && authorEmail !== '') ? Email.create(authorEmail) : undefined,
       authorTitle,
       authorUrl: (authorUrl && authorUrl !== '') ? authorUrl : undefined,
+      authorPhotoUrl: (authorPhotoUrl && authorPhotoUrl !== '') ? authorPhotoUrl : undefined,
+      videoUrl: (videoUrl && videoUrl !== '') ? videoUrl : undefined,
       status: 'pending',
       source: 'form',
       metadata: metadata && Object.keys(metadata).length > 0 ? metadata : undefined,
