@@ -37,6 +37,7 @@ export class DrizzleUserRepository implements IUserRepository {
         email: props.email,
         name: props.name,
         image: props.avatarUrl,
+        notificationPrefs: props.notificationPrefs,
         updatedAt: props.updatedAt,
       })
       .where(eq(schema.users.id, user.id));
@@ -50,6 +51,7 @@ export class DrizzleUserRepository implements IUserRepository {
       emailVerified: row.emailVerified,
       isSystemAdmin: row.isSystemAdmin,
       avatarUrl: row.image,
+      notificationPrefs: (row.notificationPrefs as any) ?? undefined,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     });

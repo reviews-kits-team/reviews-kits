@@ -1,19 +1,39 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Bell, ChevronDown } from 'lucide-react'
 import { ProfileMenu } from './profile-menu'
+import { NotificationPanel } from './notification-panel'
 import { authClient } from '../../lib/auth-client'
+import { notificationsService, type AppNotification } from '../../services/notifications.service'
 import logo from '../../assets/logo.svg'
 
 export const TopBar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isNotifOpen, setIsNotifOpen] = useState(false)
+  const [notifications, setNotifications] = useState<AppNotification[]>([])
+  const [unreadCount, setUnreadCount] = useState(0)
   const { data: session } = authClient.useSession()
+  const navigate = useNavigate()
+
+  const fetchNotifications = useCallback(() => {
+    notificationsService.list().then(data => {
+      setNotifications(data.notifications)
+      setUnreadCount(data.unreadCount)
+    })
+  }, [])
 
   useEffect(() => {
-    if (!isMenuOpen) return
-    const close = () => setIsMenuOpen(false)
+    fetchNotifications()
+    const interval = setInterval(fetchNotifications, 30000)
+    return () => clearInterval(interval)
+  }, [fetchNotifications])
+
+  useEffect(() => {
+    if (!isMenuOpen && !isNotifOpen) return
+    const close = () => { setIsMenuOpen(false); setIsNotifOpen(false) }
     document.addEventListener('click', close)
     return () => document.removeEventListener('click', close)
-  }, [isMenuOpen])
+  }, [isMenuOpen, isNotifOpen])
 
   return (
     <header className="sticky top-0 z-200 h-16 flex items-center border-b border-(--v3-border) bg-(--v3-bg)/90 backdrop-blur-xl">
@@ -25,10 +45,37 @@ export const TopBar = () => {
           </div>
         </a>
         <div className="flex items-center gap-4">
-          <button className="relative flex items-center justify-center p-2 rounded-lg bg-(--v3-bg2) border border-(--v3-border) text-(--v3-muted2) hover:text-(--v3-text) hover:border-(--v3-border2) transition-all">
-            <Bell size={15} />
-            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-(--v3-red) rounded-full border border-(--v3-bg2)" />
-          </button>
+          <div className="relative">
+            <button
+              onClick={(e) => { e.stopPropagation(); setIsNotifOpen(prev => !prev); setIsMenuOpen(false) }}
+              className="relative flex items-center justify-center p-2 rounded-lg bg-(--v3-bg2) border border-(--v3-border) text-(--v3-muted2) hover:text-(--v3-text) hover:border-(--v3-border2) transition-all"
+            >
+              <Bell size={15} />
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 flex items-center justify-center text-[10px] font-bold text-white bg-(--v3-red) rounded-full border-2 border-(--v3-bg)">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
+            <NotificationPanel
+              isOpen={isNotifOpen}
+              notifications={notifications}
+              onMarkRead={(id) => {
+                notificationsService.markRead(id)
+                setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n))
+                setUnreadCount(prev => Math.max(0, prev - 1))
+              }}
+              onMarkAllRead={() => {
+                notificationsService.markAllRead()
+                setNotifications(prev => prev.map(n => ({ ...n, isRead: true })))
+                setUnreadCount(0)
+              }}
+              onNavigate={(formId) => {
+                setIsNotifOpen(false)
+                navigate(`/forms/${formId}`)
+              }}
+            />
+          </div>
           
           <div className="relative">
             <div

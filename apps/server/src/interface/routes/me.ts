@@ -60,7 +60,11 @@ const updateMeRoute = createRoute({
           schema: z.object({
             name: z.string().optional(),
             email: z.string().email().optional(),
-            avatarUrl: z.string().nullable().optional()
+            avatarUrl: z.string().nullable().optional(),
+            notificationPrefs: z.object({
+              newReview: z.boolean().optional(),
+              weeklyReport: z.boolean().optional(),
+            }).optional()
           })
         }
       }

@@ -15,7 +15,6 @@ export class NodemailerEmailService implements IEmailService {
     }
 
     const host = process.env.SMTP_HOST;
-
     if (!host) throw new Error('SMTP_HOST is required to instantiate NodemailerEmailService');
 
     const user = process.env.SMTP_USER ?? '';

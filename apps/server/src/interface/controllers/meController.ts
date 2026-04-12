@@ -10,13 +10,17 @@ export const meController = {
   getMe: async (c: Context) => {
     // We re-fetch session just in case, or use the one from context if available
     const session = c.get("session") || await auth.api.getSession({ headers: c.req.raw.headers });
-    
+
     if (!session) {
       return c.json({ error: "Unauthorized" }, 401);
     }
-    
+
+    // Enrich user with notification prefs from DB (not stored in session)
+    const dbUser = await container.userRepository.findById(session.user.id);
+    const notificationPrefs = dbUser?.getNotificationPrefs() ?? { newReview: true, weeklyReport: true };
+
     return c.json({
-      user: session.user,
+      user: { ...session.user, notificationPrefs },
       session: session.session
     }, 200);
   },
@@ -27,14 +31,15 @@ export const meController = {
       return c.json({ error: "Unauthorized" }, 401);
     }
 
-    const { name, email, avatarUrl } = await c.req.json();
+    const { name, email, avatarUrl, notificationPrefs } = await c.req.json();
 
     try {
       await container.updateUserUseCase.execute({
         id: session.user.id,
         name,
         email,
-        avatarUrl
+        avatarUrl,
+        notificationPrefs
       });
       return c.json({ success: true });
     } catch (err: any) {

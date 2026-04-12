@@ -4,6 +4,7 @@ import { DrizzleTestimonialRepository } from './repositories/DrizzleTestimonialR
 import { DrizzleApiKeyRepository } from './repositories/DrizzleApiKeyRepository';
 import { DrizzleUserRepository } from './repositories/DrizzleUserRepository';
 import { DrizzleWebhookRepository } from './repositories/DrizzleWebhookRepository';
+import { DrizzleNotificationRepository } from './repositories/DrizzleNotificationRepository';
 import { NodemailerEmailService } from './email/NodemailerEmailService';
 import type { IEmailService } from '../domain/services/IEmailService';
 
@@ -55,6 +56,7 @@ const testimonialRepository = new DrizzleTestimonialRepository(db as any);
 const apiKeyRepository = new DrizzleApiKeyRepository(db as any);
 const userRepository = new DrizzleUserRepository(db as any);
 const webhookRepository = new DrizzleWebhookRepository(db as any);
+const notificationRepository = new DrizzleNotificationRepository(db as any);
 
 // Services
 const webhookService = new WebhookService(webhookRepository);
@@ -99,10 +101,14 @@ const getFormStatsUseCase = new GetFormStatsUseCase(formRepository, testimonialR
 const getFormTestimonialsUseCase = new GetFormTestimonialsUseCase(formRepository, testimonialRepository);
 
 const getPublicReviewsUseCase = new GetPublicReviewsUseCase(testimonialRepository, formRepository);
-const submitReviewUseCase = new SubmitReviewUseCase(testimonialRepository, formRepository, webhookService, userRepository, emailService);
+const submitReviewUseCase = new SubmitReviewUseCase(testimonialRepository, formRepository, webhookService, userRepository, emailService, notificationRepository);
 const getPublicFormUseCase = new GetPublicFormUseCase(formRepository);
 
 export const container = {
+  // Repositories
+  userRepository,
+  notificationRepository,
+
   // Services
   webhookService,
   

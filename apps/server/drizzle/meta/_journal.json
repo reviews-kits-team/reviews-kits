@@ -29,6 +29,20 @@
       "when": 1775078120044,
       "tag": "0003_happy_moon_knight",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1775909242496,
+      "tag": "0004_keen_revanche",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1775919265687,
+      "tag": "0005_plain_tattoo",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "notification_prefs" jsonb DEFAULT '{"newReview":true,"weeklyReport":true}'::jsonb;

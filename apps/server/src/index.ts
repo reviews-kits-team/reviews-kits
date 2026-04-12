@@ -11,6 +11,7 @@ import { publicRouter } from './interface/routes/public';
 import { dashboardRouter } from './interface/routes/dashboard';
 import { testimonialsRouter } from './interface/routes/testimonials';
 import webhooksRouter from './interface/routes/webhooks';
+import { notificationsRouter } from './interface/routes/notifications';
 
 
 const app = new OpenAPIHono();
@@ -79,6 +80,7 @@ app.route('/api/v1/public', publicRouter);
 app.route('/api/v1/dashboard', dashboardRouter);
 app.route('/api/v1/testimonials', testimonialsRouter);
 app.route('/api/v1/webhooks', webhooksRouter);
+app.route('/api/v1/notifications', notificationsRouter);
 
 // Welcome Route
 app.get('/', (c) => {
@@ -93,10 +95,13 @@ app.get('/', (c) => {
 
 const port = Number(process.env.PORT) || 3000;
 
+const smtpHost = process.env.SMTP_HOST;
+const mailpitLine = smtpHost === 'localhost' ? '\n  ➜  Mailpit: http://localhost:8025' : '';
+
 console.log(`
   🚀 API Server ready
   ➜  Local:   http://localhost:${port}/
-  ➜  Swagger: http://localhost:${port}/ui
+  ➜  Swagger: http://localhost:${port}/ui${mailpitLine}
 `);
 
 export default {
