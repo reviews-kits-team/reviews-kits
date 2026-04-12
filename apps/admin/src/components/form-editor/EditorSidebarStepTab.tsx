@@ -31,11 +31,19 @@ export function EditorSidebarStepTab({
   onDeleteStep,
   onToggleStepEnabled,
 }: EditorSidebarStepTabProps) {
-  const cfg = activeStep?.config as Record<string, string | boolean> | undefined
+  const cfg = activeStep?.config as Record<string, string | boolean | undefined> | undefined
 
   const setSidebarRef = (key: string) => (el: HTMLInputElement | HTMLTextAreaElement | null) => {
     const refs = sidebarRefs.current
     if (refs) refs[key] = el
+  }
+
+  // Helper to update success step config
+  const updateSuccessConfig = (key: string, value: string | boolean | undefined) => {
+    if (!activeStep) return
+    onUpdateStep(activeStep.id, { 
+      config: { ...activeStep.config, [key]: value } 
+    })
   }
 
   return (
@@ -222,19 +230,113 @@ export function EditorSidebarStepTab({
               </div>
             )}
 
-            {/* Redirect URL (success only) */}
+            {/* Thank You Page Configuration (success only) */}
             {activeStep.type === 'success' && (
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-(--v3-muted2) mb-3 block">
-                  Redirect URL (optional)
-                </label>
-                <input
-                  type="text"
-                  value={((activeStep.config as Record<string, string>)?.redirectUrl) || ''}
-                  onChange={(e) => onUpdateStep(activeStep.id, { config: { ...activeStep.config, redirectUrl: e.target.value } })}
-                  placeholder="https://yoursite.com"
-                  className="w-full bg-(--v3-bg) border border-(--v3-border) rounded-xl px-4 py-3 text-sm focus:border-(--v3-teal)/50 transition-all outline-none"
-                />
+              <div className="space-y-6">
+                <div className="pt-6 border-t border-white/5">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-[#0D9E75] block mb-4">
+                    Thank You Page
+                  </span>
+                  
+                  {/* Thank You Message (override description) */}
+                  <div className="mb-4">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-(--v3-muted2) mb-3 block">
+                      Custom message
+                    </label>
+                    <textarea
+                      value={cfg?.thankYouMessage as string || ''}
+                      onChange={(e) => updateSuccessConfig('thankYouMessage', e.target.value)}
+                      placeholder="We appreciate your review and will use it to improve our service."
+                      className="w-full bg-(--v3-bg) border border-(--v3-border) rounded-xl px-4 py-3 text-sm focus:border-(--v3-teal)/50 transition-all outline-none min-h-20 resize-none"
+                    />
+                  </div>
+
+                  {/* CTA Button Section */}
+                  <div className="bg-(--v3-bg) border border-(--v3-border) rounded-xl p-4 space-y-4">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-(--v3-muted2) block">
+                      Call-to-Action Button
+                    </span>
+                    
+                    {/* CTA Toggle */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold">Enable CTA button</span>
+                      <button
+                        onClick={() => updateSuccessConfig('thankYouCtaEnabled', !cfg?.thankYouCtaEnabled)}
+                        className={`w-10 h-5 rounded-full transition-all relative ${cfg?.thankYouCtaEnabled ? 'bg-[#0D9E75]' : 'bg-white/10'}`}
+                      >
+                        <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${cfg?.thankYouCtaEnabled ? 'left-6' : 'left-1'}`} />
+                      </button>
+                    </div>
+
+                    {/* CTA Label and URL */}
+                    {cfg?.thankYouCtaEnabled && (
+                      <div className="space-y-3 pt-2">
+                        <input
+                          type="text"
+                          value={cfg?.thankYouCtaLabel as string || ''}
+                          onChange={(e) => updateSuccessConfig('thankYouCtaLabel', e.target.value)}
+                          placeholder="Claim your 10% discount"
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs font-medium focus:border-[#0D9E75]/50 outline-none transition-all"
+                        />
+                        <input
+                          type="url"
+                          value={cfg?.thankYouCtaUrl as string || ''}
+                          onChange={(e) => updateSuccessConfig('thankYouCtaUrl', e.target.value)}
+                          placeholder="https://yoursite.com/discount"
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs font-medium focus:border-[#0D9E75]/50 outline-none transition-all"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Social Share Section */}
+                  <div className="bg-(--v3-bg) border border-(--v3-border) rounded-xl p-4 space-y-4 mt-4">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-(--v3-muted2) block">
+                      Social Share
+                    </span>
+                    
+                    {/* Social Share Toggle */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold">Show social share buttons</span>
+                      <button
+                        onClick={() => updateSuccessConfig('thankYouShowSocial', !cfg?.thankYouShowSocial)}
+                        className={`w-10 h-5 rounded-full transition-all relative ${cfg?.thankYouShowSocial ? 'bg-[#0D9E75]' : 'bg-white/10'}`}
+                      >
+                        <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${cfg?.thankYouShowSocial ? 'left-6' : 'left-1'}`} />
+                      </button>
+                    </div>
+
+                    {/* Share Text */}
+                    {cfg?.thankYouShowSocial && (
+                      <div className="pt-2">
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-(--v3-muted2) mb-3 block">
+                          Share text
+                        </label>
+                        <input
+                          type="text"
+                          value={cfg?.thankYouShareText as string || ''}
+                          onChange={(e) => updateSuccessConfig('thankYouShareText', e.target.value)}
+                          placeholder="I just left a review! Check it out:"
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs font-medium focus:border-[#0D9E75]/50 outline-none transition-all"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Redirect URL (optional, still available) */}
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-(--v3-muted2) mb-3 block">
+                    Redirect URL (optional)
+                  </label>
+                  <input
+                    type="url"
+                    value={((activeStep.config as Record<string, string>)?.redirectUrl) || ''}
+                    onChange={(e) => updateSuccessConfig('redirectUrl', e.target.value)}
+                    placeholder="https://yoursite.com"
+                    className="w-full bg-(--v3-bg) border border-(--v3-border) rounded-xl px-4 py-3 text-sm focus:border-(--v3-teal)/50 transition-all outline-none"
+                  />
+                </div>
               </div>
             )}
           </div>
