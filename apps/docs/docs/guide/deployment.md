@@ -4,22 +4,30 @@ Reviewskits is fully containerized and designed to be self-hosted on any VPS or 
 
 ---
 
-## 🏗️ Production Setup
+## Choosing the right compose file
 
-Before deploying, ensure you have a domain pointed to your server's IP address (A Record). Reviewskits uses Traefik by default to handle SSL certificates via Let's Encrypt.
+| File | When to use |
+|------|-------------|
+| `docker-compose.yml` | VPS with ports 80/443 free — Traefik handles SSL automatically |
+| `docker-compose.coolify.yml` | Deploying via [Coolify](https://coolify.io/) — SSL managed by Coolify |
+| `docker-compose.no-proxy.yml` | Existing reverse proxy (Nginx, Caddy, HAProxy…) — ports 80/443 already taken |
 
-### Environment Variables
-You will need to configure the following variables in your `.env` file or PaaS dashboard:
+---
+
+## 🏗️ Common environment variables
+
+All deployment options share these variables:
 
 | Variable | Description |
 |---|---|
 | `DOMAIN` | Your deployment domain (e.g., `reviews.example.com`) |
-| `ACME_EMAIL` | Email for SSL certificate notifications |
 | `DATABASE_URL` | `postgresql://postgres:PASSWORD@db:5432/reviewskits` |
 | `POSTGRES_PASSWORD` | A secure password for the database |
 | `BETTER_AUTH_SECRET` | A random 32-character string |
 | `ADMIN_EMAIL` | The email you'll use to log in |
 | `ADMIN_PASSWORD` | Your admin password |
+
+> `ACME_EMAIL` is only required for **Option A** (Traefik). It is not needed for Coolify or no-proxy setups.
 
 ---
 
@@ -208,8 +216,54 @@ volumes:
 
 ---
 
+## 🔧 Option C: Existing Reverse Proxy (Nginx, Caddy, HAProxy…)
+
+Use this if ports 80 and 443 are already handled by your own proxy. The services are exposed directly on the host — point your proxy at `localhost:8080` (admin) and `localhost:3000` (API).
+
+**1. Create a `.env` file** (no `ACME_EMAIL` needed):
+```env
+# --- Domain ---
+DOMAIN=yourdomain.com
+
+# --- Database ---
+POSTGRES_PASSWORD=generate_a_secure_password
+DATABASE_URL=postgresql://postgres:generate_a_secure_password@db:5432/reviewskits
+
+# --- Auth & Admin ---
+BETTER_AUTH_SECRET=generate_a_random_32_chars_string
+ADMIN_EMAIL=your@email.com
+ADMIN_PASSWORD=your_secure_admin_password
+```
+
+**2. Launch**:
+```bash
+docker compose -f infra/docker-compose.no-proxy.yml up -d
+```
+
+**3. Configure your proxy** to forward traffic:
+- `yourdomain.com` → `localhost:8080` (admin frontend)
+- `yourdomain.com/api` → `localhost:3000` (API)
+
+Example Nginx config:
+```nginx
+server {
+    listen 443 ssl;
+    server_name yourdomain.com;
+
+    location /api {
+        proxy_pass http://localhost:3000;
+    }
+
+    location / {
+        proxy_pass http://localhost:8080;
+    }
+}
+```
+
+---
+
 ## 🔐 Security Best Practices
 
 1. **Better Auth Secret**: Generate a strong 32-character random string.
 2. **Database Backups**: If using the Docker database, ensure the `db-data` volume is backed up.
-3. **HTTPS**: Traefik handles this automatically in Option A. In Option B, Coolify takes care of it.
+3. **HTTPS**: Traefik handles this automatically in Option A. In Option B, Coolify takes care of it. In Option C, your existing proxy is responsible for SSL.

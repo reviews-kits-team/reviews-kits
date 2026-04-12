@@ -58,9 +58,8 @@ See the [Email Notifications guide](/guide/email) for production configuration a
 Use these secure configurations when deploying to your `.env` in production:
 
 ```env
-# --- Domain & SSL ---
+# --- Domain ---
 DOMAIN=your.domain.tld
-ACME_EMAIL=example@gmail.com
 NODE_ENV=production
 
 # --- Database ---
@@ -72,3 +71,7 @@ BETTER_AUTH_SECRET=generate_a_random_32_chars_string
 ADMIN_EMAIL=your@email.com
 ADMIN_PASSWORD=your_secure_admin_password
 ```
+
+> **`ACME_EMAIL`** is only required when using `docker-compose.yml` (Traefik with Let's Encrypt automatic SSL).
+> It is **not needed** for Coolify (`docker-compose.coolify.yml`) or existing proxy setups (`docker-compose.no-proxy.yml`).
+> See the [Deployment guide](/guide/deployment) to choose the right option for your setup.

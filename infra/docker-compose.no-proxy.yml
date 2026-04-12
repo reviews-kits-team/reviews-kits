@@ -1,7 +1,9 @@
 # ┌─────────────────────────────────────────────────────────────────┐
-# │  PaaS Coolify — SSL et réseau gérés par Coolify                 │
-# │  Requis : instance Coolify configurée                           │
-# │  Usage  : coller ce fichier dans un Docker Compose Resource     │
+# │  Proxy existant — Nginx, Caddy, HAProxy, Apache, etc.           │
+# │  Ports 80/443 déjà pris ? Utilisez ce fichier.                  │
+# │  Expose admin sur :8080 et API sur :3000 — pointez votre proxy  │
+# │  vers ces ports. SSL géré par votre proxy existant.             │
+# │  Usage  : docker compose -f infra/docker-compose.no-proxy.yml up -d │
 # └─────────────────────────────────────────────────────────────────┘
 
 services:
@@ -9,7 +11,8 @@ services:
   admin:
     image: ghcr.io/reviews-kits-team/reviewskits-admin:latest
     restart: unless-stopped
-    # Coolify will handle the domain and SSL for this service
+    ports:
+      - "8080:80"
     networks:
       - reviewskits
 
@@ -17,6 +20,8 @@ services:
   server:
     image: ghcr.io/reviews-kits-team/reviewskits-server:latest
     restart: unless-stopped
+    ports:
+      - "3000:3000"
     environment:
       NODE_ENV: production
       DATABASE_URL: ${DATABASE_URL}
@@ -34,7 +39,7 @@ services:
     networks:
       - reviewskits
 
-  # ─── Database ──────────────────────────────────────────
+  # ─── Database ──────────────────────────────────────────────────
   db:
     image: postgres:16-alpine
     restart: unless-stopped

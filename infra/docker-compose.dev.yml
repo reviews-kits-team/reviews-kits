@@ -1,3 +1,10 @@
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  Développement local — infrastructure uniquement                │
+# │  Lance : PostgreSQL, Redis, MinIO, Mailpit                      │
+# │  L'application (bun dev) tourne sur le host, pas dans Docker   │
+# │  Usage  : make dev  (ou docker compose -f infra/docker-compose.dev.yml up -d) │
+# └─────────────────────────────────────────────────────────────────┘
+
 services:
   db:
     image: postgres:16-alpine

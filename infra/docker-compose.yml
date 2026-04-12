@@ -1,3 +1,9 @@
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  VPS standard — Traefik intégré, SSL automatique Let's Encrypt  │
+# │  Requis : un domaine pointé sur le serveur + ports 80/443 libres │
+# │  Usage  : docker compose -f infra/docker-compose.yml up -d      │
+# └─────────────────────────────────────────────────────────────────┘
+
 services:
   # ─── Reverse Proxy ────────────────────────────────────────────
   traefik:
