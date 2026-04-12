@@ -9,8 +9,6 @@ import { Notification } from '../../../domain/entities/Notification';
 import { Rating } from '../../../domain/value-objects/Rating';
 import { Email } from '../../../domain/value-objects/Email';
 import type { WebhookService } from '../../services/WebhookService';
-import { render } from '@react-email/render';
-import { NewReviewEmail } from '../../../infrastructure/email/templates/newReview';
 
 export interface SubmitReviewRequest {
   formId: string;
@@ -58,8 +56,9 @@ export class SubmitReviewUseCase {
 
     await this.testimonialRepository.save(testimonial);
 
-    // Trigger webhook asynchronously
     const tProps = testimonial.getProps();
+
+    // Trigger webhook asynchronously
     this.webhookService.trigger('testimonial.created', form.getUserId(), {
       id: testimonial.getId(),
       formId: form.getId(),
@@ -68,9 +67,9 @@ export class SubmitReviewUseCase {
       authorEmail: tProps.authorEmail?.getValue(),
       rating: tProps.rating?.getValue(),
       createdAt: tProps.createdAt
-    }).catch(err => console.error('Webhook trigger failed:', err));
+    }).catch(err => { throw new Error(`Webhook trigger failed: ${err.message}`); });
 
-    // Save in-app notification
+    // Save in-app notification asynchronously
     this.notificationRepository.save(new Notification({
       id: randomUUID(),
       userId: form.getUserId(),
@@ -80,30 +79,22 @@ export class SubmitReviewUseCase {
       formId: form.getId(),
       testimonialId: testimonial.getId(),
       isRead: false,
-    })).catch(err => console.error('Notification save failed:', err));
+    })).catch(err => { throw new Error(`Notification save failed: ${err.message}`); });
 
     // Send email notification asynchronously
     if (this.emailService) {
       this.userRepository.findById(form.getUserId()).then(owner => {
         if (!owner) return;
         if (!owner.getNotificationPrefs().newReview) return;
-        const adminUrl = process.env.ADMIN_URL ?? 'http://localhost:5180';
-        const emailProps = {
+        return this.emailService!.sendNewReviewNotification({
+          ownerEmail: owner.getEmail(),
           formName: form.getName(),
           formId: form.getId(),
           authorName,
           rating: tProps.rating?.getValue(),
           content,
-          adminUrl,
-        };
-        return render(NewReviewEmail(emailProps)).then(html =>
-          this.emailService!.send({
-            to: owner.getEmail(),
-            subject: `New review on "${form.getName()}"`,
-            html,
-          })
-        );
-      }).catch(err => console.error('Email notification failed:', err));
+        });
+      }).catch(err => { throw new Error(`Email notification failed: ${err.message}`); });
     }
 
     return testimonial.getId();
