@@ -19,6 +19,9 @@ export interface TestimonialProps {
   createdAt?: Date;
   updatedAt?: Date;
   metadata?: Record<string, any>;
+  consentPublic?: boolean;
+  consentInternal?: boolean;
+  consentedAt?: Date;
 }
 
 export class Testimonial {
@@ -38,6 +41,9 @@ export class Testimonial {
   public readonly createdAt: Date;
   private updatedAt: Date;
   private metadata: Record<string, any>;
+  private consentPublic?: boolean;
+  private consentInternal?: boolean;
+  private consentedAt?: Date;
 
   constructor(props: TestimonialProps) {
     if (!props.content) throw new Error("Testimonial content cannot be empty");
@@ -65,6 +71,9 @@ export class Testimonial {
     this.createdAt = props.createdAt ?? new Date();
     this.updatedAt = props.updatedAt ?? new Date();
     this.metadata = props.metadata ?? {};
+    this.consentPublic = props.consentPublic;
+    this.consentInternal = props.consentInternal;
+    this.consentedAt = props.consentedAt;
   }
 
   public getProps(): TestimonialProps {
@@ -85,6 +94,9 @@ export class Testimonial {
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
       metadata: this.metadata,
+      consentPublic: this.consentPublic,
+      consentInternal: this.consentInternal,
+      consentedAt: this.consentedAt,
     };
   }
 
@@ -127,6 +139,18 @@ export class Testimonial {
 
   public getAuthorEmailValue(): string | undefined {
     return this.authorEmail?.getValue();
+  }
+
+  public getConsentPublic(): boolean | undefined {
+    return this.consentPublic;
+  }
+
+  public getConsentInternal(): boolean | undefined {
+    return this.consentInternal;
+  }
+
+  public getConsentedAt(): Date | undefined {
+    return this.consentedAt;
   }
 
   public equals(other: Testimonial): boolean {

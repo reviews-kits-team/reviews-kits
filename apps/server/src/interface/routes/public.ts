@@ -118,6 +118,8 @@ const submitReviewRoute = createRoute({
             authorTitle: z.string().optional().openapi({ example: 'CEO' }),
             authorUrl: z.string().optional().openapi({ example: 'https://example.com' }),
             _honey: z.string().optional().openapi({ description: 'Honeypot field for spam prevention' }),
+            consentPublic: z.boolean().optional().openapi({ example: true, description: 'GDPR consent for public display' }),
+            consentInternal: z.boolean().optional().openapi({ example: false, description: 'GDPR consent for internal use' }),
           }),
         },
       },

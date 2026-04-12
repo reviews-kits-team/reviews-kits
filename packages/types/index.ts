@@ -21,6 +21,9 @@ export interface Testimonial {
     email?: string;
     title?: string;
   };
+  consentPublic?: boolean;
+  consentInternal?: boolean;
+  consentedAt?: Date;
   created_at: Date;
 }
 
