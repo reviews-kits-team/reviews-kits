@@ -18,6 +18,7 @@ Thanks for taking the time to contribute. This guide will get you up and running
 - [Bun](https://bun.sh) >= 1.0
 - [Docker](https://docker.com) >= 24.0
 - [Git](https://git-scm.com)
+- [Make](https://www.gnu.org/software/make/) (pre-installed on macOS and Linux)
 
 ```bash
 # 1. Fork the repo, then clone your fork
@@ -27,18 +28,32 @@ cd reviews-kits
 # 2. Install dependencies
 bun install
 
-# 3. Start the local infrastructure (DB, Redis, Minio)
-# This file only contains the necessary services for local development, excluding the app itself.
-docker compose -f infra/docker-compose.dev.yml up -d
-
-# 4. Copy environment variables
+# 3. Copy environment variables
 cp .env.example .env
 
-# 5. Push the database schema
-# The API uses Drizzle ORM. You must push the schema to the empty local DB before running the app.
-cd apps/server && bunx drizzle-kit push && cd ../..
+# 4. Start everything with a single command
+make dev
+```
 
-# 6. Start the dev server
+`make dev` handles the full setup automatically: starts the Docker infrastructure (PostgreSQL, Redis, MinIO, Mailpit), waits for the database to be ready, pushes the schema, and starts the dev server in hot-reload mode.
+
+To stop the infrastructure:
+```bash
+make stop
+```
+
+### Windows (without Make)
+
+If you are on Windows and don't have `make`, run these steps manually:
+
+```bash
+# Start infrastructure
+docker compose -f infra/docker-compose.dev.yml up -d
+
+# Wait for the DB to be ready, then push the schema
+cd apps/server && bun run db:push && cd ../..
+
+# Start the dev server
 bun run dev
 ```
 
