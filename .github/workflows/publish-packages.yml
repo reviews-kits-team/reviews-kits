@@ -1,0 +1,50 @@
+name: Version and Publish
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  version-or-publish:
+    name: Version or Publish
+    runs-on: ubuntu-latest
+    
+    # Très important pour que le Bot GitHub de Changeset puisse créer la PR
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: 📦 Checkout du code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🐇 Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 'latest'
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: 📥 Installer les dépendances
+        run: bun install
+
+      - name: 🏗️ Build du projet
+        run: bun run build
+
+      - name: 🔄 Créer la PR de Versionnage ou Publier (Changesets)
+        uses: changesets/action@v1
+        with:
+          publish: bunx changeset publish
+          version: bunx changeset version
+          commit: "chore: update versions"
+          title: "🚀 Release - Nouvelles versions des SDK"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
