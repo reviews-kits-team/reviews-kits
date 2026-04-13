@@ -70,9 +70,13 @@ export const TopBar = () => {
                 setNotifications(prev => prev.map(n => ({ ...n, isRead: true })))
                 setUnreadCount(0)
               }}
-              onNavigate={(formId) => {
+              onNavigate={(formId, testimonialId) => {
                 setIsNotifOpen(false)
-                navigate(`/forms/${formId}`)
+                if (testimonialId) {
+                  navigate(`/forms/${formId}/testimonials/${testimonialId}`)
+                } else {
+                  navigate(`/forms/${formId}`)
+                }
               }}
             />
           </div>

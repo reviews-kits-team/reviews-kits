@@ -9,7 +9,7 @@ interface NotificationPanelProps {
   notifications: AppNotification[]
   onMarkRead: (id: string) => void
   onMarkAllRead: () => void
-  onNavigate: (formId: string) => void
+  onNavigate: (formId: string, testimonialId: string | null) => void
 }
 
 function timeAgo(dateStr: string): string {
@@ -61,7 +61,7 @@ export function NotificationPanel({ isOpen, notifications, onMarkRead, onMarkAll
               key={n.id}
               onClick={() => {
                 onMarkRead(n.id)
-                if (n.formId) onNavigate(n.formId)
+                if (n.formId) onNavigate(n.formId, n.testimonialId)
               }}
               className="flex items-start gap-3 px-5 py-3.5 cursor-pointer border-b border-(--v3-border)/50 hover:bg-(--v3-bg3) transition-colors bg-(--v3-bg3)/50"
             >
