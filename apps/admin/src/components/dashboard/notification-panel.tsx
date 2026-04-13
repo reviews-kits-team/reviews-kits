@@ -1,5 +1,8 @@
+import { Link } from 'react-router-dom'
 import { MessageSquareText, CheckCheck } from 'lucide-react'
 import type { AppNotification } from '../../services/notifications.service'
+
+const PANEL_LIMIT = 5
 
 interface NotificationPanelProps {
   isOpen: boolean
@@ -23,7 +26,9 @@ function timeAgo(dateStr: string): string {
 export function NotificationPanel({ isOpen, notifications, onMarkRead, onMarkAllRead, onNavigate }: NotificationPanelProps) {
   if (!isOpen) return null
 
-  const hasUnread = notifications.some(n => !n.isRead)
+  const unread = notifications.filter(n => !n.isRead)
+  const displayed = unread.slice(0, PANEL_LIMIT)
+  const showViewAll = notifications.length >= PANEL_LIMIT
 
   return (
     <div
@@ -33,7 +38,7 @@ export function NotificationPanel({ isOpen, notifications, onMarkRead, onMarkAll
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-3.5 border-b border-(--v3-border)">
         <h3 className="text-sm font-bold text-(--v3-text)">Notifications</h3>
-        {hasUnread && (
+        {unread.length > 0 && (
           <button
             onClick={onMarkAllRead}
             className="flex items-center gap-1.5 text-xs text-(--v3-muted2) hover:text-(--v3-teal) transition-colors cursor-pointer"
@@ -46,31 +51,29 @@ export function NotificationPanel({ isOpen, notifications, onMarkRead, onMarkAll
 
       {/* List */}
       <div className="max-h-80 overflow-y-auto">
-        {notifications.length === 0 ? (
+        {displayed.length === 0 ? (
           <div className="py-10 text-center text-sm text-(--v3-muted2)">
-            No notifications yet
+            No unread notifications
           </div>
         ) : (
-          notifications.map(n => (
+          displayed.map(n => (
             <div
               key={n.id}
               onClick={() => {
-                if (!n.isRead) onMarkRead(n.id)
+                onMarkRead(n.id)
                 if (n.formId) onNavigate(n.formId)
               }}
-              className={`flex items-start gap-3 px-5 py-3.5 cursor-pointer border-b border-(--v3-border)/50 hover:bg-(--v3-bg3) transition-colors ${!n.isRead ? 'bg-(--v3-bg3)/50' : ''}`}
+              className="flex items-start gap-3 px-5 py-3.5 cursor-pointer border-b border-(--v3-border)/50 hover:bg-(--v3-bg3) transition-colors bg-(--v3-bg3)/50"
             >
-              <div className={`mt-0.5 w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${!n.isRead ? 'bg-(--v3-teal)/10 text-(--v3-teal)' : 'bg-(--v3-bg3) text-(--v3-muted2)'}`}>
+              <div className="mt-0.5 w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-(--v3-teal)/10 text-(--v3-teal)">
                 <MessageSquareText size={15} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className={`text-sm truncate ${!n.isRead ? 'font-semibold text-(--v3-text)' : 'text-(--v3-muted2)'}`}>
+                  <p className="text-sm truncate font-semibold text-(--v3-text)">
                     {n.title}
                   </p>
-                  {!n.isRead && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-(--v3-teal) shrink-0" />
-                  )}
+                  <span className="w-1.5 h-1.5 rounded-full bg-(--v3-teal) shrink-0" />
                 </div>
                 {n.body && (
                   <p className="text-xs text-(--v3-muted2) truncate mt-0.5">{n.body}</p>
@@ -81,6 +84,16 @@ export function NotificationPanel({ isOpen, notifications, onMarkRead, onMarkAll
           ))
         )}
       </div>
+
+      {/* View all link */}
+      {showViewAll && (
+        <Link
+          to="/notifications"
+          className="block text-center py-3 text-xs font-semibold text-(--v3-teal) hover:bg-(--v3-bg3) transition-colors border-t border-(--v3-border)"
+        >
+          View all notifications
+        </Link>
+      )}
     </div>
   )
 }
