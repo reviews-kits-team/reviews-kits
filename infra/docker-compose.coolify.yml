@@ -1,7 +1,7 @@
 # ┌─────────────────────────────────────────────────────────────────┐
-# │  PaaS Coolify — SSL et réseau gérés par Coolify                 │
-# │  Requis : instance Coolify configurée                           │
-# │  Usage  : coller ce fichier dans un Docker Compose Resource     │
+# │  PaaS Coolify — SSL and networking managed by Coolify           │
+# │  Requirement: Configured Coolify instance                       │
+# │  Usage  : Paste this file into a Docker Compose Resource        │
 # └─────────────────────────────────────────────────────────────────┘
 
 services:
