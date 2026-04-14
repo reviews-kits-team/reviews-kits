@@ -1,6 +1,6 @@
 # ┌─────────────────────────────────────────────────────────────────┐
-# │  VPS standard — Traefik intégré, SSL automatique Let's Encrypt  │
-# │  Requis : un domaine pointé sur le serveur + ports 80/443 libres │
+# │  Standard VPS — Integrated Traefik, automatic Let's Encrypt SSL │
+# │  Requirement: A domain pointed to the server + free 80/443 ports │
 # │  Usage  : docker compose -f infra/docker-compose.yml up -d      │
 # └─────────────────────────────────────────────────────────────────┘
 
@@ -72,7 +72,7 @@ services:
     networks:
       - reviewskits
 
-  # ─── Base de données ──────────────────────────────────────────
+  # ─── DATABASE ──────────────────────────────────────────
   db:
     image: postgres:16-alpine
     restart: unless-stopped

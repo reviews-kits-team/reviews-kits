@@ -1,8 +1,8 @@
 # ┌─────────────────────────────────────────────────────────────────┐
-# │  Proxy existant — Nginx, Caddy, HAProxy, Apache, etc.           │
-# │  Ports 80/443 déjà pris ? Utilisez ce fichier.                  │
-# │  Expose admin sur :8080 et API sur :3000 — pointez votre proxy  │
-# │  vers ces ports. SSL géré par votre proxy existant.             │
+# │  Existing Proxy — Nginx, Caddy, HAProxy, Apache, etc.           │
+# │  Ports 80/443 already taken? Use this file.                    │
+# │  Exposes admin on :8080 and API on :3000 — point your proxy    │
+# │  to these ports. SSL managed by your existing proxy.           │
 # │  Usage  : docker compose -f infra/docker-compose.no-proxy.yml up -d │
 # └─────────────────────────────────────────────────────────────────┘
 

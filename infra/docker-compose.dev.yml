@@ -1,18 +1,16 @@
 # ┌─────────────────────────────────────────────────────────────────┐
-# │  Développement local — infrastructure uniquement                │
-# │  Lance : PostgreSQL, Redis, MinIO, Mailpit                      │
-# │  L'application (bun dev) tourne sur le host, pas dans Docker   │
-# │  Usage  : make dev  (ou docker compose -f infra/docker-compose.dev.yml up -d) │
+# │  Local Development — infrastructure only                        │
+# │  Starts: PostgreSQL, Redis, MinIO, Mailpit                       │
+# │  The application (bun dev) runs on the host, not in Docker      │
+# │  Usage  : make dev  (or docker compose -f infra/docker-compose.dev.yml up -d) │
 # └─────────────────────────────────────────────────────────────────┘
 
 services:
   db:
     image: postgres:16-alpine
     restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-reviewskits}
+    env_file:
+      - ../.env
     ports:
       - "5433:5432"
     volumes:
