@@ -22,7 +22,7 @@ export function WelcomeStep({
       >
         {step.title}
       </h1>
-      <p className="text-gray-600 mb-22 text-base leading-relaxed max-w-md bg-red-300">
+      <p className="text-gray-600 mb-6 text-base leading-relaxed max-w-md">
         {step.description}
       </p>
       <button
