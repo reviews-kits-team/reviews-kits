@@ -37,7 +37,20 @@ const buildDefaultSteps = (): FormStep[] => [
     description: 'This information will be displayed with your testimonial.',
     isEnabled: true,
     locked: true,
-    config: { collectEmail: true, collectCompany: false, collectSocialLinks: false, buttonText: 'Submit' }
+    config: { collectEmail: true, collectCompany: false, collectSocialLinks: false, buttonText: 'Continue' }
+  },
+  {
+    id: randomUUID(),
+    type: 'consent',
+    title: 'Data Consent',
+    description: 'Please let us know how we can use your feedback.',
+    isEnabled: true,
+    locked: true,
+    config: { 
+      publicLabel: 'I agree that my testimonial may be displayed publicly for marketing purposes.',
+      internalLabel: 'I agree that my data may be used internally for product improvement.',
+      buttonText: 'Submit' 
+    }
   },
   {
     id: randomUUID(),

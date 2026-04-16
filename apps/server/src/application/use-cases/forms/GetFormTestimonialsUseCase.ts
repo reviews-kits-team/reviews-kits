@@ -9,6 +9,7 @@ export interface GetFormTestimonialsRequest {
   limit: number;
   sort?: string;
   order?: 'asc' | 'desc';
+  consentPublic?: boolean;
 }
 
 export class GetFormTestimonialsUseCase {
@@ -30,7 +31,8 @@ export class GetFormTestimonialsUseCase {
       limit, 
       offset, 
       sort, 
-      order 
+      order,
+      consentPublic: request.consentPublic
     });
 
     return testimonials.map(t => {

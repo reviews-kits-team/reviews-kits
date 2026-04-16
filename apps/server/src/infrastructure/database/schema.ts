@@ -140,6 +140,9 @@ export const testimonials = pgTable('testimonials', {
   mediaId: uuid('media_id').references(() => media.id, { onDelete: 'set null' }),
   position: integer('position').notNull().default(0),
   metadata: jsonb('metadata').default({}),
+  consentPublic: boolean('consent_public').notNull().default(false),
+  consentInternal: boolean('consent_internal').notNull().default(false),
+  consentedAt: timestamp('consented_at'),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 }, (t) => ({

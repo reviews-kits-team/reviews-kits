@@ -19,7 +19,9 @@ import {
   ArrowDown,
   GripVertical,
   Download,
-  Upload
+  Upload,
+  Globe,
+  Lock
 } from 'lucide-react'
 import {
   DndContext,
@@ -122,6 +124,23 @@ const SortableTestimonialRow = ({
           <span className="text-[10px] font-black text-(--v3-text) mt-1">{testimonial.rating}/5</span>
         </div>
       </td>
+      <td className="px-6 py-4 text-center">
+        <div className="flex items-center justify-center gap-1.5">
+          {testimonial.consentPublic && (
+            <div className="w-5 h-5 rounded bg-blue-500/10 text-blue-400 flex items-center justify-center" title="Public Consent">
+              <Globe size={11} strokeWidth={3} />
+            </div>
+          )}
+          {testimonial.consentInternal && (
+            <div className="w-5 h-5 rounded bg-purple-500/10 text-purple-400 flex items-center justify-center" title="Internal Consent">
+              <Lock size={11} strokeWidth={3} />
+            </div>
+          )}
+          {!testimonial.consentPublic && !testimonial.consentInternal && (
+            <span className="text-[10px] text-(--v3-muted2) italic">None</span>
+          )}
+        </div>
+      </td>
       <td className="px-6 py-4 text-center"><Badge status={testimonial.status} /></td>
       <td className="px-6 py-4 text-right">
         <div className="flex flex-col items-end">
@@ -148,11 +167,12 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
   const [showSharePopover, setShowSharePopover] = useState(false)
   const [copiedLink, setCopiedLink] = useState(false)
   const [isMigrationModalOpen, setIsMigrationModalOpen] = useState(false)
+  const [publicOnly, setPublicOnly] = useState(false)
 
   // ── Data queries ───────────────────────────────────────────────────────────
   const { data: stats, isLoading: statsLoading } = useFormStats(form.id)
   const { data: testimonials = [], isLoading: testimonialsLoading } = useFormTestimonials(
-    form.id, page, sortConfig.field, sortConfig.order
+    form.id, page, sortConfig.field, sortConfig.order, publicOnly ? true : undefined
   )
 
   // ── Mutations ──────────────────────────────────────────────────────────────
@@ -191,14 +211,14 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
     const reordered = arrayMove(testimonials, oldIndex, newIndex)
 
     // Optimistic update
-    qc.setQueryData(formTestimonialsKey(form.id, page, sortConfig.field, sortConfig.order), reordered)
+    qc.setQueryData(formTestimonialsKey(form.id, page, sortConfig.field, sortConfig.order, publicOnly ? true : undefined), reordered)
     // Persist
     reorderMutation.mutate(reordered.map((t, i) => ({ id: t.id, position: i + (page - 1) * 10 })))
   }
 
   const handleImported = () => {
     qc.invalidateQueries({ queryKey: formStatsKey(form.id) })
-    qc.invalidateQueries({ queryKey: formTestimonialsKey(form.id, page, sortConfig.field, sortConfig.order) })
+    qc.invalidateQueries({ queryKey: formTestimonialsKey(form.id, page, sortConfig.field, sortConfig.order, publicOnly ? true : undefined) })
   }
 
   // ── Derived values ─────────────────────────────────────────────────────────
@@ -375,6 +395,13 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
               <Upload size={12} /> Import
             </button>
             <div className="w-px h-4 bg-white/10 mx-1" />
+            <div className="flex items-center gap-2 mr-2">
+              <Checkbox checked={publicOnly} onChange={setPublicOnly} />
+              <span className="text-[10px] font-black uppercase tracking-widest text-(--v3-text) opacity-80 cursor-pointer" onClick={() => setPublicOnly(!publicOnly)}>
+                Public Only
+              </span>
+            </div>
+            <div className="w-px h-4 bg-white/10" />
             <span className="text-[11px] font-bold text-(--v3-muted2)">{totReviews} total</span>
           </div>
         </div>
@@ -397,15 +424,16 @@ export const DetailView = ({ form, onBack }: DetailViewProps) => {
                     <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-(--v3-muted2) cursor-pointer hover:text-(--v3-teal) transition-colors" onClick={() => handleSort('authorName')}><div className="flex items-center">Author <SortIcon field="authorName" sortConfig={sortConfig} /></div></th>
                     <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-(--v3-muted2)">Review</th>
                     <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-(--v3-muted2) text-center cursor-pointer hover:text-(--v3-teal) transition-colors" onClick={() => handleSort('rating')}><div className="flex items-center justify-center">Rating <SortIcon field="rating" sortConfig={sortConfig} /></div></th>
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-(--v3-muted2) text-center">Consent</th>
                     <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-(--v3-muted2) text-center cursor-pointer hover:text-(--v3-teal) transition-colors" onClick={() => handleSort('status')}><div className="flex items-center justify-center">Status <SortIcon field="status" sortConfig={sortConfig} /></div></th>
                     <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-(--v3-muted2) text-right cursor-pointer hover:text-(--v3-teal) transition-colors" onClick={() => handleSort('createdAt')}><div className="flex items-center justify-end">Date <SortIcon field="createdAt" sortConfig={sortConfig} /></div></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-(--v3-border)">
                   {testimonialsLoading ? (
-                    <tr><td colSpan={6} className="py-16 text-center"><RefreshCw size={20} className="animate-spin text-(--v3-teal) mx-auto" /></td></tr>
+                    <tr><td colSpan={7} className="py-16 text-center"><RefreshCw size={20} className="animate-spin text-(--v3-teal) mx-auto" /></td></tr>
                   ) : testimonials.length === 0 ? (
-                    <tr><td colSpan={6} className="py-16 text-center text-(--v3-muted2) italic text-sm">No reviews found.</td></tr>
+                    <tr><td colSpan={7} className="py-16 text-center text-(--v3-muted2) italic text-sm">No reviews found.</td></tr>
                   ) : testimonials.map((r) => (
                     <SortableTestimonialRow
                       key={r.id}

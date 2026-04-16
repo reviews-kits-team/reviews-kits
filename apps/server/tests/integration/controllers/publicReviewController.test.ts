@@ -36,7 +36,8 @@ describe("Public Review Controller Integration", () => {
       body: JSON.stringify({
         formId: publicFormId,
         content: "Great product!",
-        authorName: "Valid User"
+        authorName: "Valid User",
+        consentPublic: true
       }),
       headers: { "Content-Type": "application/json" }
     });
@@ -57,6 +58,7 @@ describe("Public Review Controller Integration", () => {
         formId: publicFormId,
         content: "Spam message",
         authorName: "Spammer",
+        consentPublic: true,
         _honey: "im_a_bot"
       }),
       headers: { "Content-Type": "application/json" }
@@ -75,7 +77,8 @@ describe("Public Review Controller Integration", () => {
     const body = JSON.stringify({
       formId: publicFormId,
       content: "Nice!",
-      authorName: "Fast User"
+      authorName: "Fast User",
+      consentPublic: true
     });
 
     // We allow 5 requests. Send 5

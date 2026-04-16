@@ -14,6 +14,7 @@ import { IdentityStep } from './public-form/steps/IdentityStep'
 import { CoreStep } from './public-form/steps/CoreStep'
 import { CustomStep } from './public-form/steps/CustomStep'
 import { SuccessStep } from './public-form/steps/SuccessStep'
+import { ConsentStep } from './public-form/steps/ConsentStep'
 
 export default function PublicFormPage() {
   const { slug } = useParams()
@@ -29,6 +30,8 @@ export default function PublicFormPage() {
   const [authorEmail, setAuthorEmail] = useState('')
   const [authorTitle, setAuthorTitle] = useState('')
   const [authorUrl, setAuthorUrl] = useState('')
+  const [consentPublic, setConsentPublic] = useState(false)
+  const [consentInternal, setConsentInternal] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   // Selection state for custom step fields (fieldId → selected value)
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, unknown>>({})
@@ -125,8 +128,18 @@ export default function PublicFormPage() {
   const appliedBodyFont = fontsReady ? bodyFont : 'system-ui, sans-serif'
 
   const handleNext = async () => {
-    if (currentStep?.type === 'identity' || currentStep?.type === 'attribution') {
-      await handleSubmit()
+    if (currentStep?.type === 'consent' || currentStep?.type === 'identity' || currentStep?.type === 'attribution') {
+      // If there is a consent step, the submit action happens on the consent step.
+      // But identity/attribution can also be the last step (submitting) if no consent step is placed after them (backward compatibility). 
+      // Based on the new design, Consent is the final step. Wait, the problem is identity/attribution have a submit action.
+      // Let's check if it is the last step (or if a consent step follows).
+      const isLastPreSubmitStep = !steps.slice(currentStepIndex + 1).some(s => s.type === 'consent' || s.type === 'identity' || s.type === 'attribution');
+      
+      if (currentStep?.type === 'consent' || isLastPreSubmitStep) {
+        await handleSubmit()
+      } else {
+        setCurrentStepIndex(prev => prev + 1)
+      }
     } else {
       setCurrentStepIndex(prev => prev + 1)
     }
@@ -170,6 +183,8 @@ export default function PublicFormPage() {
           authorTitle,
           authorUrl,
           rating,
+          consentPublic,
+          consentInternal,
           metadata: Object.keys(metadata).length > 0 ? metadata : undefined
         })
       })
@@ -284,6 +299,21 @@ export default function PublicFormPage() {
               setAuthorTitle={setAuthorTitle} 
               authorUrl={authorUrl} 
               setAuthorUrl={setAuthorUrl} 
+              submitting={submitting && (currentStepIndex === steps.length - 1 || steps[currentStepIndex + 1]?.type === 'success')} 
+              onNext={handleNext} 
+              onBack={() => setCurrentStepIndex(prev => prev - 1)} 
+            />
+          )}
+
+          {currentStep?.type === 'consent' && (
+            <ConsentStep 
+              step={currentStep} 
+              primaryColor={primaryColor} 
+              appliedHeadingFont={appliedHeadingFont} 
+              consentPublic={consentPublic} 
+              setConsentPublic={setConsentPublic}
+              consentInternal={consentInternal}
+              setConsentInternal={setConsentInternal}
               submitting={submitting} 
               onNext={handleNext} 
               onBack={() => setCurrentStepIndex(prev => prev - 1)} 
@@ -316,7 +346,7 @@ export default function PublicFormPage() {
               setAuthorTitle={setAuthorTitle} 
               authorUrl={authorUrl} 
               setAuthorUrl={setAuthorUrl} 
-              submitting={submitting} 
+              submitting={submitting && (currentStepIndex === steps.length - 1 || steps[currentStepIndex + 1]?.type === 'success')} 
               onNext={handleNext} 
               onBack={() => setCurrentStepIndex(prev => prev - 1)} 
             />

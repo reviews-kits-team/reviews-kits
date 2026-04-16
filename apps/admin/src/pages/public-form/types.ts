@@ -9,7 +9,7 @@ export interface StepField {
 
 export interface FormStep {
   id: string
-  type: 'welcome' | 'core' | 'identity' | 'success' | 'custom' | 'rating' | 'textarea' | 'attribution' | 'informative'
+  type: 'welcome' | 'core' | 'identity' | 'success' | 'custom' | 'rating' | 'textarea' | 'attribution' | 'informative' | 'consent'
   title: string
   description?: string
   isEnabled: boolean

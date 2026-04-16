@@ -291,6 +291,35 @@ export function StepPreview({
         </div>
       )}
 
+      {/* Consent */}
+      {step.type === 'consent' && (
+        <div className="w-full max-w-md flex flex-col items-center gap-y-6 text-center">
+          <EditableTitle {...sharedProps} headingFont={headingFont} />
+          <EditableDescription {...sharedProps} />
+          <div className="w-full space-y-4 text-left border border-transparent">
+            <label className="flex items-start gap-4 p-4 rounded-xl border border-gray-100 bg-gray-50">
+              <input type="checkbox" disabled checked className="mt-1" />
+              <span 
+                className={`text-xs text-gray-800 leading-snug ${editableCls(selectedElement === 'publicLabel' && activeStepId === step.id)}`}
+                onClick={() => onElementClick('publicLabel', step.id)}
+              >
+                {(cfg?.publicLabel as string) || 'I agree that my testimonial may be displayed publicly for marketing purposes.'}
+              </span>
+            </label>
+            <label className="flex items-start gap-4 p-4 rounded-xl border border-gray-100 bg-gray-50">
+              <input type="checkbox" disabled checked className="mt-1" />
+              <span 
+                className={`text-xs text-gray-800 leading-snug ${editableCls(selectedElement === 'internalLabel' && activeStepId === step.id)}`}
+                onClick={() => onElementClick('internalLabel', step.id)}
+              >
+                {(cfg?.internalLabel as string) || 'I agree that my data may be used internally for product improvement.'}
+              </span>
+            </label>
+          </div>
+          <EditableButton {...sharedProps} primaryColor={primaryColor} bodyFont={bodyFont} defaultLabel="Submit" />
+        </div>
+      )}
+
       {/* Custom */}
       {step.type === 'custom' && (
         <div className="w-full max-w-md flex flex-col items-center gap-y-6 text-center">

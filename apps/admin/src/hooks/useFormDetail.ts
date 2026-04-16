@@ -7,8 +7,8 @@ import { normalizeStepOrder } from '../components/form-editor/utils'
 
 export const formDetailKey = (id: string) => ['form', id] as const
 export const formStatsKey = (id: string) => ['form', id, 'stats'] as const
-export const formTestimonialsKey = (id: string, page: number, sort: string | null, order: string) =>
-  ['form', id, 'testimonials', page, sort, order] as const
+export const formTestimonialsKey = (id: string, page: number, sort: string | null, order: string, consentPublic?: boolean) =>
+  ['form', id, 'testimonials', page, sort, order, consentPublic] as const
 
 /** For FormEditorPage — returns FullForm with steps normalized */
 export function useFormById(id: string | undefined) {
@@ -44,11 +44,12 @@ export function useFormTestimonials(
   formId: string,
   page: number,
   sort: string | null,
-  order: 'asc' | 'desc'
+  order: 'asc' | 'desc',
+  consentPublic?: boolean
 ) {
   return useQuery({
-    queryKey: formTestimonialsKey(formId, page, sort, order),
-    queryFn: () => testimonialsService.listByForm(formId, { page, sort, order }),
+    queryKey: formTestimonialsKey(formId, page, sort, order, consentPublic),
+    queryFn: () => testimonialsService.listByForm(formId, { page, sort, order, consentPublic }),
     enabled: !!formId,
   })
 }

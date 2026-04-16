@@ -34,6 +34,8 @@ export interface TestimonialListItem {
   createdAt: string
   status: string
   authorEmail?: string
+  consentPublic?: boolean
+  consentInternal?: boolean
 }
 
 export interface FormStats {
@@ -92,10 +94,11 @@ export const testimonialsService = {
 
   listByForm: (
     formId: string,
-    params: { page?: number; sort?: string | null; order?: 'asc' | 'desc' }
+    params: { page?: number; sort?: string | null; order?: 'asc' | 'desc'; consentPublic?: boolean }
   ): Promise<TestimonialListItem[]> => {
     const qs = new URLSearchParams({ page: String(params.page ?? 1) })
     if (params.sort) { qs.set('sort', params.sort); qs.set('order', params.order ?? 'desc') }
+    if (params.consentPublic !== undefined) { qs.set('consentPublic', String(params.consentPublic)) }
     return fetch(`/api/v1/forms/${formId}/testimonials?${qs}`).then(handleResponse<TestimonialListItem[]>)
   },
 

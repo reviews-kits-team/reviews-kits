@@ -32,7 +32,8 @@ describe("Security Checks Integration", () => {
       body: JSON.stringify({
         formId: publicFormId,
         content: longContent,
-        authorName: "Attacker"
+        authorName: "Attacker",
+        consentPublic: true
       }),
       headers: { "Content-Type": "application/json" }
     });
@@ -57,6 +58,7 @@ describe("Security Checks Integration", () => {
           formId: publicFormId,
           content: "Nice!",
           authorName: "Attacker",
+          consentPublic: true,
           authorUrl
         }),
         headers: { "Content-Type": "application/json" }
@@ -87,6 +89,7 @@ describe("Security Checks Integration", () => {
           formId: publicFormId,
           content: "Valid review",
           authorName: "Good User",
+          consentPublic: true,
           authorUrl
         }),
         headers: { "Content-Type": "application/json" }
@@ -104,7 +107,8 @@ describe("Security Checks Integration", () => {
             body: JSON.stringify({
                 formId: publicFormId,
                 content: `Review ${i}`,
-                authorName: "Good User"
+                authorName: "Good User",
+                consentPublic: true
             }),
             headers: { "Content-Type": "application/json" }
         });
@@ -117,7 +121,8 @@ describe("Security Checks Integration", () => {
         body: JSON.stringify({
             formId: publicFormId,
             content: "One too many",
-            authorName: "Spammer"
+            authorName: "Spammer",
+            consentPublic: true
         }),
         headers: { "Content-Type": "application/json" }
     });

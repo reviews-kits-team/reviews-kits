@@ -12,7 +12,7 @@ export interface ITestimonialRepository {
   batchSave(testimonials: Testimonial[]): Promise<void>;
   update(testimonial: Testimonial): Promise<void>;
   findApprovedByUser(userId: string, options: { limit?: number; minRating?: number; formId: string }): Promise<Testimonial[]>;
-  findByFormId(formId: string, options?: { limit?: number; offset?: number; sort?: string; order?: 'asc' | 'desc' }): Promise<Testimonial[]>;
+  findByFormId(formId: string, options?: { limit?: number; offset?: number; sort?: string; order?: 'asc' | 'desc'; consentPublic?: boolean }): Promise<Testimonial[]>;
   batchUpdateStatus(ids: string[], status: 'approved' | 'rejected' | 'pending'): Promise<void>;
   updatePositions(positions: { id: string; position: number }[]): Promise<void>;
   getStatsByUser(userId: string): Promise<{

@@ -16,6 +16,9 @@ export interface TestimonialProps {
   formId?: string;
   mediaId?: string;
   position?: number;
+  consentPublic?: boolean;
+  consentInternal?: boolean;
+  consentedAt?: Date;
   createdAt?: Date;
   updatedAt?: Date;
   metadata?: Record<string, any>;
@@ -35,6 +38,9 @@ export class Testimonial {
   private formId?: string;
   private mediaId?: string;
   private position: number;
+  private consentPublic: boolean;
+  private consentInternal: boolean;
+  private consentedAt?: Date;
   public readonly createdAt: Date;
   private updatedAt: Date;
   private metadata: Record<string, any>;
@@ -62,6 +68,9 @@ export class Testimonial {
     this.formId = props.formId;
     this.mediaId = props.mediaId;
     this.position = props.position ?? 0;
+    this.consentPublic = props.consentPublic ?? false;
+    this.consentInternal = props.consentInternal ?? false;
+    this.consentedAt = props.consentedAt;
     this.createdAt = props.createdAt ?? new Date();
     this.updatedAt = props.updatedAt ?? new Date();
     this.metadata = props.metadata ?? {};
@@ -82,6 +91,9 @@ export class Testimonial {
       formId: this.formId,
       mediaId: this.mediaId,
       position: this.position,
+      consentPublic: this.consentPublic,
+      consentInternal: this.consentInternal,
+      consentedAt: this.consentedAt,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
       metadata: this.metadata,

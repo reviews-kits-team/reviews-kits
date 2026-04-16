@@ -155,6 +155,36 @@ export function EditorSidebarStepTab({
               </div>
             )}
 
+            {/* Consent labels (consent) */}
+            {activeStep.type === 'consent' && (
+              <div className="space-y-4">
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-(--v3-muted2) mb-3 block">
+                    Public Consent Text
+                  </label>
+                  <textarea
+                    ref={setSidebarRef('publicLabel')}
+                    value={(cfg?.publicLabel as string) || ''}
+                    onChange={(e) => onUpdateStep(activeStep.id, { config: { ...activeStep.config, publicLabel: e.target.value } })}
+                    placeholder="I agree that my testimonial may be displayed..."
+                    className="w-full bg-(--v3-bg) border border-(--v3-border) rounded-xl px-4 py-3 text-sm focus:border-(--v3-teal)/50 transition-all outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-(--v3-muted2) mb-3 block">
+                    Internal Consent Text
+                  </label>
+                  <textarea
+                    ref={setSidebarRef('internalLabel')}
+                    value={(cfg?.internalLabel as string) || ''}
+                    onChange={(e) => onUpdateStep(activeStep.id, { config: { ...activeStep.config, internalLabel: e.target.value } })}
+                    placeholder="I agree that my data may be used internally..."
+                    className="w-full bg-(--v3-bg) border border-(--v3-border) rounded-xl px-4 py-3 text-sm focus:border-(--v3-teal)/50 transition-all outline-none"
+                  />
+                </div>
+              </div>
+            )}
+
             {/* Custom fields */}
             {activeStep.type === 'custom' && (
               <div className="space-y-4">
@@ -250,7 +280,7 @@ export function EditorSidebarStepTab({
                 <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${activeStep.isEnabled ? 'left-6' : 'left-1'}`} />
               </button>
             </div>
-            {!activeStep.locked && (
+            {(!activeStep.locked && activeStep.type !== 'consent') && (
               <button
                 onClick={() => onDeleteStep(activeStep.id)}
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider text-red-400/60 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all"

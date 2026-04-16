@@ -19,6 +19,8 @@ export interface SubmitReviewRequest {
   authorTitle?: string;
   authorUrl?: string;
   metadata?: Record<string, unknown>;
+  consentPublic: boolean;
+  consentInternal: boolean;
 }
 
 export class SubmitReviewUseCase {
@@ -32,7 +34,7 @@ export class SubmitReviewUseCase {
   ) {}
 
   async execute(request: SubmitReviewRequest): Promise<string> {
-    const { formId, content, authorName, authorEmail, rating, authorTitle, authorUrl, metadata } = request;
+    const { formId, content, authorName, authorEmail, rating, authorTitle, authorUrl, metadata, consentPublic, consentInternal } = request;
 
     const form = await this.formRepository.findByPublicId(formId);
     if (!form) {
@@ -51,6 +53,9 @@ export class SubmitReviewUseCase {
       authorUrl: (authorUrl && authorUrl !== '') ? authorUrl : undefined,
       status: 'pending',
       source: 'form',
+      consentPublic,
+      consentInternal,
+      consentedAt: (consentPublic || consentInternal) ? new Date() : undefined,
       metadata: metadata && Object.keys(metadata).length > 0 ? metadata : undefined
     });
 

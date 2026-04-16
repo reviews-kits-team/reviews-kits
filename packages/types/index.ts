@@ -21,6 +21,9 @@ export interface Testimonial {
     email?: string;
     title?: string;
   };
+  consent_public: boolean;
+  consent_internal: boolean;
+  consented_at: Date | null;
   created_at: Date;
 }
 
@@ -113,6 +116,9 @@ export interface RawReview {
   authorUrl?: string;
   createdAt: string;
   type: string;
+  consentPublic: boolean;
+  consentInternal: boolean;
+  consentedAt?: string | null;
   metadata?: Record<string, unknown>;
 }
 

@@ -19,6 +19,10 @@
       "entry": ["docs/.vitepress/config.ts", "docs/**/*.md"],
       "project": ["docs/**/*.{md,ts}"]
     },
+    "packages/sdk-core": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.ts"]
+    },
     "packages/sdk-react": {
       "entry": ["src/index.ts"],
       "project": ["src/**/*.{ts,tsx}"]

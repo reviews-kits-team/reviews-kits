@@ -52,8 +52,8 @@ export function EditorCanvas({
     >
       <style>{`section::-webkit-scrollbar { display: none; }`}</style>
 
-      {/* Sticky reorder/delete controls — hidden for locked steps */}
-      {!activeStep?.locked && (
+      {/* Sticky reorder/delete controls — hidden for locked steps or consent step */}
+      {(!activeStep?.locked && activeStep?.type !== 'consent') && (
         <div className="sticky top-0 right-0 z-50 flex justify-end p-0 pointer-events-none">
           <div className="flex gap-1 bg-[#0A0A0A]/60 backdrop-blur-md p-1 rounded-bl-xl border-l border-b border-white/10 pointer-events-auto shadow-2xl overflow-hidden">
             <button

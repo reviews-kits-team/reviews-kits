@@ -204,6 +204,8 @@ export const formController = {
 
     const sort = c.req.query('sort') || 'createdAt';
     const order = (c.req.query('order') || 'desc') as 'asc' | 'desc';
+    const consentPublicParam = c.req.query('consentPublic');
+    const consentPublic = consentPublicParam ? consentPublicParam === 'true' : undefined;
 
     try {
       const testimonials = await container.getFormTestimonialsUseCase.execute({
@@ -212,7 +214,8 @@ export const formController = {
         page,
         limit,
         sort,
-        order
+        order,
+        consentPublic
       });
       return c.json(testimonials);
     } catch (err: any) {

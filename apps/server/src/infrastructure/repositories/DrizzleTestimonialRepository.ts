@@ -58,6 +58,9 @@ export class DrizzleTestimonialRepository implements ITestimonialRepository {
       authorUrl: props.authorUrl,
       mediaId: props.mediaId,
       position: props.position,
+      consentPublic: props.consentPublic,
+      consentInternal: props.consentInternal,
+      consentedAt: props.consentedAt,
       metadata: props.metadata ?? {},
       createdAt: props.createdAt,
       updatedAt: props.updatedAt,
@@ -83,6 +86,9 @@ export class DrizzleTestimonialRepository implements ITestimonialRepository {
         authorUrl: props.authorUrl,
         mediaId: props.mediaId,
         position: props.position,
+        consentPublic: props.consentPublic,
+        consentInternal: props.consentInternal,
+        consentedAt: props.consentedAt,
         metadata: props.metadata ?? {},
         createdAt: props.createdAt,
         updatedAt: props.updatedAt,
@@ -105,6 +111,9 @@ export class DrizzleTestimonialRepository implements ITestimonialRepository {
         authorUrl: props.authorUrl,
         mediaId: props.mediaId,
         position: props.position,
+        consentPublic: props.consentPublic,
+        consentInternal: props.consentInternal,
+        consentedAt: props.consentedAt,
         metadata: props.metadata ?? {},
         updatedAt: props.updatedAt,
       })
@@ -116,7 +125,8 @@ export class DrizzleTestimonialRepository implements ITestimonialRepository {
     const { gte } = await import('drizzle-orm');
     const whereConditions = [
       eq(testimonials.userId, userId),
-      eq(testimonials.status, 'approved')
+      eq(testimonials.status, 'approved'),
+      eq(testimonials.consentPublic, true)
     ];
 
     if (options?.minRating) {
@@ -140,12 +150,19 @@ export class DrizzleTestimonialRepository implements ITestimonialRepository {
     return rows.map(row => this.mapToDomain(row));
   }
 
-  async findByFormId(formId: string, options?: { limit?: number; offset?: number; sort?: string; order?: 'asc' | 'desc' }): Promise<Testimonial[]> {
-    const { asc, desc } = await import('drizzle-orm');
+  async findByFormId(formId: string, options?: { limit?: number; offset?: number; sort?: string; order?: 'asc' | 'desc'; consentPublic?: boolean }): Promise<Testimonial[]> {
+    const { asc, desc, and } = await import('drizzle-orm');
     
+    let whereClause;
+    if (options?.consentPublic !== undefined) {
+      whereClause = and(eq(testimonials.formId, formId), eq(testimonials.consentPublic, options.consentPublic));
+    } else {
+      whereClause = eq(testimonials.formId, formId);
+    }
+
     const query = this.db.select()
       .from(testimonials)
-      .where(eq(testimonials.formId, formId));
+      .where(whereClause);
 
     // Handle dynamic sorting
     const sortField = options?.sort;
@@ -487,6 +504,9 @@ export class DrizzleTestimonialRepository implements ITestimonialRepository {
       formId: row.formId || undefined,
       mediaId: row.mediaId || undefined,
       position: row.position || 0,
+      consentPublic: row.consentPublic || false,
+      consentInternal: row.consentInternal || false,
+      consentedAt: row.consentedAt || undefined,
       metadata: this.parseJsonb(row.metadata),
       createdAt: row.createdAt || undefined,
       updatedAt: row.updatedAt || undefined,

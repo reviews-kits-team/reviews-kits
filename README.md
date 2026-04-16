@@ -119,7 +119,7 @@ Reviewskits is built on a modern, fully type-safe stack — no legacy, no bloat:
 | Frontend (Admin) | [React](https://reactjs.org/) + [TailwindCSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/) |
 | Database | [PostgreSQL](https://www.postgresql.org/) + [Drizzle ORM](https://orm.drizzle.team/) |
 | Auth | [Better-Auth](https://better-auth.com/) |
-| Infra | [Docker](https://www.docker.com/) + Redis + Minio |
+| Infra | [Docker](https://www.docker.com/) + [Redis](https://redis.io/) + [Minio](https://www.min.io/) |
 | Docs | [VitePress](https://vitepress.dev/) |
 
 ---
