@@ -1,6 +1,6 @@
 # Security Policy
 
-We take security very seriously. If you come across any security vulnerabilities, please disclose them by sending an email to security@reviewskits.com.
+We take security very seriously. If you come across any security vulnerabilities, please disclose them by sending an email to ricus2001@gmail.com.
 
 ## Reporting a Vulnerability
 
