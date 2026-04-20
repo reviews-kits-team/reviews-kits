@@ -61,24 +61,20 @@ export function EditorSidebarStepTab({
     <div className="space-y-6">
       {/* Current step info */}
       <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
-        {activeStep && (
-          <span
-            className={`text-[9px] font-black uppercase tracking-[0.2em] block mb-2 ${
-              REQUIRED_STEP_TYPES.has(activeStep.type)
-                ? "text-[#0D9E75]"
-                : "text-white/40"
-            }`}
-            title={
-              REQUIRED_STEP_TYPES.has(activeStep.type)
-                ? "This step cannot be removed"
-                : undefined
-            }
-          >
-            {REQUIRED_STEP_TYPES.has(activeStep.type)
-              ? "● Required step"
-              : "○ Optional step"}
-          </span>
-        )}
+        {activeStep &&
+          (() => {
+            const isRequired = REQUIRED_STEP_TYPES.has(activeStep.type);
+            return (
+              <span
+                className={`text-[9px] font-black uppercase tracking-[0.2em] block mb-2 ${
+                  isRequired ? "text-[#0D9E75]" : "text-white/40"
+                }`}
+                title={isRequired ? "This step cannot be removed" : undefined}
+              >
+                {isRequired ? "● Required step" : "○ Optional step"}
+              </span>
+            );
+          })()}
         <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#0D9E75] block mb-1">
           Currently editing
         </span>
