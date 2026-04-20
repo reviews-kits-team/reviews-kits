@@ -20,6 +20,7 @@ interface EditorSidebarStepTabProps {
   onToggleStepEnabled: (stepId: string) => void;
 }
 
+/** Step types essential to a complete review flow. Update when adding new step types to FormStep['type']. */
 const REQUIRED_STEP_TYPES = new Set([
   "welcome",
   "core",

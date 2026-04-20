@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp, Trash2, Plus } from "lucide-react";
 import { StepPreview } from "./StepPreview";
 import type { FormData, FormStep } from "./types";
 
+/** Step types essential to a complete review flow. Update when adding new step types to FormStep['type']. */
 const REQUIRED_STEP_TYPES = new Set([
   "welcome",
   "core",
