@@ -1,32 +1,54 @@
-import { type RefObject } from 'react'
-import { ChevronDown, ChevronUp, Trash2, Plus } from 'lucide-react'
-import { StepPreview } from './StepPreview'
-import type { FormData, FormStep } from './types'
+import { type RefObject } from "react";
+import { ChevronDown, ChevronUp, Trash2, Plus } from "lucide-react";
+import { StepPreview } from "./StepPreview";
+import type { FormData, FormStep } from "./types";
+
+const REQUIRED_STEP_TYPES = new Set([
+  "welcome",
+  "core",
+  "rating",
+  "textarea",
+  "identity",
+  "success",
+]);
 
 interface EditorCanvasProps {
-  form: FormData
-  canvasRef: RefObject<HTMLDivElement | null>
-  stepRefs: RefObject<Record<string, HTMLDivElement | null>>
-  activeStepId: string | null
-  previewMode: 'desktop' | 'mobile'
-  selectedElement: string | null
-  onElementClick: (elementKey: string, stepId: string) => void
-  onScrollToStep: (stepId: string) => void
-  onMoveStep: (index: number, direction: 'up' | 'down') => void
-  onDeleteStep: (stepId: string) => void
-  onAddStep: () => void
+  form: FormData;
+  canvasRef: RefObject<HTMLDivElement | null>;
+  stepRefs: RefObject<Record<string, HTMLDivElement | null>>;
+  activeStepId: string | null;
+  previewMode: "desktop" | "mobile";
+  selectedElement: string | null;
+  onElementClick: (elementKey: string, stepId: string) => void;
+  onScrollToStep: (stepId: string) => void;
+  onMoveStep: (index: number, direction: "up" | "down") => void;
+  onDeleteStep: (stepId: string) => void;
+  onAddStep: () => void;
 }
 
 function stepTypeBadge(step: FormStep, index: number) {
   const label =
-    step.type === 'welcome' ? 'Welcome' :
-    step.type === 'core' ? 'Core' :
-    step.type === 'identity' ? 'Identity' :
-    step.type === 'success' ? 'Success' :
-    step.type === 'custom' ? 'Custom' :
-    step.type
+    step.type === "welcome"
+      ? "Welcome"
+      : step.type === "core"
+        ? "Core"
+        : step.type === "identity"
+          ? "Identity"
+          : step.type === "success"
+            ? "Success"
+            : step.type === "custom"
+              ? "Custom"
+              : step.type === "rating"
+                ? "Rating"
+                : step.type === "textarea"
+                  ? "Textarea"
+                  : step.type === "informative"
+                    ? "Informative"
+                    : step.type === "attribution"
+                      ? "Attribution"
+                      : step.type;
 
-  return `Step ${index + 1}: ${label}${step.locked ? ' 🔒' : ''}`
+  return `Step ${index + 1}: ${label}`;
 }
 
 export function EditorCanvas({
@@ -42,13 +64,17 @@ export function EditorCanvas({
   onDeleteStep,
   onAddStep,
 }: EditorCanvasProps) {
-  const activeStep = form.config.steps.find((s) => s.id === activeStepId)
+  const activeStep = form.config.steps.find((s) => s.id === activeStepId);
 
   return (
     <section
       ref={canvasRef}
       className="order-first lg:order-first w-full bg-(--v3-bg2) border border-(--v3-border) rounded-2xl lg:rounded-3xl shadow-2xl h-full overflow-y-auto p-4 md:p-8 lg:p-12 background-fixed custom-scrollbar snap-y snap-mandatory"
-      style={{ scrollBehavior: 'smooth', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      style={{
+        scrollBehavior: "smooth",
+        scrollbarWidth: "none",
+        msOverflowStyle: "none",
+      }}
     >
       <style>{`section::-webkit-scrollbar { display: none; }`}</style>
 
@@ -58,10 +84,17 @@ export function EditorCanvas({
           <div className="flex gap-1 bg-[#0A0A0A]/60 backdrop-blur-md p-1 rounded-bl-xl border-l border-b border-white/10 pointer-events-auto shadow-2xl overflow-hidden">
             <button
               disabled={(() => {
-                const idx = form.config.steps.findIndex((s) => s.id === activeStepId)
-                return idx <= 0 || !!form.config.steps[idx - 1]?.locked
+                const idx = form.config.steps.findIndex(
+                  (s) => s.id === activeStepId,
+                );
+                return idx <= 0 || !!form.config.steps[idx - 1]?.locked;
               })()}
-              onClick={() => onMoveStep(form.config.steps.findIndex((s) => s.id === activeStepId), 'up')}
+              onClick={() =>
+                onMoveStep(
+                  form.config.steps.findIndex((s) => s.id === activeStepId),
+                  "up",
+                )
+              }
               className="p-2 text-[#0D9E75] hover:bg-[#0D9E75]/10 rounded-lg transition-all disabled:opacity-20"
               title="Move current step up"
             >
@@ -69,10 +102,20 @@ export function EditorCanvas({
             </button>
             <button
               disabled={(() => {
-                const idx = form.config.steps.findIndex((s) => s.id === activeStepId)
-                return idx >= form.config.steps.length - 1 || !!form.config.steps[idx + 1]?.locked
+                const idx = form.config.steps.findIndex(
+                  (s) => s.id === activeStepId,
+                );
+                return (
+                  idx >= form.config.steps.length - 1 ||
+                  !!form.config.steps[idx + 1]?.locked
+                );
               })()}
-              onClick={() => onMoveStep(form.config.steps.findIndex((s) => s.id === activeStepId), 'down')}
+              onClick={() =>
+                onMoveStep(
+                  form.config.steps.findIndex((s) => s.id === activeStepId),
+                  "down",
+                )
+              }
               className="p-2 text-[#0D9E75] hover:bg-[#0D9E75]/10 rounded-lg transition-all disabled:opacity-20"
               title="Move current step down"
             >
@@ -94,7 +137,9 @@ export function EditorCanvas({
         {form.config.steps.map((step, index) => (
           <div
             key={step.id}
-            ref={(el) => { if (stepRefs.current) stepRefs.current[step.id] = el }}
+            ref={(el) => {
+              if (stepRefs.current) stepRefs.current[step.id] = el;
+            }}
             data-step-id={step.id}
             className="flex flex-col items-center w-full min-h-125 md:min-h-[calc(100vh-160px)] snap-center justify-center py-10 md:py-12 relative"
           >
@@ -103,17 +148,30 @@ export function EditorCanvas({
               onClick={() => onScrollToStep(step.id)}
               className={`
                 transition-all duration-500 shadow-2xl relative bg-white overflow-hidden rounded-2xl md:rounded-3xl cursor-pointer
-                ${previewMode === 'mobile' ? 'w-full max-w-96 h-fit max-h-[calc(100vh-200px)]' : 'w-full max-w-200 h-fit max-h-[85%]'}
-                ${activeStepId === step.id
-                  ? 'ring-4 ring-[#0D9E75] ring-offset-4 ring-offset-[#0A0A0A]'
-                  : 'opacity-40 hover:opacity-100 hover:ring-2 hover:ring-white/20 scale-95 lg:scale-95'}
-                ${!step.isEnabled ? 'grayscale-[1]' : ''}
+                ${previewMode === "mobile" ? "w-full max-w-96 h-fit max-h-[calc(100vh-200px)]" : "w-full max-w-200 h-fit max-h-[85%]"}
+                ${
+                  activeStepId === step.id
+                    ? "ring-4 ring-[#0D9E75] ring-offset-4 ring-offset-[#0A0A0A]"
+                    : "opacity-40 hover:opacity-100 hover:ring-2 hover:ring-white/20 scale-95 lg:scale-95"
+                }
+                ${!step.isEnabled ? "grayscale-[1]" : ""}
               `}
             >
               {/* Step badge */}
-              <div className="absolute top-4 left-4 z-20">
+              <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
                 <div className="bg-[#0A0A0A]/80 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white border border-white/10">
                   {stepTypeBadge(step, index)}
+                </div>
+                <div
+                  className={`backdrop-blur-md px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-widest ${
+                    REQUIRED_STEP_TYPES.has(step.type)
+                      ? "bg-[#0D9E75]/15 text-[#0D9E75]"
+                      : "bg-white/8 text-white/50"
+                  }`}
+                >
+                  {REQUIRED_STEP_TYPES.has(step.type)
+                    ? "● Required"
+                    : "○ Optional"}
                 </div>
               </div>
 
@@ -135,12 +193,18 @@ export function EditorCanvas({
             )}
 
             {/* Add step button — appears before identity/attribution */}
-            {(form.config.steps[index + 1]?.type === 'identity' ||
-              form.config.steps[index + 1]?.type === 'attribution') && (
+            {(form.config.steps[index + 1]?.type === "identity" ||
+              form.config.steps[index + 1]?.type === "attribution") && (
               <div className="flex items-center justify-center py-2 w-full">
-                <button className="flex flex-col items-center gap-4 group" onClick={onAddStep}>
+                <button
+                  className="flex flex-col items-center gap-4 group"
+                  onClick={onAddStep}
+                >
                   <div className="w-16 h-16 rounded-full bg-white/5 border border-dashed border-white/20 flex items-center justify-center group-hover:bg-[#0D9E75]/10 group-hover:border-[#0D9E75] transition-all">
-                    <Plus size={24} className="text-white/40 group-hover:text-[#0D9E75]" />
+                    <Plus
+                      size={24}
+                      className="text-white/40 group-hover:text-[#0D9E75]"
+                    />
                   </div>
                   <span className="text-[10px] font-black uppercase tracking-widest text-white/20 group-hover:text-white/60">
                     Add a step
@@ -152,5 +216,5 @@ export function EditorCanvas({
         ))}
       </div>
     </section>
-  )
+  );
 }
