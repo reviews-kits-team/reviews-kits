@@ -1,5 +1,6 @@
 import { type RefObject } from "react";
 import { Trash2, Plus } from "lucide-react";
+import { REQUIRED_STEP_TYPES } from "./types";
 import type { FormStep, StepField } from "./types";
 
 interface EditorSidebarStepTabProps {
@@ -19,16 +20,6 @@ interface EditorSidebarStepTabProps {
   onDeleteStep: (stepId: string) => void;
   onToggleStepEnabled: (stepId: string) => void;
 }
-
-/** Step types essential to a complete review flow. Update when adding new step types to FormStep['type']. */
-const REQUIRED_STEP_TYPES = new Set([
-  "welcome",
-  "core",
-  "rating",
-  "textarea",
-  "identity",
-  "success",
-]);
 
 const FIELD_LABELS: Record<StepField["type"], string> = {
   text: "Short text",
@@ -69,7 +60,9 @@ export function EditorSidebarStepTab({
                 className={`text-[9px] font-black uppercase tracking-[0.2em] block mb-2 ${
                   isRequired ? "text-[#0D9E75]" : "text-white/40"
                 }`}
-                title={isRequired ? "This step cannot be removed" : undefined}
+                title={
+                  isRequired ? "Required steps can't be disabled" : undefined
+                }
               >
                 {isRequired ? "● Required step" : "○ Optional step"}
               </span>
