@@ -184,13 +184,13 @@ Please read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request. 
 
 Have a question, a partnership idea, or want to chat?
 
-[📅 Book a call on Cal.com](https://cal.com/reviewskits) · ✉️ `hello@reviewskits.com`
+[📅 Book a call on Cal.com](https://cal.com/reviewskits/30min) · ✉️ `ricus2001@gmail.com`
 
 ---
 
 ## 🔒 Security
 
-Security issues should be disclosed responsibly. Please **do not** open a public issue — instead, send an email to `security@reviewskits.com`. See [SECURITY.md](./SECURITY.md) for details.
+Security issues should be disclosed responsibly. Please **do not** open a public issue — instead, send an email to `ricus2001@gmail.com`. See [SECURITY.md](./SECURITY.md) for details.
 
 ---
 
@@ -200,7 +200,7 @@ Security issues should be disclosed responsibly. Please **do not** open a public
 
 **Enterprise Edition** — additional features for larger teams are available under a commercial license. See [COMMERCIAL_LICENSE.md](./COMMERCIAL_LICENSE.md) or our [License docs](https://docs.reviewskits.com/guide/license).
 
-White-labeling is not currently offered. Other licensing needs? Email `hello@reviewskits.com`.
+White-labeling is not currently offered. Other licensing needs? Email `ricus2001@gmail.com`.
 
 ---
 
