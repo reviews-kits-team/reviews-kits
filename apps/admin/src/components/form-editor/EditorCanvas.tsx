@@ -3,6 +3,12 @@ import { ChevronDown, ChevronUp, Trash2, Plus } from "lucide-react";
 import { StepPreview } from "./StepPreview";
 import { REQUIRED_STEP_TYPES } from "./types";
 import type { FormData, FormStep } from "./types";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
 
 interface EditorCanvasProps {
   form: FormData;
@@ -154,17 +160,45 @@ export function EditorCanvas({
                 <div className="bg-[#0A0A0A]/80 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white border border-white/10">
                   {stepTypeBadge(step, index)}
                 </div>
-                <div
-                  className={`backdrop-blur-md px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-widest ${
-                    REQUIRED_STEP_TYPES.has(step.type)
-                      ? "bg-[#0D9E75]/15 text-[#0D9E75]"
-                      : "bg-white/8 text-white/50"
-                  }`}
-                >
-                  {REQUIRED_STEP_TYPES.has(step.type)
-                    ? "● Required"
-                    : "○ Optional"}
-                </div>
+                {(() => {
+                  const isRequired = REQUIRED_STEP_TYPES.has(step.type);
+                  const isLocked = !!step.locked;
+
+                  const badgeText = isRequired ? "● Required" : "○ Optional";
+                  const badgeClass = isRequired
+                    ? "bg-[#0D9E75]/10 text-[#0D9E75]"
+                    : "bg-white/5 text-white/40";
+
+                  if (!isRequired && !isLocked) {
+                    return (
+                      <div
+                        className={`backdrop-blur-md px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-widest ${badgeClass}`}
+                      >
+                        {badgeText}
+                      </div>
+                    );
+                  }
+
+                  const tooltipText =
+                    isRequired && isLocked
+                      ? "This step cannot be removed or disabled."
+                      : isRequired
+                        ? "This step cannot be disabled."
+                        : "This step cannot be removed.";
+
+                  return (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div
+                          className={`backdrop-blur-md px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-widest cursor-help ${badgeClass}`}
+                        >
+                          {badgeText}
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">{tooltipText}</TooltipContent>
+                    </Tooltip>
+                  );
+                })()}
               </div>
 
               <StepPreview
