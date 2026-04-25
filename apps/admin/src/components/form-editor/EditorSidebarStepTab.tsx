@@ -1,7 +1,12 @@
 import { type RefObject } from "react";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, Info } from "lucide-react";
 import { REQUIRED_STEP_TYPES } from "./types";
 import type { FormStep, StepField } from "./types";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface EditorSidebarStepTabProps {
   activeStep: FormStep | undefined;
@@ -55,28 +60,68 @@ export function EditorSidebarStepTab({
         {activeStep &&
           (() => {
             const isRequired = REQUIRED_STEP_TYPES.has(activeStep.type);
+            const isLocked = !!activeStep.locked;
+
+            const tooltipText =
+              isRequired && isLocked
+                ? "This step cannot be removed or disabled."
+                : isRequired
+                  ? "This step cannot be disabled."
+                  : isLocked
+                    ? "This step cannot be removed."
+                    : null;
+
             return (
-              <span
-                className={`text-[9px] font-black uppercase tracking-[0.2em] block mb-2 ${
-                  isRequired ? "text-[#0D9E75]" : "text-white/40"
-                }`}
-                title={
-                  isRequired ? "Required steps can't be disabled" : undefined
-                }
-              >
-                {isRequired ? "● Required step" : "○ Optional step"}
-              </span>
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  {tooltipText ? (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span
+                          className={`text-[9px] font-black uppercase tracking-[0.2em] cursor-help ${
+                            isRequired ? "text-[#0D9E75]" : "text-white/40"
+                          }`}
+                        >
+                          {isRequired ? "● REQUIRED STEP" : "● LOCKED STEP"}
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">{tooltipText}</TooltipContent>
+                    </Tooltip>
+                  ) : (
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40">
+                      ○ OPTIONAL STEP
+                    </span>
+                  )}
+                </div>
+
+                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#0D9E75] block mb-1">
+                  Currently editing
+                </span>
+                <h3 className="text-sm font-bold truncate">
+                  {activeStep.title}
+                </h3>
+
+                {tooltipText && (
+                  <div className="mt-4 flex items-start gap-2 p-2.5 rounded-xl bg-white/5 border border-white/5">
+                    <Info size={14} className="text-[#0D9E75] shrink-0 mt-0.5" />
+                    <p className="text-[10px] leading-relaxed text-white/60">
+                      {tooltipText}
+                    </p>
+                  </div>
+                )}
+              </>
             );
           })()}
-        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#0D9E75] block mb-1">
-          Currently editing
-        </span>
-        <h3 className="text-sm font-bold truncate">
-          {activeStep ? activeStep.title : "No step selected"}
-        </h3>
-        <p className="text-[10px] text-white/40 mt-1 italic">
-          Click on a step in the canvas to edit it.
-        </p>
+        {!activeStep && (
+          <>
+            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 block mb-1">
+              Select a step
+            </span>
+            <p className="text-[10px] text-white/40 mt-1 italic">
+              Click on a step in the canvas to edit it.
+            </p>
+          </>
+        )}
       </div>
 
       <div className="h-px bg-white/5" />
