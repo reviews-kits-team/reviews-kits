@@ -158,7 +158,7 @@ export function EditorCanvas({
                   className={`backdrop-blur-md px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-widest ${
                     REQUIRED_STEP_TYPES.has(step.type)
                       ? "bg-[#0D9E75]/15 text-[#0D9E75]"
-                      : "bg-white/8 text-white/50"
+                      : "bg-white/[0.08] text-white/50"
                   }`}
                 >
                   {REQUIRED_STEP_TYPES.has(step.type)
