@@ -14,7 +14,7 @@ interface EditorCanvasProps {
   onScrollToStep: (stepId: string) => void
   onMoveStep: (index: number, direction: 'up' | 'down') => void
   onDeleteStep: (stepId: string) => void
-  onAddStep: () => void
+  onAddStep: (insertAfterIndex?: number) => void
 }
 
 function stepTypeBadge(step: FormStep, index: number) {
@@ -134,20 +134,17 @@ export function EditorCanvas({
               </div>
             )}
 
-            {/* Add step button — appears before identity/attribution */}
-            {(form.config.steps[index + 1]?.type === 'identity' ||
-              form.config.steps[index + 1]?.type === 'attribution') && (
-              <div className="flex items-center justify-center py-2 w-full">
-                <button className="flex flex-col items-center gap-4 group" onClick={onAddStep}>
-                  <div className="w-16 h-16 rounded-full bg-white/5 border border-dashed border-white/20 flex items-center justify-center group-hover:bg-[#0D9E75]/10 group-hover:border-[#0D9E75] transition-all">
-                    <Plus size={24} className="text-white/40 group-hover:text-[#0D9E75]" />
-                  </div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-white/20 group-hover:text-white/60">
-                    Add a step
-                  </span>
-                </button>
-              </div>
-            )}
+            {/* Add step button — appears after all steps */}
+            <div className="flex items-center justify-center py-2 w-full mb-6">
+              <button type="button" className="flex flex-col items-center gap-4 group" onClick={(e) => { e.preventDefault(); onAddStep(index); }}>
+                <div className="w-16 h-16 rounded-full bg-white/5 border border-dashed border-white/20 flex items-center justify-center group-hover:bg-[#0D9E75]/10 group-hover:border-[#0D9E75] transition-all">
+                  <Plus size={24} className="text-white/40 group-hover:text-[#0D9E75]" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-white/20 group-hover:text-white/60">
+                  Add a step
+                </span>
+              </button>
+            </div>
           </div>
         ))}
       </div>

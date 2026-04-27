@@ -92,7 +92,7 @@ function FormEditorContent({ initialForm, formId }: { initialForm: FullForm; for
     })
   }, [])
 
-  const addStep = useCallback(() => {
+  const addStep = useCallback((insertAfterIndex?: number) => {
     setForm((prev) => {
       const newId = `step_${Date.now()}`
       const newStep: FormStep = {
@@ -107,12 +107,21 @@ function FormEditorContent({ initialForm, formId }: { initialForm: FullForm; for
           buttonText: 'Continue',
         },
       }
-      const insertAt = prev.config.steps.findIndex(
-        (s) => s.type === 'identity' || s.type === 'attribution'
-      )
-      const steps = insertAt >= 0
-        ? [...prev.config.steps.slice(0, insertAt), newStep, ...prev.config.steps.slice(insertAt)]
-        : [...prev.config.steps, newStep]
+
+      const steps = [...prev.config.steps]
+      if (insertAfterIndex !== undefined && insertAfterIndex >= 0 && insertAfterIndex < steps.length) {
+        steps.splice(insertAfterIndex + 1, 0, newStep)
+      } else {
+        const insertAt = steps.findIndex(
+          (s) => s.type === 'identity' || s.type === 'attribution' || s.type === 'success'
+        )
+        if (insertAt >= 0) {
+          steps.splice(insertAt, 0, newStep)
+        } else {
+          steps.push(newStep)
+        }
+      }
+
       setTimeout(() => scrollToStep(newId), 100)
       return { ...prev, config: { ...prev.config, steps } }
     })
